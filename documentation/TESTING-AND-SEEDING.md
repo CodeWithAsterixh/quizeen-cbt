@@ -38,40 +38,22 @@ Get-ChildItem -Recurse -Include *.ts,*.tsx,*.css -Exclude node_modules,dist,.nex
 
 ---
 
-## Mock data seeding engine
+## Initial data state
 
-Quizeen provides curriculum-aligned sample data located in `packages/shared/src/seed/`.
+Quizeen initializes with a clean slate to allow end-to-end testing from scratch. No default assessments or test submissions are pre-seeded into storage on first run.
 
-### Seed structure
+### Data storage directories
 
-The seed dataset contains curriculum models for Nigerian primary and secondary schools:
-
-- **Primary school**: Primary 1 through Primary 6.
-- **Junior secondary school**: JSS 1 through JSS 3.
-- **Senior secondary school**: SSS 1 through SSS 3 across Science, Arts, and Commercial departments.
-
-### Default assessments
-
-The factory seed includes sample assessments for testing:
-
-- **Senior secondary mathematics**: Algebra, linear equations, and calculus.
-- **Senior secondary physics and English language**: Mechanics, comprehension, and grammar.
-- **Primary general science and arithmetic**: Basic science concepts and arithmetic operations.
-
-### Default submissions
-
-Pre-populated student results provide immediate reporting data across different score ranges:
-
-- Distinction grades (above 75 percent).
-- Credit and pass grades (50 to 74 percent).
-- Support needed grades (below 50 percent).
-- Window blur incident counters for evaluating focus violation alerts.
+- **Central server**: Stores runtime records in `apps/server/data/cbt-store.json`.
+- **Manager app**: Stores local assessments and submissions in offline IndexedDB/Electron local storage.
+- **Student app**: Stores downloaded assessment packages and student attempts locally until submitted.
 
 ---
 
-## Resetting storage to defaults
+## Resetting storage
 
 When testing fresh states, use the built-in reset controls:
 
-- **Manager dashboard**: Open `Settings` and select `Reset to Default Sample Data`.
-- **Student portal**: Open `Settings` from the start screen and select `Reset to Default Assessments`.
+- **Server endpoint**: Send a POST request to `/api/analytics/reset` to wipe stored exams and submissions back to an empty initial state.
+- **Student portal**: Open supervisor tools from the start screen and select `Delete All Tests on this Station` to clear cached assessment packages.
+

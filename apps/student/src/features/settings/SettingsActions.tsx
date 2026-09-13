@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { FileArchive, ArrowClockwise, Trash } from '@phosphor-icons/react';
+import { FileArchive, Trash } from '@phosphor-icons/react';
 import { Button, Badge } from '@cbt/shared';
 import { ServerConnectionConfig } from './ServerConnectionConfig';
 
@@ -7,7 +7,6 @@ interface SettingsActionsProps {
   currentExamCount: number;
   isProcessing: boolean;
   onFileSelect: (file: File) => void;
-  onResetToDefaults: () => Promise<void>;
   onClearAll: () => Promise<void>;
   onClose: () => void;
 }
@@ -16,7 +15,6 @@ export const SettingsActions: React.FC<SettingsActionsProps> = ({
   currentExamCount,
   isProcessing,
   onFileSelect,
-  onResetToDefaults,
   onClearAll,
   onClose,
 }) => {
@@ -60,11 +58,8 @@ export const SettingsActions: React.FC<SettingsActionsProps> = ({
 
       <ServerConnectionConfig />
 
-      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Button variant="secondary" size="sm" onClick={onResetToDefaults} icon={<ArrowClockwise size={16} />}>
-          Reload Starter Demo Tests
-        </Button>
-        <Button variant="danger" size="sm" onClick={onClearAll} icon={<Trash size={16} />}>
+      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
+        <Button variant="danger" size="sm" onClick={onClearAll} icon={<Trash size={16} />} style={{ width: '100%' }}>
           Delete All Tests on this Station
         </Button>
       </div>

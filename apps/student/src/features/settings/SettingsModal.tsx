@@ -9,7 +9,6 @@ interface SettingsModalProps {
   onClose: () => void;
   onExamsUpdated: (exams: Exam[]) => void;
   currentExamCount: number;
-  onResetToDefaults: () => Promise<void>;
   onClearAll: () => Promise<void>;
 }
 
@@ -18,7 +17,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onExamsUpdated,
   currentExamCount,
-  onResetToDefaults,
   onClearAll,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -73,7 +71,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           currentExamCount={currentExamCount}
           isProcessing={isProcessing}
           onFileSelect={handleFileSelect}
-          onResetToDefaults={onResetToDefaults}
           onClearAll={onClearAll}
           onClose={handleClose}
         />

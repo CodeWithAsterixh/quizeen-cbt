@@ -1,4 +1,4 @@
-import { Exam, Submission, SEED_EXAMS } from '@cbt/shared';
+import { Exam, Submission } from '@cbt/shared';
 
 export interface DatabaseState {
   exams: Exam[];
@@ -7,7 +7,8 @@ export interface DatabaseState {
 
 export const getInitialSeedData = (): DatabaseState => {
   return {
-    exams: [...SEED_EXAMS],
+    exams: [],
     submissions: [],
   };
 };
+

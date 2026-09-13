@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Assessment, Submission, LocalStore, SEED_EXAMS, apiClient } from '@cbt/shared';
+import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
 
 const assessmentStore = new LocalStore<Assessment>('exams');
 const submissionStore = new LocalStore<Submission>('submissions');
@@ -18,18 +18,20 @@ export function useManagerAppStore() {
           ]);
           setAssessments(remoteAssessments);
           setSubmissions(remoteSubs);
-          await assessmentStore.saveBatch(remoteAssessments);
-          await submissionStore.saveBatch(remoteSubs);
+          await assessmentStore.clear();
+          if (remoteAssessments.length > 0) {
+            await assessmentStore.saveBatch(remoteAssessments);
+          }
+          await submissionStore.clear();
+          if (remoteSubs.length > 0) {
+            await submissionStore.saveBatch(remoteSubs);
+          }
           return;
         }
       } catch {
         // fallback to local storage
       }
-      let stored = await assessmentStore.getAll();
-      if (stored.length === 0) {
-        await assessmentStore.saveBatch(SEED_EXAMS);
-        stored = SEED_EXAMS;
-      }
+      const stored = await assessmentStore.getAll();
       setAssessments(stored);
       setSubmissions(await submissionStore.getAll());
     };

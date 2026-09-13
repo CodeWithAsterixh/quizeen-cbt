@@ -11,5 +11,5 @@ analyticsRouter.get('/overview', (_req: Request, res: Response) => {
 
 analyticsRouter.post('/reset', (_req: Request, res: Response) => {
   db.resetToSeed();
-  res.json({ success: true, message: 'Database reset to starter curriculum demo state.' });
+  res.json({ success: true, message: 'Database reset to clean initial state.' });
 });

@@ -9,7 +9,6 @@ interface AppModalsProps {
   onCloseSettings: () => void;
   onExamsUpdated: (exams: Assessment[]) => void;
   examCount: number;
-  onResetToDefaults: () => Promise<void>;
   onClearAll: () => Promise<void>;
   isProfileOpen: boolean;
   onCloseProfile: () => void;
@@ -23,7 +22,7 @@ interface AppModalsProps {
 
 export const AppModals: React.FC<AppModalsProps> = ({
   isSettingsOpen, onCloseSettings, onExamsUpdated, examCount,
-  onResetToDefaults, onClearAll, isProfileOpen, onCloseProfile,
+  onClearAll, isProfileOpen, onCloseProfile,
   onProfileSubmit, session, pendingPinExam, isPinOpen, onClosePin, onConfirmPin,
 }) => (
   <>
@@ -32,7 +31,6 @@ export const AppModals: React.FC<AppModalsProps> = ({
       onClose={onCloseSettings}
       onExamsUpdated={onExamsUpdated}
       currentExamCount={examCount}
-      onResetToDefaults={onResetToDefaults}
       onClearAll={onClearAll}
     />
     <StudentProfileModal

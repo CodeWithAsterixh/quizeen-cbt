@@ -9,7 +9,7 @@ import { AssessmentCompletedScreen } from './features/completion/AssessmentCompl
 import { useStudentAppStore } from './store/useStudentAppStore';
 
 export const App: React.FC = () => {
-  const { assessments, submissions, saveSubmission, importAssessments, resetToDefaults, clearAllAssessments } = useStudentAppStore();
+  const { assessments, submissions, saveSubmission, importAssessments, clearAllAssessments } = useStudentAppStore();
   const [session, setSession] = useState<StudentSession | null>(null);
   const [activeAssessment, setActiveAssessment] = useState<Assessment | null>(null);
   const [pendingPinAssessment, setPendingPinAssessment] = useState<Assessment | null>(null);
@@ -76,7 +76,7 @@ export const App: React.FC = () => {
       <AppModals
         isSettingsOpen={isSettingsOpen} onCloseSettings={() => setSettingsOpen(false)}
         onExamsUpdated={importAssessments} examCount={assessments.length}
-        onResetToDefaults={resetToDefaults} onClearAll={clearAllAssessments}
+        onClearAll={clearAllAssessments}
         isProfileOpen={isProfileOpen} onCloseProfile={() => setProfileOpen(false)}
         onProfileSubmit={(s) => { setSession(s); setProfileOpen(false); setView('catalog'); }}
         session={session} pendingPinExam={pendingPinAssessment} isPinOpen={isPinOpen}
