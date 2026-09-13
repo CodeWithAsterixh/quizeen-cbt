@@ -1,0 +1,48 @@
+.grading-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.grading-card.correct {
+  border-left: 4px solid var(--color-success);
+}
+.grading-card.incorrect {
+  border-left: 4px solid var(--color-danger);
+}
+.grading-card.pending {
+  border-left: 4px solid var(--color-warning);
+}
+.grading-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+.student-answer-box {
+  background-color: var(--color-surface-hover);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.score-badge.pass {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+.score-badge.fail {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}

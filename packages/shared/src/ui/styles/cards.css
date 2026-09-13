@@ -1,0 +1,62 @@
+.cbt-card, .card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.cbt-card-interactive {
+  cursor: pointer;
+}
+.cbt-card-interactive:hover {
+  border-color: var(--color-border-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.cbt-card-accent-blue {
+  border-top: 3px solid var(--color-primary);
+}
+.cbt-card-accent-emerald {
+  border-top: 3px solid var(--color-success);
+}
+.cbt-card-accent-amber {
+  border-top: 3px solid var(--color-warning);
+}
+.cbt-card-accent-purple {
+  border-top: 3px solid var(--rich-cerulean);
+}
+.cbt-card-accent-rose {
+  border-top: 3px solid var(--color-danger);
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table th {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}

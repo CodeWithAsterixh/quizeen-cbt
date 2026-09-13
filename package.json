@@ -1,0 +1,22 @@
+{
+  "name": "cbt-system-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "student:dev": "npm --workspace=apps/student run dev",
+    "student:electron": "npm --workspace=apps/student run electron:dev",
+    "student:build": "npm --workspace=apps/student run build",
+    "manager:dev": "npm --workspace=apps/manager run dev",
+    "manager:electron": "npm --workspace=apps/manager run electron:dev",
+    "manager:build": "npm --workspace=apps/manager run build",
+    "server:dev": "npm --workspace=apps/server run dev",
+    "server:build": "npm --workspace=apps/server run build",
+    "release": "node scripts/build-release.js",
+    "release:bump": "node scripts/bump-version.js",
+    "release:icons": "node scripts/generate-icons.js"
+  }
+}

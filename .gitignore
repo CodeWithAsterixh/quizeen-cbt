@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-electron/
+release/
+.qzn-releases/
+.next/
+out/
+build/
+*.log
+.DS_Store
+Thumbs.db
