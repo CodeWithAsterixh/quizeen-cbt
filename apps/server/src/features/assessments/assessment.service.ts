@@ -22,22 +22,25 @@ export class AssessmentService {
     return db.getExamById(id);
   }
 
-  public createAssessment(data: Omit<Assessment, 'id' | 'createdAt'>): Assessment {
-    const totalPoints = data.questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
+  public createAssessment(data: Partial<Assessment> & Omit<Assessment, 'createdAt'>): Assessment {
+    const questions = data.questions || [];
+    const totalPoints = questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
     const newAssessment: Assessment = {
       ...data,
-      id: `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      id: data.id || `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       totalPoints,
-      createdAt: new Date().toISOString(),
+      createdAt: data.createdAt || new Date().toISOString(),
       isPublished: true,
-    };
+    } as Assessment;
     db.saveExam(newAssessment);
     return newAssessment;
   }
 
-  public updateAssessment(id: string, updates: Partial<Assessment>): Assessment | null {
+  public updateAssessment(id: string, updates: Partial<Assessment>): Assessment {
     const existing = db.getExamById(id);
-    if (!existing) return null;
+    if (!existing) {
+      return this.createAssessment({ ...updates, id } as any);
+    }
     const questions = updates.questions ?? existing.questions;
     const totalPoints = questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
     const updated: Assessment = { ...existing, ...updates, id, questions, totalPoints };

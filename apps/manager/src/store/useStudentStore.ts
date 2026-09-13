@@ -35,9 +35,10 @@ export function useStudentStore() {
 
   const generateCodeForStudent = async (studentId: string): Promise<string> => {
     let newCode = '';
+    const student = students.find((s) => s.id === studentId);
     try {
       if (await apiClient.isAvailable()) {
-        const res = await apiClient.generateStudentCode(studentId);
+        const res = await apiClient.generateStudentCode(studentId, student);
         if (res?.code) newCode = res.code;
       }
     } catch { /* offline */ }
@@ -45,7 +46,6 @@ export function useStudentStore() {
       const existing = new Set(students.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
       newCode = generateStudentCode(existing);
     }
-    const student = students.find((s) => s.id === studentId);
     if (student) {
       await studentStore.save({ ...student, code: newCode });
       setStudents(await studentStore.getAll());

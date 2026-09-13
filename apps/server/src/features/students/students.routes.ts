@@ -25,7 +25,7 @@ studentsRouter.post('/', (req: Request, res: Response) => {
 });
 
 studentsRouter.post('/:id/generate-code', (req: Request, res: Response) => {
-  const student = studentsService.generateCode(req.params.id as string);
+  const student = studentsService.generateCode(req.params.id as string, req.body);
   if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
   res.json({ success: true, data: student });
 });
@@ -36,6 +36,6 @@ studentsRouter.post('/generate-all', (req: Request, res: Response) => {
 });
 
 studentsRouter.delete('/:id', (req: Request, res: Response) => {
-  const deleted = studentsService.delete(req.params.id as string);
-  res.json({ success: deleted });
+  studentsService.delete(req.params.id as string);
+  res.json({ success: true });
 });

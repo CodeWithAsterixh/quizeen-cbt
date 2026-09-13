@@ -27,9 +27,11 @@ export const studentApi = {
     return json.data;
   },
 
-  async generateCode(id: string): Promise<Student | null> {
+  async generateCode(id: string, fallbackStudent?: any): Promise<Student | null> {
     const res = await fetch(`${serverConfig.getApiBase()}/students/${encodeURIComponent(id)}/generate-code`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: fallbackStudent ? JSON.stringify(fallbackStudent) : undefined,
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { success: boolean; data: Student };

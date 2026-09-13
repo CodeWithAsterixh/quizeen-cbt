@@ -25,9 +25,12 @@ export const studentsService = {
     return student;
   },
 
-  generateCode(id: string): Student | null {
+  generateCode(id: string, fallbackStudent?: any): Student | null {
     const list = db.getStudents();
-    const student = list.find((s) => s.id === id);
+    let student = list.find((s) => s.id === id);
+    if (!student && fallbackStudent?.name) {
+      student = this.save({ ...fallbackStudent, id });
+    }
     if (!student) return null;
     const existing = new Set(list.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
     student.code = generateStudentCode(existing);

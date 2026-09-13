@@ -37,8 +37,7 @@ assessmentRouter.put('/:id', (req: Request, res: Response) => {
 });
 
 assessmentRouter.delete('/:id', (req: Request, res: Response) => {
-  const ok = assessmentService.deleteAssessment(req.params.id as string);
-  if (!ok) return res.status(404).json({ success: false, error: 'Assessment not found' });
+  assessmentService.deleteAssessment(req.params.id as string);
   res.json({ success: true, message: 'Assessment deleted successfully' });
 });
 
