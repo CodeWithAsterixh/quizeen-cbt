@@ -35,7 +35,8 @@ InstallDir "$PROGRAMFILES64\Queez CBT Suite"
 InstallDirRegKey HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
 RequestExecutionLevel admin
 
-SetCompressor /SOLID lzma
+Unicode true
+SetCompressor /SOLID zlib
 BrandingText "Quizeen CBT Systems"
 
 ; Installer visuals
@@ -105,45 +106,37 @@ Section "Queez Local Server" SecServer
   SectionIn 1 2
   SetOutPath "$INSTDIR\Server"
   File /r "${SERVER_DIR}\*.*"
-
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
-    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
-  !insertmacro MUI_STARTMENU_WRITE_END
-
-  CreateShortcut "$DESKTOP\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
 SectionEnd
 
 Section "Queez Assessment Manager" SecManager
   SectionIn 1 2
   SetOutPath "$INSTDIR\Manager"
   File /r "${MANAGER_DIR}\*.*"
-
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
-    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
-  !insertmacro MUI_STARTMENU_WRITE_END
-
-  CreateShortcut "$DESKTOP\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
 SectionEnd
 
 Section "Queez Student Portal" SecStudent
   SectionIn 1 3
   SetOutPath "$INSTDIR\Student"
   File /r "${STUDENT_DIR}\*.*"
-
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
-    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
-  !insertmacro MUI_STARTMENU_WRITE_END
-
-  CreateShortcut "$DESKTOP\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
 SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
+    ${If} ${SectionIsSelected} ${SecServer}
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
+      CreateShortcut "$DESKTOP\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
+    ${EndIf}
+    ${If} ${SectionIsSelected} ${SecManager}
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
+      CreateShortcut "$DESKTOP\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    ${EndIf}
+    ${If} ${SectionIsSelected} ${SecStudent}
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
+      CreateShortcut "$DESKTOP\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
+    ${EndIf}
     CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk" "$INSTDIR\uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -153,6 +146,8 @@ Section -Post
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
   WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
+
+  System::Call 'shell32.dll::SHChangeNotify(i, i, p, p) v (0x08000000, 0, 0, 0)'
 SectionEnd
 
 ; Component Descriptions
@@ -161,6 +156,14 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecManager} "Exam creation, student registration, login slip printing, and marking portal for teachers."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecStudent} "Secure examination taking portal used by candidates to enter login codes and take tests."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+Function .onInit
+  SetShellVarContext all
+FunctionEnd
+
+Function un.onInit
+  SetShellVarContext all
+FunctionEnd
 
 ; Launch helper
 Function LaunchManager
@@ -178,6 +181,7 @@ FunctionEnd
 ; ------------------------------------------------------------------------------
 
 Section "Uninstall"
+  SetShellVarContext all
   !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
 
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
@@ -198,4 +202,6 @@ Section "Uninstall"
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"
   DeleteRegKey HKLM "Software\Quizeen\Queez CBT Suite"
+
+  System::Call 'shell32.dll::SHChangeNotify(i, i, p, p) v (0x08000000, 0, 0, 0)'
 SectionEnd

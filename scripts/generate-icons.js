@@ -118,6 +118,16 @@ function saveAppIcons(nativeImg) {
     fs.writeFileSync(path.join(resDir, 'icon.svg'), SVG_CONTENT, 'utf8');
     console.log(`Generated icons in ${resDir}`);
   });
+
+  const publicDirs = [
+    path.join(root, 'apps', 'manager', 'public'),
+    path.join(root, 'apps', 'student', 'public'),
+    path.join(root, 'apps', 'server', 'public'),
+  ];
+  publicDirs.forEach((pDir) => {
+    fs.mkdirSync(pDir, { recursive: true });
+    fs.writeFileSync(path.join(pDir, 'icon.png'), png256);
+  });
   console.log('App icons successfully generated.');
 }
 

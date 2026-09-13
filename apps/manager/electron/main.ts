@@ -13,6 +13,7 @@ function createWindow() {
     minWidth: 950,
     minHeight: 650,
     title: 'Queez CBT Manager',
+    icon: path.join(__dirname, '../dist/icon.png'),
     backgroundColor: '#f2f7f4',
     frame: false,
     autoHideMenuBar: true,

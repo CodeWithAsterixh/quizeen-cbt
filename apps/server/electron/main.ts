@@ -15,7 +15,8 @@ function createWindow() {
     width: 1080,
     height: 720,
     minWidth: 840,
-    minHeight: 560,
+    title: 'Queez CBT Server',
+    icon: path.join(__dirname, '../dist/icon.png'),
     frame: false,
     backgroundColor: '#f2f7f4',
     webPreferences: {

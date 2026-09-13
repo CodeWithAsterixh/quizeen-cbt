@@ -13,6 +13,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'Queez Student Portal',
+    icon: path.join(__dirname, '../dist/icon.png'),
     backgroundColor: '#f2f7f4',
     frame: false,
     autoHideMenuBar: true,
