@@ -2,30 +2,96 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-function makePng(size, [r1, g1, b1], [r2, g2, b2]) {
+// Render flat, smooth "qz" icon with 4x4 subpixel anti-aliasing
+function renderSmoothIcon(size, bgRgb, qRgb = [255, 255, 255], zRgb = [179, 216, 156]) {
+  const s = size / 256;
   const raw = Buffer.alloc(size * (size * 4 + 1));
+  const cx = 128 * s;
+  const cy = 128 * s;
+  const radius = 118 * s;
+  const sub = [-0.375, -0.125, 0.125, 0.375];
+
+  // Precise clean Z polygon
+  const zPoly = [
+    [134 * s, 86 * s],
+    [188 * s, 86 * s],
+    [188 * s, 102 * s],
+    [153 * s, 138 * s],
+    [188 * s, 138 * s],
+    [188 * s, 154 * s],
+    [134 * s, 154 * s],
+    [134 * s, 138 * s],
+    [169 * s, 102 * s],
+    [134 * s, 102 * s],
+  ];
+
+  function inPoly(px, py, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i][0], yi = poly[i][1];
+      const xj = poly[j][0], yj = poly[j][1];
+      const intersect = ((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
   for (let y = 0; y < size; y++) {
     const rowOffset = y * (size * 4 + 1);
     raw[rowOffset] = 0;
-    const ty = y / (size - 1);
     for (let x = 0; x < size; x++) {
       const px = rowOffset + 1 + x * 4;
-      const tx = x / (size - 1);
-      const r = Math.round(r1 * (1 - ty) + r2 * ty);
-      const g = Math.round(g1 * (1 - ty) + g2 * ty);
-      const b = Math.round(b1 * (1 - ty) + b2 * ty);
-      const corner = Math.min(x, y, size - 1 - x, size - 1 - y);
-      const alpha = corner < 12 ? Math.max(0, Math.min(255, corner * 22)) : 255;
-      const dx = (x - size / 2) / (size / 3.2);
-      const dy = (y - size / 2) / (size / 3.2);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const isLetter = (dist > 0.65 && dist < 1.0) || (x > size * 0.55 && x < size * 0.75 && y > size * 0.55 && y < size * 0.75);
-      raw[px] = isLetter ? 255 : r;
-      raw[px + 1] = isLetter ? 255 : g;
-      raw[px + 2] = isLetter ? 255 : b;
-      raw[px + 3] = alpha;
+      let accR = 0, accG = 0, accB = 0, accA = 0;
+
+      for (let sy = 0; sy < 4; sy++) {
+        const py = y + 0.5 + sub[sy];
+        for (let sx = 0; sx < 4; sx++) {
+          const pxSub = x + 0.5 + sub[sx];
+          const dist = Math.hypot(pxSub - cx, py - cy);
+
+          if (dist > radius) continue;
+
+          // Flat solid background color (no gradients)
+          let r = bgRgb[0], g = bgRgb[1], b = bgRgb[2];
+
+          // Q loop
+          const qcx = 90 * s, qcy = 120 * s;
+          const qDist = Math.hypot((pxSub - qcx) / (38 * s), (py - qcy) / (44 * s));
+          const qInDist = Math.hypot((pxSub - qcx) / (22 * s), (py - qcy) / (28 * s));
+          let isQ = qDist <= 1.0 && qInDist >= 1.0;
+
+          // Q tail pill
+          const p1x = 92 * s, p1y = 134 * s;
+          const p2x = 126 * s, p2y = 168 * s;
+          const vLen = Math.hypot(p2x - p1x, p2y - p1y);
+          const u = Math.max(0, Math.min(1, ((pxSub - p1x) * (p2x - p1x) + (py - p1y) * (p2y - p1y)) / (vLen * vLen)));
+          const tailDist = Math.hypot(pxSub - (p1x + u * (p2x - p1x)), py - (p1y + u * (p2y - p1y)));
+          if (tailDist <= 8.5 * s) isQ = true;
+
+          // Z polygon
+          const isZ = inPoly(pxSub, py, zPoly);
+
+          if (isQ) {
+            r = qRgb[0]; g = qRgb[1]; b = qRgb[2];
+          } else if (isZ) {
+            r = zRgb[0]; g = zRgb[1]; b = zRgb[2];
+          }
+
+          accR += r; accG += g; accB += b; accA += 255;
+        }
+      }
+
+      if (accA > 0) {
+        raw[px] = Math.round(accR / 16);
+        raw[px + 1] = Math.round(accG / 16);
+        raw[px + 2] = Math.round(accB / 16);
+        raw[px + 3] = Math.round(accA / 16);
+      } else {
+        raw[px + 3] = 0;
+      }
     }
   }
+
   const chunk = (type, data) => {
     const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
     const t = Buffer.from(type);
@@ -52,17 +118,33 @@ function makeIco(pngBuf) {
   return Buffer.concat([header, entry, pngBuf]);
 }
 
-function saveAppIcons(appDir, color1, color2) {
+function makeSvg(bgHex, qHex = '#ffffff', zHex = '#b3d89c') {
+  return `<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="128" cy="128" r="118" fill="${bgHex}"/>
+  <g fill="${qHex}">
+    <ellipse cx="90" cy="120" rx="38" ry="44"/>
+    <ellipse cx="90" cy="120" rx="22" ry="28" fill="${bgHex}"/>
+    <path d="M 92 134 L 126 168" stroke="${qHex}" stroke-width="17" stroke-linecap="round"/>
+  </g>
+  <polygon points="134,86 188,86 188,102 153,138 188,138 188,154 134,154 134,138 169,102 134,102" fill="${zHex}"/>
+</svg>
+`;
+}
+
+function saveAppIcons(appDir, bgRgb, bgHex) {
   const resDir = path.join(appDir, 'resources');
   fs.mkdirSync(resDir, { recursive: true });
-  const png = makePng(256, color1, color2);
+  const png = renderSmoothIcon(256, bgRgb);
   const ico = makeIco(png);
+  const svg = makeSvg(bgHex);
   fs.writeFileSync(path.join(resDir, 'icon.png'), png);
   fs.writeFileSync(path.join(resDir, 'icon.ico'), ico);
+  fs.writeFileSync(path.join(resDir, 'icon.svg'), svg, 'utf8');
   console.log(`Generated icons in ${resDir}`);
 }
 
 const root = path.resolve(__dirname, '..');
-saveAppIcons(path.join(root, 'apps', 'manager'), [13, 148, 136], [16, 185, 129]); // Teal / Emerald
-saveAppIcons(path.join(root, 'apps', 'student'), [37, 99, 235], [99, 102, 241]);  // Blue / Indigo
+// Rich Cerulean #4d7298 for Manager, Deep Navy #233748 for Student
+saveAppIcons(path.join(root, 'apps', 'manager'), [77, 114, 152], '#4d7298');
+saveAppIcons(path.join(root, 'apps', 'student'), [35, 55, 72], '#233748');
 console.log('App icons successfully generated.');
