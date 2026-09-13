@@ -36,14 +36,9 @@ export function printStudentCodesPdf(students: Student[], classFilter?: string):
           .meta { font-size: 11px; color: #475569; margin-top: 4px; }
           table { width: 100%; border-collapse: collapse; font-size: 12px; }
           th { background: #f1f5f9; padding: 8px 10px; border: 1px solid #94a3b8; text-align: left; font-size: 11px; text-transform: uppercase; }
-          .print-btn { background: #1e3a8a; color: #ffffff; border: none; padding: 8px 16px; font-weight: 600; border-radius: 4px; cursor: pointer; margin-bottom: 16px; }
-          @media print { .no-print { display: none; } }
         </style>
       </head>
       <body>
-        <div class="no-print" style="display: flex; justify-content: flex-end; gap: 10px;">
-          <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
-        </div>
         <div class="header">
           <div>
             <div class="title">Candidate Examination Login Slips</div>
@@ -68,4 +63,8 @@ export function printStudentCodesPdf(students: Student[], classFilter?: string):
     </html>
   `);
   printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+  }, 250);
 }

@@ -1,0 +1,201 @@
+; ==============================================================================
+; Queez CBT Suite - Unified Multi-Stage Setup Script
+; ==============================================================================
+
+!include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "FileFunc.nsh"
+
+; Define defaults if not passed via command line
+!ifndef VERSION
+  !define VERSION "2.1.0"
+!endif
+!ifndef ICON_PATH
+  !define ICON_PATH "..\apps\manager\resources\icon.ico"
+!endif
+!ifndef LICENSE_PATH
+  !define LICENSE_PATH "LICENSE.txt"
+!endif
+!ifndef OUT_FILE
+  !define OUT_FILE "Queez-CBT-Suite-Setup-v${VERSION}.exe"
+!endif
+!ifndef SERVER_DIR
+  !define SERVER_DIR "..\apps\server\release\win-unpacked"
+!endif
+!ifndef MANAGER_DIR
+  !define MANAGER_DIR "..\apps\manager\release\win-unpacked"
+!endif
+!ifndef STUDENT_DIR
+  !define STUDENT_DIR "..\apps\student\release\win-unpacked"
+!endif
+
+Name "Queez CBT Suite ${VERSION}"
+OutFile "${OUT_FILE}"
+InstallDir "$PROGRAMFILES64\Queez CBT Suite"
+InstallDirRegKey HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+RequestExecutionLevel admin
+
+SetCompressor /SOLID lzma
+BrandingText "Quizeen CBT Systems"
+
+; Installer visuals
+!define MUI_ICON "${ICON_PATH}"
+!define MUI_UNICON "${ICON_PATH}"
+!define MUI_ABORTWARNING
+
+; ------------------------------------------------------------------------------
+; Wizard Pages
+; ------------------------------------------------------------------------------
+
+; Page 1: Welcome
+!define MUI_WELCOMEPAGE_TITLE "Welcome to Queez CBT Suite Setup"
+!define MUI_WELCOMEPAGE_TEXT "This setup wizard will install the Queez Computer Based Testing System on your computer.$\r$\n$\r$\nQueez is an offline assessment suite built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
+!insertmacro MUI_PAGE_WELCOME
+
+; Page 2: License Agreement
+!define MUI_LICENSEPAGE_CHECKBOX
+!define MUI_LICENSEPAGE_TEXT_TOP "Please review the license terms before proceeding. You must accept these terms to install Queez CBT Suite."
+!define MUI_LICENSEPAGE_TEXT_BOTTOM "If you accept the terms of the agreement, select the checkbox below and click Next."
+!insertmacro MUI_PAGE_LICENSE "${LICENSE_PATH}"
+
+; Page 3: Component Selection
+InstType "Full Suite (Server, Manager and Student)"
+InstType "Admin Workstation (Server and Manager)"
+InstType "Student Lab Station (Student Portal Only)"
+
+!define MUI_COMPONENTSPAGE_TEXT_TOP "Choose which Queez applications to install based on this computer's role:"
+!define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Available Applications:"
+!insertmacro MUI_PAGE_COMPONENTS
+
+; Page 4: Install Location
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install Queez CBT Suite in the following folder. To install in a different folder, click Browse and select another folder."
+!insertmacro MUI_PAGE_DIRECTORY
+
+; Page 5: Start Menu Folder
+Var STARTMENU_FOLDER
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\Quizeen\Queez CBT Suite"
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "Queez CBT Suite"
+!insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
+
+; Page 6: Progress
+!insertmacro MUI_PAGE_INSTFILES
+
+; Page 7: Finish
+!define MUI_FINISHPAGE_TITLE "Installation Finished"
+!define MUI_FINISHPAGE_TEXT "Queez CBT Suite has been installed successfully.$\r$\n$\r$\nYour applications are ready to use in the Start Menu under the Queez CBT Suite folder."
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_TEXT "Open Queez Assessment Manager"
+!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchManager"
+!insertmacro MUI_PAGE_FINISH
+
+; Uninstaller Pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
+!insertmacro MUI_LANGUAGE "English"
+
+; ------------------------------------------------------------------------------
+; Component Sections
+; ------------------------------------------------------------------------------
+
+Section "Queez Local Server" SecServer
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\Server"
+  File /r "${SERVER_DIR}\*.*"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+  CreateShortcut "$DESKTOP\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
+SectionEnd
+
+Section "Queez Assessment Manager" SecManager
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\Manager"
+  File /r "${MANAGER_DIR}\*.*"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+  CreateShortcut "$DESKTOP\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
+SectionEnd
+
+Section "Queez Student Portal" SecStudent
+  SectionIn 1 3
+  SetOutPath "$INSTDIR\Student"
+  File /r "${STUDENT_DIR}\*.*"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+  CreateShortcut "$DESKTOP\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
+SectionEnd
+
+Section -Post
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk" "$INSTDIR\uninstall.exe"
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+  WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
+SectionEnd
+
+; Component Descriptions
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecServer} "Offline database and local assessment network engine. Required on the host computer running exams."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecManager} "Exam creation, student registration, login slip printing, and marking portal for teachers."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecStudent} "Secure examination taking portal used by candidates to enter login codes and take tests."
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; Launch helper
+Function LaunchManager
+  ${If} ${FileExists} "$INSTDIR\Manager\Queez CBT Manager.exe"
+    Exec "$INSTDIR\Manager\Queez CBT Manager.exe"
+  ${ElseIf} ${FileExists} "$INSTDIR\Server\Queez CBT Server.exe"
+    Exec "$INSTDIR\Server\Queez CBT Server.exe"
+  ${ElseIf} ${FileExists} "$INSTDIR\Student\Queez CBT Student.exe"
+    Exec "$INSTDIR\Student\Queez CBT Student.exe"
+  ${EndIf}
+FunctionEnd
+
+; ------------------------------------------------------------------------------
+; Uninstaller Section
+; ------------------------------------------------------------------------------
+
+Section "Uninstall"
+  !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
+
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
+  RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
+
+  Delete "$DESKTOP\Queez Local Server.lnk"
+  Delete "$DESKTOP\Queez Assessment Manager.lnk"
+  Delete "$DESKTOP\Queez Student Portal.lnk"
+
+  RMDir /r "$INSTDIR\Server"
+  RMDir /r "$INSTDIR\Manager"
+  RMDir /r "$INSTDIR\Student"
+  Delete "$INSTDIR\uninstall.exe"
+  RMDir "$INSTDIR"
+
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"
+  DeleteRegKey HKLM "Software\Quizeen\Queez CBT Suite"
+SectionEnd

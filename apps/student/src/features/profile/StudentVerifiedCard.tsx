@@ -16,8 +16,8 @@ export const StudentVerifiedCard: React.FC<Props> = ({ student }) => {
       <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--color-text)' }}>{student.name}</div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <Badge color="emerald">{student.classGroup}</Badge>
-        {student.department && <Badge color="indigo">{student.department}</Badge>}
-        {student.code && <Badge color="neutral">ID: {student.code}</Badge>}
+        {student.department && <Badge color="purple">{student.department}</Badge>}
+        {student.code && <Badge color="blue">ID: {student.code}</Badge>}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 {
   "name": "@cbt/student",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Quizeen CBT Student examination portal desktop application",
   "author": "Quizeen",
   "private": true,
@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "electron:dev": "vite",
-    "electron:build": "tsc && vite build && electron-builder"
+    "electron:build": "tsc && vite build && electron-builder",
+    "electron:pack": "tsc && vite build && electron-builder --dir"
   },
   "dependencies": {
     "@cbt/shared": "*",

@@ -1,6 +1,6 @@
 {
   "name": "cbt-system-prototype",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -17,6 +17,7 @@
     "server:electron": "npm --workspace=apps/server run electron:dev",
     "server:build": "npm --workspace=apps/server run build",
     "release": "node scripts/build-release.js",
+    "release:suite": "node scripts/build-release.js",
     "release:bump": "node scripts/bump-version.js",
     "release:icons": "node scripts/generate-icons.js"
   }
