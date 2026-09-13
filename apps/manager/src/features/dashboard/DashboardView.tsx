@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, DownloadSimple } from '@phosphor-icons/react';
-import { Assessment, Submission, Button } from '@cbt/shared';
+import { Assessment, Submission, Button, isAssessmentAvailable } from '@cbt/shared';
 import { ManagerTab } from '../../components/layout/Sidebar';
 import { DashboardMetrics } from './DashboardMetrics';
 import { DashboardRecentAssessments } from './DashboardRecentAssessments';
@@ -19,9 +19,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
   onOpenCreateExam,
 }) => {
-  const nearStartDate = exams.filter((exam) => exam.availableFrom).length;
-
-  console.log(nearStartDate);
+  const availableCount = exams.filter((exam) => isAssessmentAvailable(exam)).length;
   const pendingGrading = submissions.filter((s) => s.status === 'awaiting_result').length;
 
   return (
@@ -45,7 +43,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       <DashboardMetrics
         examCount={exams.length}
-        nearStartDate={1}
+        availableCount={availableCount}
         submissionCount={submissions.length}
         pendingGradingCount={pendingGrading}
       />

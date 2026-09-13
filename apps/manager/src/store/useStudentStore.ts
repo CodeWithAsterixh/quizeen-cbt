@@ -53,18 +53,18 @@ export function useStudentStore() {
     return newCode;
   };
 
-  const generateAllCodes = async (filterClass?: string): Promise<void> => {
+  const generateCodesForStudents = async (studentIds: string[]): Promise<void> => {
     try {
       if (await apiClient.isAvailable()) {
-        const updated = await apiClient.generateAllStudentCodes(filterClass);
+        const updated = await apiClient.generateAllStudentCodes(undefined, studentIds);
         if (updated?.length > 0) { setStudents(updated); await studentStore.saveBatch(updated); return; }
       }
     } catch { /* offline */ }
     const existing = new Set(students.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
-    const target = filterClass ? students.filter((s) => s.classGroup === filterClass) : students;
+    const targetSet = new Set(studentIds);
     const updated = students.map((s) => {
-      if (target.some((t) => t.id === s.id)) {
-        const c = s.code || generateStudentCode(existing);
+      if (targetSet.has(s.id)) {
+        const c = generateStudentCode(existing);
         existing.add(c);
         return { ...s, code: c };
       }
@@ -74,11 +74,14 @@ export function useStudentStore() {
     setStudents(updated);
   };
 
+  const generateAllCodes = (filterClass?: string) =>
+    generateCodesForStudents((filterClass ? students.filter((s) => s.classGroup === filterClass) : students).map((s) => s.id));
+
   const deleteStudent = async (id: string) => {
     try { if (await apiClient.isAvailable()) await apiClient.deleteStudent(id); } catch { /* offline */ }
     await studentStore.delete(id);
     setStudents(await studentStore.getAll());
   };
 
-  return { students, saveStudent, generateCodeForStudent, generateAllCodes, deleteStudent };
+  return { students, saveStudent, generateCodeForStudent, generateCodesForStudents, generateAllCodes, deleteStudent };
 }

@@ -85,6 +85,6 @@ export const apiClient = {
   getStudentByCode: (code: string) => studentApi.getStudentByCode(code),
   saveStudent: (student: any) => studentApi.saveStudent(student),
   generateStudentCode: (id: string) => studentApi.generateCode(id),
-  generateAllStudentCodes: (classGroup?: string) => studentApi.generateAllCodes(classGroup),
+  generateAllStudentCodes: (classGroup?: string, studentIds?: string[]) => studentApi.generateAllCodes(classGroup, studentIds),
   deleteStudent: (id: string) => studentApi.deleteStudent(id),
 };

@@ -36,11 +36,11 @@ export const studentApi = {
     return json.data || null;
   },
 
-  async generateAllCodes(classGroup?: string): Promise<Student[]> {
+  async generateAllCodes(classGroup?: string, studentIds?: string[]): Promise<Student[]> {
     const res = await fetch(`${serverConfig.getApiBase()}/students/generate-all`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ classGroup }),
+      body: JSON.stringify({ classGroup, studentIds }),
     });
     if (!res.ok) return [];
     const json = (await res.json()) as { success: boolean; data: Student[] };

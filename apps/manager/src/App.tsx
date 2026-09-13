@@ -21,7 +21,7 @@ export const App: React.FC = () => {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const { assessments, submissions, saveAssessment, deleteAssessment, duplicateAssessment, updateSubmission } = useManagerAppStore();
-  const { students, saveStudent, generateCodeForStudent, generateAllCodes, deleteStudent } = useStudentStore();
+  const { students, saveStudent, generateCodeForStudent, generateCodesForStudents, deleteStudent } = useStudentStore();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
@@ -71,7 +71,7 @@ export const App: React.FC = () => {
               {currentTab === 'students' && (
                 <StudentListView
                   students={students} onOpenCreate={() => setIsStudentModalOpen(true)}
-                  onGenerateCode={generateCodeForStudent} onGenerateAllCodes={generateAllCodes}
+                  onGenerateCode={generateCodeForStudent} onGenerateCodes={generateCodesForStudents}
                   onDeleteStudent={deleteStudent}
                 />
               )}
@@ -88,10 +88,7 @@ export const App: React.FC = () => {
         onClose={() => { setIsEditorOpen(false); setEditingAssessment(null); }}
         onSave={async (e) => { await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); }}
       />
-      <StudentEditorModal
-        isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)}
-        onSave={async (s) => { await saveStudent(s); setIsStudentModalOpen(false); }}
-      />
+      <StudentEditorModal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)} onSave={async (s) => { await saveStudent(s); setIsStudentModalOpen(false); }} />
       <ServerSettingsModal isOpen={isServerModalOpen} onClose={() => setIsServerModalOpen(false)} />
     </div>
   );

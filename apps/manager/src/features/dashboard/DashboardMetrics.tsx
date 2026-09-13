@@ -4,14 +4,14 @@ import { Card } from '@cbt/shared';
 
 interface DashboardMetricsProps {
   examCount: number;
-  nearStartDate: number;
+  availableCount: number;
   submissionCount: number;
   pendingGradingCount: number;
 }
 
 export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   examCount,
-  nearStartDate,
+  availableCount,
   submissionCount,
   pendingGradingCount,
 }) => {
@@ -32,8 +32,8 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
           <Archive size={26} weight="fill" />
         </div>
         <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{nearStartDate}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Assessement coming up</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{availableCount}</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Available to Take</div>
         </div>
       </Card>
 
@@ -43,7 +43,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         </div>
         <div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{submissionCount}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Students Tested</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Students Assessed</div>
         </div>
       </Card>
 

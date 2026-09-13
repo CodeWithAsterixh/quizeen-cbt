@@ -35,10 +35,15 @@ export const studentsService = {
     return student;
   },
 
-  generateAllCodes(filterClass?: string): Student[] {
+  generateAllCodes(filterClass?: string, studentIds?: string[]): Student[] {
     const list = db.getStudents();
     const existing = new Set(list.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
-    const target = filterClass ? list.filter((s) => s.classGroup === filterClass) : list;
+    let target = list;
+    if (studentIds && studentIds.length > 0) {
+      target = list.filter((s) => studentIds.includes(s.id));
+    } else if (filterClass) {
+      target = list.filter((s) => s.classGroup === filterClass);
+    }
     target.forEach((s) => {
       s.code = generateStudentCode(existing);
       existing.add(s.code);

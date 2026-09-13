@@ -31,7 +31,7 @@ studentsRouter.post('/:id/generate-code', (req: Request, res: Response) => {
 });
 
 studentsRouter.post('/generate-all', (req: Request, res: Response) => {
-  const updated = studentsService.generateAllCodes(req.body.classGroup);
+  const updated = studentsService.generateAllCodes(req.body.classGroup, req.body.studentIds);
   res.json({ success: true, data: updated });
 });
 
