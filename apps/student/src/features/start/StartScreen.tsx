@@ -53,7 +53,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             Welcome to Queez
           </h1>
           <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-            Hello student! Select the button below when you are ready to choose your assessment.
+            Hello candidate! Enter the 6-character Student ID code provided by your teacher to access your tests.
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           icon={<Play size={18} weight="fill" />}
           style={{ minWidth: 200 }}
         >
-          Start Assessment
+          Enter Student ID
         </Button>
 
       </Card>

@@ -70,19 +70,31 @@ The Manager application enables teachers and administrators to create tests, man
    - Select "Done" on the question card to collapse it into a preview item.
 4. Select "Save Assessment" to finalize the paper.
 
+### Managing students and generating student IDs
+
+1. Select "Students" from the navigation sidebar.
+2. Select "Add Student".
+3. In the single-stage creation modal:
+   - Enter the student full name.
+   - A unique 6-character alphanumeric ID is generated automatically. You can select "Generate" to create a new code or type a custom 6-character code.
+   - Toggle the education level: Primary, Junior Secondary, or Senior Secondary.
+   - Toggle the student's class group.
+   - For Senior Secondary, toggle the department stream (Science, Arts, or Commercial).
+4. Select "Create Student" to save the candidate account.
+5. Use the copy button next to any student ID in the list to distribute the code to the candidate.
+
 ### Exporting assessments for offline exam rooms (.qzn)
 
 1. Select "Compile Assessments" from the navigation menu.
-2. Check the boxes next to the assessments you want to include in the package.
-3. Enter an archive filename (for example, Term1_Final_Exams).
-4. Select "Save .qzn Package" to generate the package file.
-5. Copy the `.qzn` file to a USB drive to distribute to candidate computers.
+2. Choose the assessments to bundle into the package.
+3. Set examination date and time windows for each paper.
+4. Select "Export .qzn Package" and save the file to a USB flash drive for offline rooms.
 
 ---
 
 ## Candidate and student manual (Student portal)
 
-The Student portal provides a clean interface for registering, selecting papers, and completing assessments.
+The Student portal provides a clean interface for entering your student ID, selecting papers, and completing assessments.
 
 ### Server connection and auto-discovery
 
@@ -94,13 +106,10 @@ Candidate computers connected to the same local area network as the Server will 
 ### Taking an assessment
 
 1. Open the Quizeen Student application.
-2. Select "Start Examination".
-3. Complete the registration steps:
-   - Step 1: Enter your full name.
-   - Step 2: Select your school level (Primary, Junior Secondary, or Senior Secondary).
-   - Step 3: Select your class group (for example, SSS 2).
-   - Step 4: If in Senior Secondary, select your department stream (Science, Arts, or Commercial).
-4. Review the list of available assessments for your class.
+2. Select "Enter Student ID".
+3. Enter your 6-character Student ID code in the OTP-style input boxes. The code is case-insensitive and can be typed or pasted.
+4. When verified, your name, class, and department stream are confirmed. Select "Start Assessments".
+5. Review the list of available assessments filtered for your class and department stream.
 5. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
 6. Read each question carefully. Use the question grid buttons to jump between questions.
 7. Open the built-in calculator from the side menu if you need to perform calculations.

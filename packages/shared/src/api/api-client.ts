@@ -1,5 +1,6 @@
 import { Assessment, Submission, ExamScheduleConfig, EducationLevel, Department } from '../types/index.js';
 import { serverConfig } from './server-config.js';
+import { studentApi } from './student-api.js';
 
 export const apiClient = {
   getServerUrl: (): string => serverConfig.getUrl(),
@@ -79,4 +80,11 @@ export const apiClient = {
     });
     return ((await res.json()) as any).data;
   },
+
+  getStudents: () => studentApi.getStudents(),
+  getStudentByCode: (code: string) => studentApi.getStudentByCode(code),
+  saveStudent: (student: any) => studentApi.saveStudent(student),
+  generateStudentCode: (id: string) => studentApi.generateCode(id),
+  generateAllStudentCodes: (classGroup?: string) => studentApi.generateAllCodes(classGroup),
+  deleteStudent: (id: string) => studentApi.deleteStudent(id),
 };

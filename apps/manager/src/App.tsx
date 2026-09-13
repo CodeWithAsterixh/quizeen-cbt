@@ -10,16 +10,21 @@ import { PackageCompilerView } from './features/compiler/PackageCompilerView';
 import { GradingQueueView } from './features/grading/GradingQueueView';
 import { StudentResultDetailPage } from './features/grading/StudentResultDetailPage';
 import { AnalyticsView } from './features/analytics/AnalyticsView';
+import { StudentListView } from './features/students/StudentListView';
+import { StudentEditorModal } from './features/students/StudentEditorModal';
 import { ServerSettingsModal } from './components/layout/ServerSettingsModal';
 import { useManagerAppStore } from './store/useManagerAppStore';
+import { useStudentStore } from './store/useStudentStore';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<ManagerTab>('dashboard');
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const { assessments, submissions, saveAssessment, deleteAssessment, duplicateAssessment, updateSubmission } = useManagerAppStore();
+  const { students, saveStudent, generateCodeForStudent, generateAllCodes, deleteStudent } = useStudentStore();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
 
   const pendingCount = submissions.filter((s) => s.status === 'awaiting_result').length;
@@ -63,6 +68,13 @@ export const App: React.FC = () => {
                   onDuplicateAssessment={duplicateAssessment} onDeleteAssessment={deleteAssessment}
                 />
               )}
+              {currentTab === 'students' && (
+                <StudentListView
+                  students={students} onOpenCreate={() => setIsStudentModalOpen(true)}
+                  onGenerateCode={generateCodeForStudent} onGenerateAllCodes={generateAllCodes}
+                  onDeleteStudent={deleteStudent}
+                />
+              )}
               {currentTab === 'compiler' && <PackageCompilerView exams={assessments} />}
               {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={updateSubmission} />}
               {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} />}
@@ -75,6 +87,10 @@ export const App: React.FC = () => {
         isOpen={isEditorOpen} initialExam={editingAssessment}
         onClose={() => { setIsEditorOpen(false); setEditingAssessment(null); }}
         onSave={async (e) => { await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); }}
+      />
+      <StudentEditorModal
+        isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)}
+        onSave={async (s) => { await saveStudent(s); setIsStudentModalOpen(false); }}
       />
       <ServerSettingsModal isOpen={isServerModalOpen} onClose={() => setIsServerModalOpen(false)} />
     </div>

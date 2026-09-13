@@ -1,10 +1,10 @@
 import React from 'react';
 import {
-  Gauge, BookOpen, Archive, ClipboardText, ChartBar, Gear,
+  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear,
 } from '@phosphor-icons/react';
 import { Badge, Button } from '@cbt/shared';
 
-export type ManagerTab = 'dashboard' | 'exams' | 'compiler' | 'grading' | 'analytics';
+export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics';
 
 interface SidebarProps {
   currentTab: ManagerTab;
@@ -22,6 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { id: 'dashboard' as ManagerTab, label: 'Overview', icon: Gauge },
     { id: 'exams' as ManagerTab, label: 'Assessments', icon: BookOpen },
+    { id: 'students' as ManagerTab, label: 'Students', icon: Users },
     { id: 'compiler' as ManagerTab, label: 'Compile Assessments', icon: Archive },
     {
       id: 'grading' as ManagerTab,

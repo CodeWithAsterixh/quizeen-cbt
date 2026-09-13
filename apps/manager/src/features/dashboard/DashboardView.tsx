@@ -19,7 +19,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
   onOpenCreateExam,
 }) => {
-  const totalQuestions = exams.reduce((acc, curr) => acc + curr.questions.length, 0);
+  const nearStartDate = exams.filter((exam) => exam.availableFrom).length;
+
+  console.log(nearStartDate);
   const pendingGrading = submissions.filter((s) => s.status === 'awaiting_result').length;
 
   return (
@@ -43,7 +45,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       <DashboardMetrics
         examCount={exams.length}
-        questionCount={totalQuestions}
+        nearStartDate={1}
         submissionCount={submissions.length}
         pendingGradingCount={pendingGrading}
       />

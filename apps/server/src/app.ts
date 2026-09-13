@@ -4,6 +4,7 @@ import { assessmentRouter } from './features/assessments/assessment.routes.js';
 import { submissionRouter } from './features/submissions/submission.routes.js';
 import { packageRouter } from './features/packages/package.routes.js';
 import { analyticsRouter } from './features/analytics/analytics.routes.js';
+import { studentsRouter } from './features/students/students.routes.js';
 
 export interface RequestLogEntry {
   id: string;
@@ -50,6 +51,7 @@ export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express
   app.use('/api/submissions', submissionRouter);
   app.use('/api/packages', packageRouter);
   app.use('/api/analytics', analyticsRouter);
+  app.use('/api/students', studentsRouter);
 
   return app;
 };

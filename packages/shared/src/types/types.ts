@@ -66,10 +66,9 @@ export interface Submission {
 }
 
 export interface StudentSession {
-  studentName: string;
-  educationLevel: EducationLevel;
-  classGroup: string;
-  department?: Department;
+  studentId?: string; studentCode?: string;
+  studentName: string; educationLevel: EducationLevel;
+  classGroup: string; department?: Department;
   loggedInAt: string;
 }
 

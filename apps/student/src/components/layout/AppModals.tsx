@@ -1,7 +1,7 @@
 import React from 'react';
 import { Assessment, StudentSession } from '@cbt/shared';
 import { SettingsModal } from '../../features/settings/SettingsModal';
-import { StudentProfileModal } from '../../features/profile/StudentProfileModal';
+import { StudentCodeModal } from '../../features/profile/StudentCodeModal';
 import { AssessmentPinModal } from '../../features/catalog/AssessmentPinModal';
 
 interface AppModalsProps {
@@ -33,11 +33,10 @@ export const AppModals: React.FC<AppModalsProps> = ({
       currentExamCount={examCount}
       onClearAll={onClearAll}
     />
-    <StudentProfileModal
+    <StudentCodeModal
       isOpen={isProfileOpen}
       onClose={onCloseProfile}
       onProfileSubmit={onProfileSubmit}
-      initialSession={session}
     />
     <AssessmentPinModal
       assessment={pendingPinExam}
