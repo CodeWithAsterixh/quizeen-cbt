@@ -1,11 +1,6 @@
 import React from 'react';
 import {
-  Gauge,
-  BookOpen,
-  Archive,
-  ClipboardText,
-  ChartBar,
-  ShieldCheck,
+  Gauge, BookOpen, Archive, ClipboardText, ChartBar, Gear,
 } from '@phosphor-icons/react';
 import { Badge, Button } from '@cbt/shared';
 
@@ -14,12 +9,14 @@ export type ManagerTab = 'dashboard' | 'exams' | 'compiler' | 'grading' | 'analy
 interface SidebarProps {
   currentTab: ManagerTab;
   onSelectTab: (tab: ManagerTab) => void;
+  onOpenServerSettings: () => void;
   pendingGradingCount: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
+  onOpenServerSettings,
   pendingGradingCount,
 }) => {
   const navItems = [
@@ -63,6 +60,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
+      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)' }}>
+        <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenServerSettings}>
+          <Gear size={18} />
+          <span>Server Connection</span>
+        </Button>
+      </div>
     </aside>
   );
 };

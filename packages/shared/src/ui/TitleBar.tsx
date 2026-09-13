@@ -17,11 +17,13 @@ const CloseIcon = () => (
 export interface TitleBarProps {
   title?: string;
   badge?: string;
+  onClose?: () => void;
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'Queez',
   badge = 'CBT Platform',
+  onClose,
 }) => {
   const { isElectron, isMax, handleMinimize, handleMaximize, handleClose } = useTitleBar();
 
@@ -41,7 +43,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         <button type="button" className="title-btn" onClick={handleMaximize} title={isMax ? 'Restore' : 'Maximize'} aria-label={isMax ? 'Restore' : 'Maximize'}>
           {isMax ? <RestoreIcon /> : <SquareIcon />}
         </button>
-        <button type="button" className="title-btn title-btn-close" onClick={handleClose} title="Close" aria-label="Close">
+        <button type="button" className="title-btn title-btn-close" onClick={onClose || handleClose} title="Close" aria-label="Close">
           <CloseIcon />
         </button>
       </div>

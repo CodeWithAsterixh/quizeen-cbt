@@ -44,9 +44,12 @@ function createWindow() {
   }
 }
 
+import { startDiscoveryListener } from './discovery-listener.js';
+
 app.whenReady().then(() => {
   setupIpc();
   createWindow();
+  startDiscoveryListener((d) => mainWindow?.webContents.send('server:discovered', d));
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

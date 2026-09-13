@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { FileArchive, ArrowClockwise, Trash } from '@phosphor-icons/react';
 import { Button, Badge } from '@cbt/shared';
+import { ServerConnectionConfig } from './ServerConnectionConfig';
 
 interface SettingsActionsProps {
   currentExamCount: number;
@@ -56,6 +57,8 @@ export const SettingsActions: React.FC<SettingsActionsProps> = ({
           {isProcessing ? 'Checking & Unpacking...' : 'Choose .qzn Package to Load'}
         </Button>
       </div>
+
+      <ServerConnectionConfig />
 
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Button variant="secondary" size="sm" onClick={onResetToDefaults} icon={<ArrowClockwise size={16} />}>

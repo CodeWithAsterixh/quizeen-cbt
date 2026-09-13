@@ -1,6 +1,42 @@
 # Quizeen CBT user manual
 
-This manual provides instructions for educators authoring tests and students sitting for examinations using the Quizeen Computer-Based Testing platform.
+This manual provides instructions for educators authoring tests, exam proctors managing local servers, and students sitting for examinations using the Quizeen Computer-Based Testing platform.
+
+---
+
+## Exam proctor manual (Server app)
+
+The Server application acts as the local examination hub. It hosts tests, collects submissions, provides real-time traffic monitoring, and broadcasts network discovery beacons across the examination room.
+
+### Starting and stopping the server
+
+1. Open the Quizeen Server application.
+2. In the "Server Control & Network" card, verify the port number (default is 4000).
+3. Select "Start Server" to begin listening for examination traffic. The status badge will change to "Active (Listening)".
+4. Select "Stop Server" to temporarily pause network traffic.
+
+### Configuring auto-start
+
+If you want the server to launch automatically every time you open the application, enable the "Auto-start server when app opens" checkbox under the server control card. Leave this unchecked if you prefer to start the server manually for each exam session.
+
+### Finding your server network address
+
+The server automatically scans your computer network adapters and lists all available IP addresses:
+1. Locate the IP address list in the server control card (for example, `http://192.168.1.150:4000`).
+2. Select "Copy" next to the primary LAN IP address to copy the URL to your clipboard.
+3. Share this address with test candidates or rely on the automatic zero-configuration discovery built into the Student and Manager apps.
+
+### Monitoring live candidate activity
+
+The live requests panel at the bottom of the window displays an auto-scrolling log of all incoming traffic:
+- Each entry shows the timestamp, HTTP method (GET, POST), request path, status code, latency in milliseconds, and client IP address.
+- Use the search bar in the toolbar to filter logs by endpoint (for example, type `/submissions` to view incoming exam submissions).
+- Select "Export" to download the captured logs as a JSON file for your records.
+- Select "Clear" to reset the log display for a new examination session.
+
+### Exiting the application safely
+
+If you click the window close button while the server is actively running, a confirmation prompt appears warning that closing the window will stop the server and disconnect active student sessions. Select "Keep Server Running" to cancel or "Stop Server & Exit" to proceed.
 
 ---
 
@@ -8,36 +44,35 @@ This manual provides instructions for educators authoring tests and students sit
 
 The Manager application enables teachers and administrators to create tests, manage schedules, compile offline packages, and review class performance.
 
-### Creating an assessment
+### Connecting to the central server
 
 1. Open the Manager application.
-2. Select the "Create Assessment" button from the top navigation bar.
-3. In the "Settings and Availability" tab:
-   - Enter the subject name (for example, Mathematics or Biology) and the academic session (for example, 2024/2025).
+2. Select "Server Connection" at the bottom of the navigation sidebar.
+3. If the Server app is running on the same network, a banner displays "Discovered server". Select "Use Discovered" to connect automatically.
+4. Alternatively, enter the server URL manually and select "Test Connection" to confirm availability.
+
+### Creating an assessment
+
+1. Select the "Create Assessment" button from the top navigation bar.
+2. In the "Settings and Availability" tab:
+   - Enter the subject name (for example, Mathematics or Biology) and academic session (for example, 2024/2025).
    - Select the assessment type: Periodic Test or Major Exam.
    - Choose the education level: Primary, Junior Secondary, or Senior Secondary.
    - Select the target classes permitted to take this test (for example, SSS 2, SSS 3).
    - For Senior Secondary, select the department stream if applicable (Science, Arts, or Commercial).
    - Set the duration in minutes and the minimum passing score percentage.
    - Configure availability: enable the Active status toggle and set optional start or deadline timestamps.
-4. Switch to the "Questions" tab:
+3. Switch to the "Questions" tab:
    - Select "Add Question" to create a new question.
    - Choose the question format (Multiple Choice, True/False, or Short Answer).
    - Enter the question text and answer options.
    - Mark the correct answer option.
    - Select "Done" on the question card to collapse it into a preview item.
-5. Select "Save Assessment" to finalize the paper.
-
-### Editing an assessment
-
-1. Navigate to the class or subject listing in the Manager dashboard.
-2. Open the assessment and select "Edit".
-3. Modify settings or individual questions. To edit an existing question, select "Edit Question" on its preview card, make updates, and select "Done".
-4. Select "Save Assessment" to apply updates.
+4. Select "Save Assessment" to finalize the paper.
 
 ### Exporting assessments for offline exam rooms (.qzn)
 
-1. Select "Compile Packages (.qzn)" from the navigation menu.
+1. Select "Compile Assessments" from the navigation menu.
 2. Check the boxes next to the assessments you want to include in the package.
 3. Enter an archive filename (for example, Term1_Final_Exams).
 4. Select "Save .qzn Package" to generate the package file.
@@ -48,6 +83,13 @@ The Manager application enables teachers and administrators to create tests, man
 ## Candidate and student manual (Student portal)
 
 The Student portal provides a clean interface for registering, selecting papers, and completing assessments.
+
+### Server connection and auto-discovery
+
+Candidate computers connected to the same local area network as the Server will automatically discover the server. To review or change the connection:
+1. From the start screen, select "Settings".
+2. Enter supervisor credentials if prompted.
+3. Review the "Network Server Connection" card. If an active server is detected, select "Connect" to link directly to the teacher's station.
 
 ### Taking an assessment
 

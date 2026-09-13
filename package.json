@@ -14,6 +14,7 @@
     "manager:electron": "npm --workspace=apps/manager run electron:dev",
     "manager:build": "npm --workspace=apps/manager run build",
     "server:dev": "npm --workspace=apps/server run dev",
+    "server:electron": "npm --workspace=apps/server run electron:dev",
     "server:build": "npm --workspace=apps/server run build",
     "release": "node scripts/build-release.js",
     "release:bump": "node scripts/bump-version.js",

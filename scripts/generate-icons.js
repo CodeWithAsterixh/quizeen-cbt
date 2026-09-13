@@ -144,7 +144,8 @@ function saveAppIcons(appDir, bgRgb, bgHex) {
 }
 
 const root = path.resolve(__dirname, '..');
-// Rich Cerulean #4d7298 for Manager, Deep Navy #233748 for Student
+// Rich Cerulean #4d7298 for Manager, Deep Navy #233748 for Student, Steel Blue #77a6b6 for Server
 saveAppIcons(path.join(root, 'apps', 'manager'), [77, 114, 152], '#4d7298');
 saveAppIcons(path.join(root, 'apps', 'student'), [35, 55, 72], '#233748');
+saveAppIcons(path.join(root, 'apps', 'server'), [119, 166, 182], '#77a6b6');
 console.log('App icons successfully generated.');

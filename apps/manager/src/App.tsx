@@ -10,6 +10,7 @@ import { PackageCompilerView } from './features/compiler/PackageCompilerView';
 import { GradingQueueView } from './features/grading/GradingQueueView';
 import { StudentResultDetailPage } from './features/grading/StudentResultDetailPage';
 import { AnalyticsView } from './features/analytics/AnalyticsView';
+import { ServerSettingsModal } from './components/layout/ServerSettingsModal';
 import { useManagerAppStore } from './store/useManagerAppStore';
 
 export const App: React.FC = () => {
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
   const { assessments, submissions, saveAssessment, deleteAssessment, duplicateAssessment, updateSubmission } = useManagerAppStore();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
+  const [isServerModalOpen, setIsServerModalOpen] = useState(false);
 
   const pendingCount = submissions.filter((s) => s.status === 'awaiting_result').length;
   const activeSub = submissions.find((s) => s.id === selectedSubmissionId);
@@ -29,23 +31,19 @@ export const App: React.FC = () => {
     <div className="app-shell">
       <TitleBar title="Queez" badge="Management" />
       <div className="manager-body">
-        <Sidebar currentTab={currentTab} onSelectTab={handleTabChange} pendingGradingCount={pendingCount} />
+        <Sidebar currentTab={currentTab} onSelectTab={handleTabChange} onOpenServerSettings={() => setIsServerModalOpen(true)} pendingGradingCount={pendingCount} />
         <main className="main-viewport">
           {activeSub && activeAssessment ? (
             <StudentResultDetailPage
-              submission={activeSub}
-              exam={activeAssessment}
+              submission={activeSub} exam={activeAssessment} onSave={updateSubmission}
               onBack={() => setSelectedSubmissionId(null)}
-              onSave={updateSubmission}
               backLabel={selectedExamId ? 'Back to Assessment Details' : 'Back to Marking Queue'}
             />
           ) : activeAssessment && currentTab === 'exams' ? (
             <AssessmentDetailPage
-              assessment={activeAssessment}
-              submissions={submissions}
-              onBack={() => setSelectedExamId(null)}
+              assessment={activeAssessment} submissions={submissions}
+              onBack={() => setSelectedExamId(null)} onDuplicate={duplicateAssessment}
               onEdit={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }}
-              onDuplicate={duplicateAssessment}
               onDelete={(id) => { deleteAssessment(id); setSelectedExamId(null); }}
               onSelectSubmission={(s) => setSelectedSubmissionId(s.id)}
             />
@@ -59,20 +57,14 @@ export const App: React.FC = () => {
               )}
               {currentTab === 'exams' && (
                 <AssessmentListView
-                  assessments={assessments}
+                  assessments={assessments} onOpenAssessment={(e) => setSelectedExamId(e.id)}
                   onOpenCreate={() => { setEditingAssessment(null); setIsEditorOpen(true); }}
-                  onOpenAssessment={(e) => setSelectedExamId(e.id)}
                   onEditAssessment={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }}
-                  onDuplicateAssessment={duplicateAssessment}
-                  onDeleteAssessment={deleteAssessment}
+                  onDuplicateAssessment={duplicateAssessment} onDeleteAssessment={deleteAssessment}
                 />
               )}
               {currentTab === 'compiler' && <PackageCompilerView exams={assessments} />}
-              {currentTab === 'grading' && (
-                <GradingQueueView
-                  submissions={submissions} exams={assessments} onUpdateSubmission={updateSubmission}
-                />
-              )}
+              {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={updateSubmission} />}
               {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} />}
             </>
           )}
@@ -84,7 +76,7 @@ export const App: React.FC = () => {
         onClose={() => { setIsEditorOpen(false); setEditingAssessment(null); }}
         onSave={async (e) => { await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); }}
       />
+      <ServerSettingsModal isOpen={isServerModalOpen} onClose={() => setIsServerModalOpen(false)} />
     </div>
   );
 };
-

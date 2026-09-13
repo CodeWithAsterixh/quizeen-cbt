@@ -32,16 +32,9 @@ async function main() {
 
   run('node scripts/generate-icons.js', root);
 
-  console.log('\n--- Building Server ---');
-  run('npm --workspace=apps/server run build', root);
-  const srvDist = path.join(root, 'apps', 'server', 'dist');
-  const srvDest = path.join(releaseDir, 'server');
-  if (fs.existsSync(srvDist)) {
-    fs.mkdirSync(srvDest, { recursive: true });
-    fs.cpSync(srvDist, path.join(srvDest, 'dist'), { recursive: true });
-    fs.copyFileSync(path.join(root, 'apps', 'server', 'package.json'), path.join(srvDest, 'package.json'));
-    console.log('Server build saved to release.');
-  }
+  console.log('\n--- Building Server Electron App ---');
+  run('npm --workspace=apps/server run electron:build', root);
+  copyInstaller(path.join(root, 'apps', 'server'), releaseDir);
 
   console.log('\n--- Building Manager Electron App ---');
   run('npm --workspace=apps/manager run electron:build', root);
