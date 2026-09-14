@@ -15,13 +15,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
   const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
 
-  const total = submissions.length;
-  const avg = total > 0 ? Math.round(submissions.reduce((a, s) => a + s.percentage, 0) / total) : 0;
-  const passed = submissions.filter((s) => s.percentage >= 50).length;
+  const completed = submissions.filter((s) => s.status !== 'in_progress');
+  const total = completed.length;
+  const avg = total > 0 ? Math.round(completed.reduce((a, s) => a + s.percentage, 0) / total) : 0;
+  const passed = completed.filter((s) => s.percentage >= 50).length;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
   const infractions = submissions.reduce((a, s) => a + (s.infractionCount || 0), 0);
 
-  const classSummaries = buildClassSummaries(exams, submissions);
+  const classSummaries = buildClassSummaries(exams, completed);
   const currentClassSummary = classSummaries.find((c) => c.className === selectedClassName);
   const activeExam = exams.find((e) => e.id === selectedSubjectId);
 
@@ -30,15 +31,15 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
       <SubjectDetailPage
         className={selectedClassName}
         exam={activeExam}
-        submissions={submissions}
+        submissions={completed}
         onBack={() => setSelectedSubjectId(null)}
       />
     );
   }
 
   if (selectedClassName) {
-    const subjects = buildClassSubjectSummaries(selectedClassName, exams, submissions);
-    const students = buildStudentSummaries(selectedClassName, submissions);
+    const subjects = buildClassSubjectSummaries(selectedClassName, exams, completed);
+    const students = buildStudentSummaries(selectedClassName, completed);
     return (
       <ClassDetailPage
         className={selectedClassName}

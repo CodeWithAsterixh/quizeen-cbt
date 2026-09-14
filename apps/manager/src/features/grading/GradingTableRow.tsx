@@ -8,12 +8,13 @@ interface GradingTableRowProps {
 }
 
 export const GradingTableRow: React.FC<GradingTableRowProps> = ({ sub, onReview }) => {
+  const isInProgress = sub.status === 'in_progress';
   return (
     <tr>
       <td>
         <div style={{ fontWeight: 700 }}>{sub.studentName}</div>
         <div style={{ fontSize: '0.75rem', color: 'var(--cbt-text-muted)' }}>
-          Submitted at {new Date(sub.submittedAt).toLocaleTimeString()}
+          {isInProgress ? 'In progress' : `Submitted at ${new Date(sub.submittedAt).toLocaleTimeString()}`}
         </div>
       </td>
       <td>{sub.examTitle}</td>
@@ -24,13 +25,17 @@ export const GradingTableRow: React.FC<GradingTableRowProps> = ({ sub, onReview 
         )}
       </td>
       <td>
-        <span style={{ fontWeight: 700, color: sub.percentage >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-          {sub.score} / {sub.totalPoints} ({sub.percentage}%)
-        </span>
+        {isInProgress ? (
+          <span style={{ fontSize: '0.85rem', color: 'var(--cbt-text-muted)', fontWeight: 600 }}>In Session</span>
+        ) : (
+          <span style={{ fontWeight: 700, color: sub.percentage >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>
+            {sub.score} / {sub.totalPoints} ({sub.percentage}%)
+          </span>
+        )}
       </td>
       <td>
-        <Badge color={sub.status === 'graded' ? 'emerald' : 'amber'}>
-          {sub.status === 'graded' ? 'Marked' : 'Needs Marking'}
+        <Badge color={sub.status === 'graded' ? 'emerald' : isInProgress ? 'blue' : 'amber'}>
+          {sub.status === 'graded' ? 'Marked' : isInProgress ? 'In Progress' : 'Needs Marking'}
         </Badge>
       </td>
       <td>
@@ -43,8 +48,8 @@ export const GradingTableRow: React.FC<GradingTableRowProps> = ({ sub, onReview 
         )}
       </td>
       <td style={{ textAlign: 'right' }}>
-        <Button variant="secondary" size="sm" icon={<Eye size={16} />} onClick={() => onReview(sub)}>
-          Mark
+        <Button variant="secondary" size="sm" icon={<Eye size={16} />} onClick={() => onReview(sub)} disabled={isInProgress}>
+          {isInProgress ? 'Active' : 'Mark'}
         </Button>
       </td>
     </tr>

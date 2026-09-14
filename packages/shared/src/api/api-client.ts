@@ -1,4 +1,5 @@
 import { Assessment, Submission, ExamScheduleConfig, EducationLevel, Department } from '../types/index.js';
+import { createIdempotencyKey } from '../utils/idempotency.js';
 import { serverConfig } from './server-config.js';
 import { studentApi } from './student-api.js';
 
@@ -21,19 +22,30 @@ export const apiClient = {
   },
 
   async createExam(exam: Omit<Assessment, 'id' | 'createdAt'>): Promise<{ data: Assessment; message?: string; statusCode?: number }> {
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(exam) });
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'idempotency-key': createIdempotencyKey('exam') },
+      body: JSON.stringify(exam),
+    });
     const json = await res.json();
     return { data: json.data, message: json.message, statusCode: json.statusCode ?? res.status };
   },
 
   async updateExam(id: string, updates: Partial<Assessment>): Promise<{ data: Assessment; message?: string; statusCode?: number }> {
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'idempotency-key': createIdempotencyKey(`exam_${id}`) },
+      body: JSON.stringify(updates),
+    });
     const json = await res.json();
     return { data: json.data, message: json.message, statusCode: json.statusCode ?? res.status };
   },
 
   async deleteExam(id: string): Promise<{ success: boolean; message?: string }> {
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, {
+      method: 'DELETE',
+      headers: { 'idempotency-key': createIdempotencyKey(`del_exam_${id}`) },
+    });
     const json = await res.json();
     return { success: json.success ?? res.ok, message: json.message };
   },
@@ -56,6 +68,7 @@ export const apiClient = {
   deleteAssessment(id: string) { return this.deleteExam(id); },
 
   submitAnswers: (p: any) => submissionApi.submitAnswers(p),
+  reportLiveSession: (p: any) => submissionApi.reportLiveSession(p),
   getSubmissions: (examId?: string) => submissionApi.getSubmissions(examId),
   gradeSubmission: (id: string, a: any) => submissionApi.gradeSubmission(id, a),
 

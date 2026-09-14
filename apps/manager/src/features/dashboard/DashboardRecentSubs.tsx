@@ -36,10 +36,10 @@ export const DashboardRecentSubs: React.FC<DashboardRecentSubsProps> = ({ submis
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontWeight: 700, color: sub.percentage >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                  {sub.percentage}%
+                  {sub.status === 'in_progress' ? 'In Test' : `${sub.percentage}%`}
                 </div>
-                <Badge color={sub.status === 'graded' ? 'emerald' : 'amber'}>
-                  {sub.status === 'graded' ? 'Marked' : 'Needs Marking'}
+                <Badge color={sub.status === 'graded' ? 'emerald' : sub.status === 'in_progress' ? 'blue' : 'amber'}>
+                  {sub.status === 'graded' ? 'Marked' : sub.status === 'in_progress' ? 'In Progress' : 'Needs Marking'}
                 </Badge>
               </div>
             </div>

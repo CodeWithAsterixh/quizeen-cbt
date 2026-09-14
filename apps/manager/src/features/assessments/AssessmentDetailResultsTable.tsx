@@ -47,27 +47,40 @@ export const AssessmentDetailResultsTable: React.FC<AssessmentDetailResultsTable
           ) : (
             submissions.map((sub) => {
               const isGraded = Boolean(sub.isFinalized || sub.status === 'graded');
+              const isInProgress = sub.status === 'in_progress';
               const pct = sub.percentage ?? 0;
               const passed = pct >= (exam.passingScore || 50);
 
               return (
                 <tr
                   key={sub.id}
-                  onClick={() => onSelectSubmission(sub)}
-                  style={{ cursor: 'pointer' }}
+                  onClick={() => !isInProgress && onSelectSubmission(sub)}
+                  style={{ cursor: isInProgress ? 'default' : 'pointer' }}
                 >
                   <td><strong>{sub.studentName}</strong></td>
                   <td>{sub.classGroup}</td>
-                  <td>{isGraded ? `${sub.score} / ${sub.totalPoints} (${pct}%)` : '—'}</td>
                   <td>
-                    <span className={`badge ${isGraded ? (passed ? 'badge-success' : 'badge-danger') : 'badge-warning'}`}>
-                      {isGraded ? (passed ? 'Passed' : 'Failed') : 'Awaiting Result'}
+                    {isInProgress
+                      ? 'In Progress'
+                      : isGraded
+                        ? `${sub.score} / ${sub.totalPoints} (${pct}%)`
+                        : 'Not Graded'}
+                  </td>
+                  <td>
+                    <span className={`badge ${isInProgress ? 'badge-primary' : isGraded ? (passed ? 'badge-success' : 'badge-danger') : 'badge-warning'}`}>
+                      {isInProgress ? 'In Progress' : isGraded ? (passed ? 'Passed' : 'Failed') : 'Awaiting Result'}
                     </span>
                   </td>
                   <td>{new Date(sub.submittedAt).toLocaleDateString()}</td>
                   <td style={{ textAlign: 'right' }}>
-                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onSelectSubmission(sub); }} icon={<CaretRight size={13} />}>
-                      {isGraded ? 'View Details' : 'Grade Test'}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); if (!isInProgress) onSelectSubmission(sub); }}
+                      icon={<CaretRight size={13} />}
+                      disabled={isInProgress}
+                    >
+                      {isInProgress ? 'Active' : isGraded ? 'View Details' : 'Grade Test'}
                     </Button>
                   </td>
                 </tr>

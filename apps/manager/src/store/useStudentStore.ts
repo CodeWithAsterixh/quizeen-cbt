@@ -8,20 +8,28 @@ const studentStore = new LocalStore<Student>('students');
 export function useStudentStore() {
   const [students, setStudents] = useState<Student[]>([]);
 
+  const refresh = async () => {
+    try {
+      if (await apiClient.isAvailable()) {
+        const remote = await apiClient.getStudents();
+        setStudents(remote);
+        await studentStore.clear();
+        if (remote.length > 0) await studentStore.saveBatch(remote);
+        return;
+      }
+    } catch {}
+    setStudents(await studentStore.getAll());
+  };
+
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (await apiClient.isAvailable()) {
-          const remote = await apiClient.getStudents();
-          setStudents(remote);
-          await studentStore.clear();
-          if (remote.length > 0) await studentStore.saveBatch(remote);
-          return;
-        }
-      } catch {}
-      setStudents(await studentStore.getAll());
+    refresh();
+    const interval = setInterval(refresh, 5000);
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
     };
-    init();
   }, []);
 
   const saveStudent = async (data: { name: string; educationLevel: any; classGroup: string; department?: any }) => {
@@ -57,5 +65,5 @@ export function useStudentStore() {
     return { success: true, message: 'Student record removed.' };
   };
 
-  return { students, saveStudent, generateCodeForStudent, generateCodesForStudents, generateAllCodes, deleteStudent };
+  return { students, refresh, saveStudent, generateCodeForStudent, generateCodesForStudents, generateAllCodes, deleteStudent };
 }

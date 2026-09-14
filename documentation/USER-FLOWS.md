@@ -46,31 +46,35 @@ stateDiagram-v2
 ### Stage breakdown
 
 1. **Start and registration**:
-   - First-time candidates complete a step-by-step wizard capturing full name, education level (`Primary`, `Junior Secondary`, or `Senior Secondary`), class, and optional department stream.
-   - The session persists in local storage so returning students bypass the wizard directly to their class catalog.
+   - Candidates can enter their 6-character Student ID code (provided by the teacher) or complete a step-by-step registration wizard capturing full name, education level (`Primary`, `Junior Secondary`, or `Senior Secondary`), class, and optional department stream.
+   - The session persists locally so returning students bypass the wizard directly to their class catalog.
    - Candidates can reset their active session at any point by selecting the "Leave Exam Room" button.
 
 2. **Assessment catalog**:
    - Displays all assessments matching the student's assigned level, class, and department.
    - Checks date and time availability against `availableFrom` and `availableTo` constraints.
+   - In-progress assessments remain available to continue, while finished tests are marked as submitted.
    - Locked exams require entering an invigilator PIN before opening.
+   - Includes a manual "Refresh" button to pull newly published tests from the server instantly.
 
 3. **Assessment runner**:
    - The test launches in full-screen mode with an active countdown timer.
+   - On launch, the runner registers a live session with the server (`POST /api/submissions/live`).
    - Candidates navigate questions sequentially or jump to questions using the question index grid.
    - A built-in scientific calculator is available as an on-demand drawer.
-   - If the candidate switches windows or minimizes the application, a blur event triggers a warning and increments the `windowSwitchCount` counter.
+   - If the candidate switches windows or minimizes the application, a blur event triggers a warning, increments the `infractionCount` counter, and immediately transmits the infraction count to the Central Server.
 
 4. **Submission and results**:
    - When time expires, answers submit automatically.
    - When submitting manually, the candidate confirms review before final grading.
+   - Submissions pass through the server idempotency middleware to guarantee no duplicate attempts.
    - Once submitted, completed assessments display an "Already Submitted" status and lock re-entry.
 
 ---
 
 ## Educator journey
 
-Educators create, schedule, and curate assessment content from the Manager application.
+Educators create, schedule, curate, monitor, and mark assessment content from the Manager application.
 
 ### Assessment authoring workflow
 
@@ -92,13 +96,19 @@ Educators create, schedule, and curate assessment content from the Manager appli
 
 4. **Saving and publishing**:
    - Validates all required fields, point weights, and correct answer selections.
-   - Persists the record to local storage and syncs to the central server when connected.
+   - Persists the record to local storage and syncs to the central server via REST API.
+
+5. **Live monitoring and marking queue**:
+   - Navigating to "Mark Student Answers" displays all student test attempts.
+   - Active students appear in real time with "In Progress" badges and live app switch warning counts.
+   - Teachers click "Mark" to review student answers, award points for short answers, and finalize results.
+   - A "Sync Data" button in the sidebar and `F5` / `Ctrl+R` hotkey allow on-demand data refreshes alongside the automatic 3-second background sync.
 
 ---
 
-## Package compilation and distribution flow (.qzn)
+## Optional offline package distribution flow (.qzn)
 
-For offline or air-gapped exam rooms without reliable local area network connections, assessments can be compiled into encrypted `.qzn` distribution archives.
+For fully air-gapped classrooms without a local area network connection, assessments can optionally be compiled into encrypted `.qzn` distribution archives.
 
 ```mermaid
 flowchart TD
@@ -110,7 +120,7 @@ flowchart TD
 ```
 
 1. **Manager compilation**:
-   - The educator opens "Compile Packages (.qzn)" from the navigation menu.
+   - The educator opens "Compile Assessments" from the navigation menu.
    - Selects one or more assessments for inclusion.
    - Provides an archive name (for example, `First_Term_Exams.qzn`).
    - The compiler packages assessments, questions, and manifests into a single `.qzn` archive.

@@ -1,4 +1,4 @@
-import { Student, generateStudentCode } from '@cbt/shared';
+import { Student, generateStudentCode, getLocalIsoTimestamp } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 
 export const studentsService = {
@@ -18,7 +18,7 @@ export const studentsService = {
       educationLevel: payload.educationLevel,
       classGroup: payload.classGroup,
       department: payload.department,
-      createdAt: payload.createdAt || new Date().toISOString(),
+      createdAt: payload.createdAt || getLocalIsoTimestamp(),
     };
 
     db.saveStudent(student);

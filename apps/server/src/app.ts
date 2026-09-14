@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import { getLocalIsoTimestamp } from '@cbt/shared';
+import { idempotencyMiddleware } from './core/middleware/idempotency.js';
 import { assessmentRouter } from './features/assessments/assessment.routes.js';
 import { submissionRouter } from './features/submissions/submission.routes.js';
 import { packageRouter } from './features/packages/package.routes.js';
@@ -28,15 +30,17 @@ export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express
     res.setHeader('Expires', '0');
     next();
   });
+  app.use(idempotencyMiddleware);
 
   if (onRequest) {
     app.use((req, res, next) => {
+      if (req.path === '/health') return next();
       const start = Date.now();
       const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
       res.on('finish', () => {
         onRequest({
           id: `req_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalIsoTimestamp(),
           method: req.method,
           url: req.originalUrl || req.url,
           status: res.statusCode,
@@ -49,7 +53,7 @@ export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express
   }
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'cbt-server', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', service: 'cbt-server', timestamp: getLocalIsoTimestamp() });
   });
 
   app.use('/api/assessments', assessmentRouter);

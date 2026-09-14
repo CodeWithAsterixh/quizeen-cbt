@@ -1,4 +1,5 @@
 import { Student } from '../types/index.js';
+import { createIdempotencyKey } from '../utils/idempotency.js';
 import { serverConfig } from './server-config.js';
 
 export interface ApiResponse<T = any> {
@@ -46,7 +47,12 @@ export const studentApi = {
 
   async saveStudent(student: Partial<Student> & { name: string }): Promise<Student> {
     const res = await fetch(`${serverConfig.getApiBase()}/students`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(student),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'idempotency-key': createIdempotencyKey(`stu_${student.id || student.name}`),
+      },
+      body: JSON.stringify(student),
     });
     const json = (await res.json()) as { success: boolean; data: Student };
     return json.data;
@@ -54,7 +60,12 @@ export const studentApi = {
 
   async generateCode(id: string, fallbackStudent?: any): Promise<Student | null> {
     const res = await fetch(`${serverConfig.getApiBase()}/students/${encodeURIComponent(id)}/generate-code`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: fallbackStudent ? JSON.stringify(fallbackStudent) : undefined,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'idempotency-key': createIdempotencyKey(`gencode_${id}`),
+      },
+      body: fallbackStudent ? JSON.stringify(fallbackStudent) : undefined,
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { success: boolean; data: Student };
@@ -63,7 +74,12 @@ export const studentApi = {
 
   async generateAllCodes(classGroup?: string, studentIds?: string[]): Promise<Student[]> {
     const res = await fetch(`${serverConfig.getApiBase()}/students/generate-all`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ classGroup, studentIds }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'idempotency-key': createIdempotencyKey('genallcodes'),
+      },
+      body: JSON.stringify({ classGroup, studentIds }),
     });
     if (!res.ok) return [];
     const json = (await res.json()) as { success: boolean; data: Student[] };
@@ -71,7 +87,10 @@ export const studentApi = {
   },
 
   async deleteStudent(id: string): Promise<boolean> {
-    const res = await fetch(`${serverConfig.getApiBase()}/students/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    const res = await fetch(`${serverConfig.getApiBase()}/students/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { 'idempotency-key': createIdempotencyKey(`del_stu_${id}`) },
+    });
     return res.ok;
   },
 };

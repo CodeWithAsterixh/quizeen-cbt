@@ -1,4 +1,4 @@
-import { Assessment, Exam } from '@cbt/shared';
+import { Assessment, Exam, getLocalIsoTimestamp } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 import { ExamQueryFilter } from '../../core/types/contracts.js';
 
@@ -29,7 +29,7 @@ export class AssessmentService {
       ...data,
       id: data.id || `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       totalPoints,
-      createdAt: data.createdAt || new Date().toISOString(),
+      createdAt: data.createdAt || getLocalIsoTimestamp(),
       isPublished: true,
     } as Assessment;
     db.saveExam(newAssessment);

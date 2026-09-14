@@ -26,6 +26,7 @@ This document provides a complete inventory of all network requests called by th
 | `updateAssessment` | PUT | `/api/assessments/:id` | `PUT /api/assessments/:id` | Active Match |
 | `deleteAssessment` | DELETE | `/api/assessments/:id` | `DELETE /api/assessments/:id` | Active Match |
 | `submitAnswers` | POST | `/api/submissions` | `POST /api/submissions` | Active Match |
+| `reportLiveSession` | POST | `/api/submissions/live` | `POST /api/submissions/live` | Active Match |
 | `getSubmissions` | GET | `/api/submissions` | `GET /api/submissions` | Active Match |
 | `gradeSubmission` | PUT | `/api/submissions/:id/grade` | `PUT /api/submissions/:id/grade` | Active Match |
 | `compilePackage` | POST | `/api/packages/compile` | `POST /api/packages/compile` | Active Match |
@@ -572,3 +573,31 @@ You can verify all client and server endpoints at any time by running:
 ```bash
 npm run api:audit
 ```
+
+---
+
+## 7. Idempotency Support for Mutating Requests
+
+All requests that create, update, or delete data (`POST`, `PUT`, `PATCH`, `DELETE`) are guarded against duplicate execution through idempotency.
+
+### How Idempotency Works
+
+1. **Client Header**: The client sends an `idempotency-key` HTTP header with a unique request token (e.g. `idem_sub_JohnDoe_assessment1`).
+2. **Automatic Signature Fallback**: If an external client or custom script omits the `idempotency-key` header, the server automatically computes a SHA-256 hash from the HTTP method, endpoint URL, and JSON request body.
+3. **In-Flight Deduplication**: If multiple identical requests arrive simultaneously, subsequent requests wait for the first request to complete.
+4. **Cached Response Replay**: When a duplicate request arrives after completion, the server does not execute the database mutation a second time. It returns the original status code and response body with the following response headers:
+   - `Idempotency-Key: <key>`
+   - `Idempotent-Replayed: true`
+5. **Cache Retention**: Completed idempotency entries are cached in memory for 15 minutes and expired automatically.
+
+---
+
+## 8. Timezone and Local Timestamp Standard
+
+All server timestamps, request logs, and record creation dates use location-aware timestamps with timezone offset:
+
+- **Format**: `YYYY-MM-DDTHH:mm:ss.sss+HH:MM` (e.g. `2026-09-14T06:53:19.852+01:00`).
+- **Utility**: Implemented via `getLocalIsoTimestamp()` in `@cbt/shared` (`packages/shared/src/utils/date-utils.ts`).
+- **Server Request Log**: Request entries in the server UI and exported JSON log files show the actual local time of the host machine rather than zero-offset UTC.
+- **Heartbeat Filtering**: Internal `/health` pings from client pollers are excluded from the live request log table to keep the logs focused on real exam activity.
+

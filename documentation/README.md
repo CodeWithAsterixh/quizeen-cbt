@@ -1,6 +1,6 @@
 # Quizeen CBT System Prototype
 
-Quizeen is an offline-capable Computer-Based Testing (CBT) platform for secondary and primary schools. It packages assessments into encrypted archive files (.qzn), runs exams locally without active internet access, monitors window focus during test sessions, and aggregates grading analytics across multiple class levels.
+Quizeen is a client-server Computer-Based Testing (CBT) platform for secondary and primary schools. It operates over a school Local Area Network (LAN) connected to a central server, with optional offline package distribution (.qzn) for air-gapped classrooms. The platform provides real-time test monitoring, automatic and manual marking, live anti-cheat tracking, and comprehensive class analytics.
 
 ## Repository layout
 

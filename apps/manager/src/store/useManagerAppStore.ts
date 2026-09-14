@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
+import { fetchAndSyncManagerData } from './managerStoreSync';
 
 const assessmentStore = new LocalStore<Assessment>('exams');
 const submissionStore = new LocalStore<Submission>('submissions');
@@ -7,27 +8,26 @@ const submissionStore = new LocalStore<Submission>('submissions');
 export function useManagerAppStore() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const refresh = useCallback(async () => {
+    setIsSyncing(true);
+    const data = await fetchAndSyncManagerData(assessmentStore, submissionStore);
+    setAssessments(data.assessments);
+    setSubmissions(data.submissions);
+    setIsSyncing(false);
+  }, []);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (await apiClient.isAvailable()) {
-          const [remoteAssessments, remoteSubs] = await Promise.all([apiClient.getAssessments(), apiClient.getSubmissions()]);
-          setAssessments(remoteAssessments);
-          setSubmissions(remoteSubs);
-          await assessmentStore.clear();
-          if (remoteAssessments.length > 0) await assessmentStore.saveBatch(remoteAssessments);
-          await submissionStore.clear();
-          if (remoteSubs.length > 0) await submissionStore.saveBatch(remoteSubs);
-          return;
-        }
-      } catch {}
-      const stored = await assessmentStore.getAll();
-      setAssessments(stored);
-      setSubmissions(await submissionStore.getAll());
+    refresh();
+    const interval = setInterval(refresh, 3000);
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
     };
-    init();
-  }, []);
+  }, [refresh]);
 
   const saveAssessment = async (assessment: Assessment): Promise<{ success: boolean; message: string }> => {
     let message = 'Assessment updates saved successfully.';
@@ -77,7 +77,7 @@ export function useManagerAppStore() {
   };
 
   return {
-    assessments, exams: assessments, submissions,
+    assessments, exams: assessments, submissions, isSyncing, refresh,
     saveAssessment, saveExam: saveAssessment,
     deleteAssessment, deleteExam: deleteAssessment,
     duplicateAssessment, duplicateExam: duplicateAssessment,

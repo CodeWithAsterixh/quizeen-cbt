@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { WarningCircle } from '@cbt/shared';
-import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge } from '@cbt/shared';
+import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge, apiClient } from '@cbt/shared';
 import { FloatingCalculator } from '../calculator';
 import { RunnerHeader } from './RunnerHeader';
 import { RunnerQuestionCard } from './RunnerQuestionCard';
@@ -29,7 +29,23 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [isQuitOpen, setIsQuitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { infractionCount, warningBanner } = useAntiCheatTracker();
+
+  const handleInfraction = useCallback((count: number) => {
+    apiClient.reportLiveSession({
+      examId: exam.id, studentName: student.studentName,
+      classGroup: student.classGroup, department: student.department,
+      infractionCount: count, timeSpentSeconds: Math.max(0, exam.durationMinutes * 60 - secondsLeft),
+    });
+  }, [exam.id, exam.durationMinutes, secondsLeft, student.classGroup, student.department, student.studentName]);
+
+  const { infractionCount, warningBanner } = useAntiCheatTracker(handleInfraction);
+
+  useEffect(() => {
+    apiClient.reportLiveSession({
+      examId: exam.id, studentName: student.studentName,
+      classGroup: student.classGroup, department: student.department, infractionCount: 0,
+    });
+  }, [exam.id, student.classGroup, student.department, student.studentName]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;

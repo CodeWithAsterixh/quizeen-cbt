@@ -23,26 +23,26 @@ graph TD
     ServerApp -. "UDP broadcast beacon (port 4001)" .-> Manager
     ServerApp -. "UDP broadcast beacon (port 4001)" .-> Student
 
-    Manager -- "REST API / Sync (HTTP: 4000)" --> ServerApp
-    Student -- "REST API / Submit (HTTP: 4000)" --> ServerApp
+    Manager -- "REST API / Live Sync (HTTP: 4000)" --> ServerApp
+    Student -- "REST API / Live Sessions & Submits (HTTP: 4000)" --> ServerApp
 
-    Manager -. "Direct .qzn package transfer (USB)" .-> Student
+    Manager -. "Optional offline .qzn package transfer (USB)" .-> Student
 ```
 
 ## Architectural principles
 
-### 1. Offline-first local execution
-School computer laboratories frequently operate in bandwidth-constrained or air-gapped environments. Quizeen operates without continuous network connectivity:
-- The Manager compiles assessments into standalone `.qzn` archives.
-- The Student client imports packages into local storage.
-- All candidate responses and timing data persist locally as the examination progresses.
-- Completed submissions can sync over local Wi-Fi or Ethernet to the central server, or export to USB media.
+### 1. Centralized local network (LAN) architecture with offline fallback
+The standard operating mode connects Manager and Student applications to the Central Server over a local area network (LAN, Wi-Fi, or Ethernet):
+- The Central Server provides real-time REST API endpoints for publishing assessments, registering student codes, monitoring live test sessions, reporting infractions, and grading submissions.
+- Continuous auto-sync: Manager and Student clients sync data automatically in the background, on window focus, and via manual refresh buttons.
+- Mutating request idempotency: All create, update, and delete requests use idempotency keys and payload hashes to guarantee safe retries without duplicate records.
+- Optional offline package fallback: In fully air-gapped classrooms without a local network, Manager can export assessments into encrypted `.qzn` archives for direct USB transfer to student terminals.
 
 ### 2. Desktop architecture across all three applications
 All three components (Manager, Student, and Server) run as dedicated Electron applications:
-- **Manager**: Authoring, class analytics, score compilation, and offline packaging.
-- **Student**: Fullscreen examination runner with focus violation tracking and built-in calculator.
-- **Server**: Express engine wrapped in an Electron interface with live request monitoring, network IP reporting, auto-start controls, and shutdown warnings to prevent accidental exam interruptions.
+- **Manager**: Test authoring, student code generation, live marking queue, score analytics, and optional offline packaging.
+- **Student**: Fullscreen test runner, Student ID login, built-in calculator, and real-time infraction sync.
+- **Server**: Express REST engine wrapped in an Electron desktop interface with real-time request logging, network adapter IP display, auto-start controls, and shutdown confirmation warnings.
 
 ### 3. Automatic local network discovery
 The platform features zero-configuration server discovery for local area networks:
@@ -59,11 +59,12 @@ Desktop applications wrap the frontend in an Electron container with strict secu
 - System actions (storage access, window controls, and discovery events) communicate through typed context bridges in `preload.ts`.
 - The custom TitleBar integrates with window state handlers to support frameless windows.
 
-### 6. Integrity and focus monitoring
-During an active assessment, the client runs focus detection routines:
-- `document.onvisibilitychange` and `window.onblur` track when the candidate switches applications or minimizes the window.
-- The exam runner increments an internal counter (`windowSwitchCount`) each time the window loses focus.
-- The counter is embedded into the submitted payload so teachers can review test integrity during grading.
+### 6. Real-time integrity and focus monitoring
+During an active assessment, the client runs continuous focus detection routines:
+- `document.onvisibilitychange` and `window.onblur` track when the candidate switches applications, changes tabs, or minimizes the window.
+- The exam runner increments an internal counter (`infractionCount`) each time the window loses focus.
+- The runner immediately reports the updated count to the Central Server via `POST /api/submissions/live`, allowing teachers to view active app switches in the Manager live queue while the test is underway.
+- The finalized count is saved into the completed submission record for review during grading.
 
 ### 7. Categorized data storage architecture
 The server persists records using an embedded, file-based JSON store split across domain-specific directories under `data/`:

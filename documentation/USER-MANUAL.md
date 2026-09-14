@@ -91,13 +91,33 @@ The Manager application enables teachers and administrators to create tests, man
    - For Senior Secondary, toggle the department stream (Science, Arts, or Commercial).
 4. Select "Create Student" to save the candidate account.
 5. Use the copy button next to any student ID in the list to distribute the code to the candidate.
+6. Alternatively, select "Generate Codes" to assign IDs in batch to all students in a class.
 
-### Exporting assessments for offline exam rooms (.qzn)
+### Live monitoring and marking student answers
 
+1. Select "Mark Student Answers" from the navigation sidebar.
+2. The marking queue displays all active and completed tests:
+   - Active students appear with an "In Progress" badge and live infraction warnings indicating app switches.
+   - Submitted tests show percentage scores and status badges ("Needs Marking" or "Marked").
+3. Select "Mark" on any completed submission to open the review interface:
+   - Multiple-choice questions are scored automatically by the system.
+   - Short-answer questions display the student's response alongside the question prompt and point weight.
+   - Enter awarded marks and select "Save Marking" to finalize the score.
+
+### Synchronizing data with the central server
+
+The Manager application keeps data current through multiple sync mechanisms:
+- **Automatic polling**: The app checks the server every 3 seconds for new submissions and active sessions.
+- **Window focus sync**: Clicking into the Manager window triggers an instant sync.
+- **Manual refresh**: Click "Sync Data" in the bottom sidebar or press `F5` / `Ctrl+R` on your keyboard at any time.
+
+### Optional offline package export (.qzn)
+
+When conducting exams in rooms without a local network or Wi-Fi router:
 1. Select "Compile Assessments" from the navigation menu.
 2. Choose the assessments to bundle into the package.
 3. Set examination date and time windows for each paper.
-4. Select "Export .qzn Package" and save the file to a USB flash drive for offline rooms.
+4. Select "Export .qzn Package" and save the file to a USB flash drive to copy onto student workstations.
 
 ---
 
@@ -118,11 +138,12 @@ Candidate computers connected to the same local area network as the Server will 
 2. Select "Enter Student ID".
 3. Enter your 6-character Student ID code in the OTP-style input boxes. The code is case-insensitive and can be typed or pasted.
 4. When verified, your name, class, and department stream are confirmed. Select "Start Assessments".
-5. Review the list of available assessments filtered for your class and department stream.
-5. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
-6. Read each question carefully. Use the question grid buttons to jump between questions.
-7. Open the built-in calculator from the side menu if you need to perform calculations.
-8. When finished, select "Submit Assessment" and confirm your submission.
+5. Review the list of available assessments filtered for your class and department stream. You can select "Refresh" if your teacher just published a new test.
+6. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
+7. Read each question carefully. Use the question grid buttons to jump between questions.
+8. Open the built-in calculator from the side menu if you need to perform calculations.
+9. Focus and anti-cheat protection: Do not switch applications, open new tabs, or minimize the window. Every app switch is recorded and sent to the teacher station in real time.
+10. When finished, select "Submit Assessment" and confirm your submission.
 
 ### Leaving the exam room
 

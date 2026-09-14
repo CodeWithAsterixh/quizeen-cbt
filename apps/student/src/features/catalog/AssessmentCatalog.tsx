@@ -23,7 +23,7 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
   const [typeFilter, setTypeFilter] = useState<'all' | 'test' | 'exam'>('all');
   const submittedExamIds = new Set(
     submissions
-      .filter((s) => s.studentName.trim().toLowerCase() === student.studentName.trim().toLowerCase())
+      .filter((s) => s.studentName.trim().toLowerCase() === student.studentName.trim().toLowerCase() && s.status !== 'in_progress')
       .map((s) => s.examId)
   );
 

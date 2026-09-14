@@ -88,10 +88,11 @@ Records a completed candidate exam attempt, scoring metrics, and integrity count
 | `score` | `number` | Yes | Total points earned. |
 | `totalPoints` | `number` | Yes | Total points possible. |
 | `percentage` | `number` | Yes | Score divided by total points, multiplied by 100. |
-| `status` | `'awaiting_result' \| 'graded'` | Yes | Grading lifecycle status. |
+| `status` | `'in_progress' \| 'awaiting_result' \| 'graded'` | Yes | Lifecycle status: in session, awaiting marking, or marked. |
 | `timeSpentSeconds` | `number` | Yes | Elapsed test duration in seconds. |
-| `windowSwitchCount` | `number` | Yes | Count of window blur events recorded during the test. |
-| `submittedAt` | `string` | Yes | ISO 8601 submission timestamp. |
+| `infractionCount` | `number` | No | Count of window blur or application switch events recorded during the test. |
+| `submittedAt` | `string` | Yes | Location-aware ISO 8601 submission timestamp with timezone offset. |
+| `gradedAt` | `string` | No | Optional ISO 8601 grading timestamp when marked by a teacher. |
 
 ---
 

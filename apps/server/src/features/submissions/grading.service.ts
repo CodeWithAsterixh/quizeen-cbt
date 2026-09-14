@@ -1,8 +1,9 @@
-import { Submission } from '@cbt/shared';
+import { Submission, getLocalIsoTimestamp } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 import { SubmitExamPayload, ReviewGradesPayload } from '../../core/types/contracts.js';
 
 import { scoreAnswers } from './scoring-helper.js';
+import { recordLiveSession } from './live-session.service.js';
 
 export class GradingService {
   public submitAndGrade(payload: SubmitExamPayload): Submission {
@@ -13,12 +14,15 @@ export class GradingService {
 
     const totalPoints = exam.totalPoints || 1;
     const percentage = Math.round((totalScore / totalPoints) * 100);
+    const cleanName = payload.studentName.trim();
+    const liveId = `live_${cleanName.replace(/\s+/g, '_')}_${exam.id}`;
+    const existingLive = db.getSubmissionById(liveId);
 
     const submission: Submission = {
-      id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      id: existingLive ? liveId : `sub_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       examId: exam.id,
       examTitle: exam.title,
-      studentName: payload.studentName.trim(),
+      studentName: cleanName,
       educationLevel: exam.educationLevel,
       classGroup: payload.classGroup,
       department: payload.department,
@@ -28,7 +32,7 @@ export class GradingService {
       percentage,
       status: hasPendingReview ? 'awaiting_result' : 'graded',
       answers: answersRecord,
-      submittedAt: new Date().toISOString(),
+      submittedAt: getLocalIsoTimestamp(),
       infractionCount: payload.infractionCount || 0,
       isFinalized: !hasPendingReview,
     };
@@ -60,7 +64,7 @@ export class GradingService {
       percentage: pct,
       status: 'graded',
       isFinalized: true,
-      gradedAt: new Date().toISOString(),
+      gradedAt: getLocalIsoTimestamp(),
     };
 
     db.saveSubmission(updated);
@@ -70,6 +74,10 @@ export class GradingService {
   public listSubmissions(examId?: string): Submission[] {
     const all = db.getSubmissions();
     return examId ? all.filter((s) => s.examId === examId) : all;
+  }
+
+  public recordLiveSession(payload: any): Submission | null {
+    return recordLiveSession(payload);
   }
 }
 

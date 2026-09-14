@@ -121,8 +121,8 @@ On server boot, the migration service (`database-migration.ts`) checks for this 
 
 The Student and Manager applications also maintain local client storage:
 
-- **Browser and Electron Web Storage**: Active test state, unsaved answers, student registration session info, and network settings persist in `localStorage`.
-- **Encrypted package archives (.qzn)**: Complete exam packages exported from Manager are packaged as AES-encrypted ZIP archives. The Student app can import these `.qzn` packages directly without an active server connection.
+- **Browser and Electron Web Storage**: Active test state, unsaved answers, student session info, and network settings persist in `localStorage` and `LocalStore` to guarantee zero data loss during temporary network drops.
+- **Optional encrypted package archives (.qzn)**: Complete exam packages exported from Manager are packaged as AES-encrypted ZIP archives. In air-gapped classrooms without a local area network, the Student app can import these `.qzn` packages directly without an active server connection.
 
 ---
 
@@ -146,3 +146,14 @@ To clear all data and start fresh:
 1. Stop the server.
 2. Delete the JSON files inside `data/assessments/`, `data/students/`, and `data/submissions/`.
 3. Restart the server. The folders will be recreated automatically if they are missing.
+
+---
+
+## Idempotent write safety
+
+To prevent duplicate records from network retries, client reconnects, or repeated button clicks, all mutating operations (`POST`, `PUT`, `PATCH`, `DELETE`) pass through server idempotency middleware:
+
+- **Keyed requests**: Requests with an `Idempotency-Key` header are deduplicated for 15 minutes.
+- **Payload signatures**: Unkeyed mutating requests automatically hash their method, endpoint, and payload to prevent duplicate writes.
+- **Cache replay**: Replayed requests return the original status and data with `Idempotent-Replayed: true` without duplicating records in the data store.
+

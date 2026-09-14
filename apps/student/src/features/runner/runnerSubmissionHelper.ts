@@ -1,4 +1,4 @@
-import { Exam, StudentSession, Submission, AnswerItem } from '@cbt/shared';
+import { Exam, StudentSession, Submission, AnswerItem, getLocalIsoTimestamp } from '@cbt/shared';
 
 export function buildExamSubmission(
   exam: Exam,
@@ -36,7 +36,7 @@ export function buildExamSubmission(
     totalPoints: exam.totalPoints,
     percentage: pct,
     status: hasShort ? 'awaiting_result' : 'graded',
-    submittedAt: new Date().toISOString(),
+    submittedAt: getLocalIsoTimestamp(),
     infractionCount,
   };
 }

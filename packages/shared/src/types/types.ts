@@ -43,7 +43,7 @@ export interface AnswerItem {
   teacherRemarks?: string;
 }
 
-export type SubmissionStatus = 'awaiting_result' | 'graded';
+export type SubmissionStatus = 'in_progress' | 'awaiting_result' | 'graded';
 
 export interface Submission {
   id: string;

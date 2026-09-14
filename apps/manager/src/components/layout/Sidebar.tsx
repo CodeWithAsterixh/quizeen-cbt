@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear,
+  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear, ArrowsClockwise,
 } from '@cbt/shared';
 import { Badge, Button } from '@cbt/shared';
 
@@ -11,6 +11,8 @@ interface SidebarProps {
   onSelectTab: (tab: ManagerTab) => void;
   onOpenServerSettings: () => void;
   pendingGradingCount: number;
+  onRefresh?: () => void;
+  isSyncing?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -18,6 +20,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   onOpenServerSettings,
   pendingGradingCount,
+  onRefresh,
+  isSyncing = false,
 }) => {
   const navItems = [
     { id: 'dashboard' as ManagerTab, label: 'Overview', icon: Gauge },
@@ -61,7 +65,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)' }}>
+      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {onRefresh && (
+          <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onRefresh} disabled={isSyncing}>
+            <ArrowsClockwise size={18} className={isSyncing ? 'cbt-spin' : ''} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+          </Button>
+        )}
         <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenServerSettings}>
           <Gear size={18} />
           <span>Server Connection</span>

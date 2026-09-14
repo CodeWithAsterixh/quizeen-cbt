@@ -52,7 +52,7 @@ export const RequestLogTable: React.FC<Props> = ({ logs, onClear }) => {
           <tbody>
             {filteredLogs.slice().reverse().map((entry) => (
               <tr key={entry.id}>
-                <td style={{ color: 'var(--color-text-subtle)' }}>{entry.timestamp.slice(11, 19)}</td>
+                <td style={{ color: 'var(--color-text-subtle)' }}>{new Date(entry.timestamp).toLocaleTimeString()}</td>
                 <td><span className={`method-badge ${entry.method}`}>{entry.method}</span></td>
                 <td style={{ fontFamily: 'monospace' }}>{entry.url}</td>
                 <td className={entry.status < 400 ? 'status-code-200' : 'status-code-error'}>{entry.status}</td>
