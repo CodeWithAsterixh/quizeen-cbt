@@ -10,6 +10,9 @@ SetCompressor /SOLID zlib
 !include "FileFunc.nsh"
 !include "nsDialogs.nsh"
 
+!insertmacro GetParameters
+!insertmacro GetOptions
+
 ; Installation scope variables
 Var DialogInstallScope
 Var RadioAllUsers
@@ -41,9 +44,8 @@ Var InstallScope
 
 Name "Queez CBT Suite ${VERSION}"
 OutFile "${OUT_FILE}"
-InstallDir "$PROGRAMFILES64\Queez CBT Suite"
-InstallDirRegKey HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
-RequestExecutionLevel admin
+InstallDir "$LOCALAPPDATA\Programs\Queez CBT Suite"
+RequestExecutionLevel user
 
 BrandingText "Quizeen CBT Systems"
 
@@ -85,7 +87,7 @@ InstType "Student Lab Station (Student Portal Only)"
 
 ; Page 5: Start Menu Folder
 Var STARTMENU_FOLDER
-!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM"
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\Quizeen\Queez CBT Suite"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER "Queez CBT Suite"
@@ -216,10 +218,26 @@ FunctionEnd
 Function PageInstallScopeLeave
   ${NSD_GetState} $RadioAllUsers $0
   ${If} $0 == ${BST_CHECKED}
+    ; User selected All Users
+    UserInfo::GetAccountType
+    Pop $1
+    ${If} $1 != "Admin"
+      ; Relaunch elevated with /allusers argument
+      ClearErrors
+      ExecShell "runas" "$EXEPATH" "/allusers"
+      ${If} ${Errors}
+        MessageBox MB_ICONEXCLAMATION|MB_OK "Administrator privileges are required to install for all users. Please select 'Only for me' or provide administrator credentials."
+        Abort
+      ${Else}
+        Quit
+      ${EndIf}
+    ${EndIf}
+
     StrCpy $InstallScope "all"
     SetShellVarContext all
     StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
   ${Else}
+    ; User selected Current User
     StrCpy $InstallScope "current"
     SetShellVarContext current
     StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Queez CBT Suite"
@@ -227,8 +245,44 @@ Function PageInstallScopeLeave
 FunctionEnd
 
 Function .onInit
-  StrCpy $InstallScope "all"
-  SetShellVarContext all
+  ; Check if /allusers argument was passed via command line or elevation
+  ${GetParameters} $R0
+  ClearErrors
+  ${GetOptions} $R0 "/allusers" $R1
+  ${IfNot} ${Errors}
+    StrCpy $InstallScope "all"
+    SetShellVarContext all
+    ReadRegStr $1 HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+    ${EndIf}
+    Return
+  ${EndIf}
+
+  ; Check current account type
+  UserInfo::GetAccountType
+  Pop $0
+  ${If} $0 == "Admin"
+    StrCpy $InstallScope "all"
+    SetShellVarContext all
+    ReadRegStr $1 HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+    ${EndIf}
+  ${Else}
+    StrCpy $InstallScope "current"
+    SetShellVarContext current
+    ReadRegStr $1 HKCU "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Queez CBT Suite"
+    ${EndIf}
+  ${EndIf}
 FunctionEnd
 
 Function un.onInit
