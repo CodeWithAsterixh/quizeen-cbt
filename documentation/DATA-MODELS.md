@@ -2,11 +2,15 @@
 
 This document describes the TypeScript interfaces and data structures shared across all Quizeen applications via the `@cbt/shared` package.
 
+For full details on disk structure, file partitioning, caching, and persistence, see [Database architecture and storage management](DATABASE.md).
+
 ---
 
 ## Assessment entity
 
 An assessment represents a complete test or examination paper.
+
+- **Storage on server**: `data/assessments/[id].json` (standalone file per assessment)
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
@@ -47,9 +51,29 @@ Individual questions belonging to an assessment.
 
 ---
 
+## Student entity
+
+Represents a registered student candidate eligible to take assessments.
+
+- **Storage on server**: `data/students/[category].json` (partitioned by level: `primary.json`, `junior.json`, `senior.json`, `general.json`)
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `id` | `string` | Yes | Unique student identifier. |
+| `code` | `string` | No | Short 6-character access code for candidate login (for example, `K7M9P2`). |
+| `name` | `string` | Yes | Full candidate name. |
+| `educationLevel` | `EducationLevel` | Yes | School level (`primary`, `junior_secondary`, or `senior_secondary`). |
+| `classGroup` | `string` | Yes | Class group (for example, `SSS 2A`). |
+| `department` | `Department` | No | Academic stream (`science`, `arts`, or `commercial`). |
+| `createdAt` | `string` | Yes | ISO 8601 creation timestamp. |
+
+---
+
 ## Submission entity
 
 Records a completed candidate exam attempt, scoring metrics, and integrity counters.
+
+- **Storage on server**: `data/submissions/[examId].json` (grouped by assessment)
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
@@ -77,6 +101,8 @@ Active candidate identity state inside the student portal.
 
 ```typescript
 export interface StudentSession {
+  studentId?: string;
+  studentCode?: string;
   studentName: string;
   educationLevel: EducationLevel;
   classGroup: string;

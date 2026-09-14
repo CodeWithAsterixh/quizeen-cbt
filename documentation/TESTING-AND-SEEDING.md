@@ -44,7 +44,7 @@ Quizeen initializes with a clean slate to allow end-to-end testing from scratch.
 
 ### Data storage directories
 
-- **Central server**: Stores runtime records in `apps/server/data/cbt-store.json`.
+- **Central server**: Stores runtime records in categorized JSON files under the `data/` directory (`data/assessments/`, `data/students/`, and `data/submissions/`). See [Database architecture and storage management](DATABASE.md) for full details.
 - **Manager app**: Stores local assessments and submissions in offline IndexedDB/Electron local storage.
 - **Student app**: Stores downloaded assessment packages and student attempts locally until submitted.
 

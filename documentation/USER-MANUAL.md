@@ -26,13 +26,22 @@ The server automatically scans your computer network adapters and lists all avai
 2. Select "Copy" next to the primary LAN IP address to copy the URL to your clipboard.
 3. Share this address with test candidates or rely on the automatic zero-configuration discovery built into the Student and Manager apps.
 
-### Monitoring live candidate activity
+### Navigating the server dashboard
 
-The live requests panel at the bottom of the window displays an auto-scrolling log of all incoming traffic:
-- Each entry shows the timestamp, HTTP method (GET, POST), request path, status code, latency in milliseconds, and client IP address.
-- Use the search bar in the toolbar to filter logs by endpoint (for example, type `/submissions` to view incoming exam submissions).
-- Select "Export" to download the captured logs as a JSON file for your records.
-- Select "Clear" to reset the log display for a new examination session.
+The Server GUI provides a navigation sidebar with three primary views:
+
+1. **Overview tab**:
+   - Contains server status, port controls, and Start/Stop actions.
+   - Shows active local IP addresses with copy buttons.
+   - Includes the auto-start toggle and quick status summary.
+2. **Visual Graph tab**:
+   - Visualizes request latency and traffic frequency over time as an interactive chart.
+   - Helps proctors spot connectivity slowdowns or traffic spikes during peak exam start times.
+3. **Live tab (Live requests)**:
+   - Displays an auto-scrolling log of incoming HTTP requests with real-time badges showing request counts.
+   - Shows timestamp, HTTP method (GET, POST), path, status code, latency in milliseconds, and client IP address.
+   - Provides a search bar to filter logs by endpoint (for example, `/submissions` or `/assessments`).
+   - Includes "Export" to download captured logs as a JSON file and "Clear" to reset the log display.
 
 ### Exiting the application safely
 

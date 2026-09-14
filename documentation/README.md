@@ -74,14 +74,13 @@ npm run release:bump
 ```
 
 Compiled installers are placed in `.qzn-releases/v{version}/`:
-- `Queez CBT Manager-Setup-{version}.exe`
-- `Queez CBT Student-Setup-{version}.exe`
-- `Queez CBT Server-Setup-{version}.exe`
+- `Queez-CBT-Suite-Setup-v{version}.exe` (unified suite installer containing Manager, Student, and Server)
 - `release-manifest.json`
 
 ## Documentation index
 
 - [System architecture](ARCHITECTURE.md): System layout, offline model, and security controls.
+- [Database architecture](DATABASE.md): File-based storage engine, directory partitioning, and data lifecycle management.
 - [REST API specification](API-SPEC.md): Endpoints, payloads, and response structures.
 - [Data models](DATA-MODELS.md): TypeScript definitions and entity schemas.
 - [User flows](USER-FLOWS.md): Student registration, runner lifecycle, and authoring workflows.
@@ -89,3 +88,4 @@ Compiled installers are placed in `.qzn-releases/v{version}/`:
 - [Security policy](SECURITY.md): Vulnerability reporting instructions and response timelines.
 - [Testing and seeding](TESTING-AND-SEEDING.md): Verification commands and sample data generators.
 - [User manual](USER-MANUAL.md): Step-by-step instructions for teachers, students, and proctors.
+

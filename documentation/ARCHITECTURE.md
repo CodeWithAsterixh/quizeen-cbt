@@ -64,3 +64,13 @@ During an active assessment, the client runs focus detection routines:
 - `document.onvisibilitychange` and `window.onblur` track when the candidate switches applications or minimizes the window.
 - The exam runner increments an internal counter (`windowSwitchCount`) each time the window loses focus.
 - The counter is embedded into the submitted payload so teachers can review test integrity during grading.
+
+### 7. Categorized data storage architecture
+The server persists records using an embedded, file-based JSON store split across domain-specific directories under `data/`:
+- `data/assessments/[id].json`: Each assessment resides in an isolated file.
+- `data/students/[category].json`: Student records are partitioned by level (`primary`, `junior`, `senior`, `general`).
+- `data/submissions/[examId].json`: Candidate submissions are grouped per exam.
+- In-memory caching (`Map<string, T>`) provides instant reads during test sessions, while write-through logic saves changes immediately to disk.
+
+For full technical specifications, see [Database architecture and storage management](DATABASE.md).
+
