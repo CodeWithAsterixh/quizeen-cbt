@@ -2,9 +2,19 @@
 ; Queez CBT Suite - Unified Multi-Stage Setup Script
 ; ==============================================================================
 
+Unicode true
+SetCompressor /SOLID zlib
+
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "FileFunc.nsh"
+!include "nsDialogs.nsh"
+
+; Installation scope variables
+Var DialogInstallScope
+Var RadioAllUsers
+Var RadioCurrentUser
+Var InstallScope
 
 ; Define defaults if not passed via command line
 !ifndef VERSION
@@ -35,8 +45,6 @@ InstallDir "$PROGRAMFILES64\Queez CBT Suite"
 InstallDirRegKey HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
 RequestExecutionLevel admin
 
-Unicode true
-SetCompressor /SOLID zlib
 BrandingText "Quizeen CBT Systems"
 
 ; Installer visuals
@@ -59,7 +67,10 @@ BrandingText "Quizeen CBT Systems"
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "If you accept the terms of the agreement, select the checkbox below and click Next."
 !insertmacro MUI_PAGE_LICENSE "${LICENSE_PATH}"
 
-; Page 3: Component Selection
+; Page 3: Installation Scope (All Users vs Current User)
+Page custom PageInstallScopeShow PageInstallScopeLeave
+
+; Page 4: Component Selection
 InstType "Full Suite (Server, Manager and Student)"
 InstType "Admin Workstation (Server and Manager)"
 InstType "Student Lab Station (Student Portal Only)"
@@ -123,6 +134,12 @@ SectionEnd
 Section -Post
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
+  ${If} $InstallScope == "all"
+    SetShellVarContext all
+  ${Else}
+    SetShellVarContext current
+  ${EndIf}
+
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     ${If} ${SectionIsSelected} ${SecServer}
@@ -140,12 +157,23 @@ Section -Post
     CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk" "$INSTDIR\uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
-  WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
+  ${If} $InstallScope == "all"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "InstallScope" "all"
+  ${Else}
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKCU "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKCU "Software\Quizeen\Queez CBT Suite" "InstallScope" "current"
+  ${EndIf}
 
   System::Call 'shell32.dll::SHChangeNotify(i, i, p, p) v (0x08000000, 0, 0, 0)'
 SectionEnd
@@ -157,12 +185,64 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecStudent} "Secure examination taking portal used by candidates to enter login codes and take tests."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
+; Installation Scope Page callbacks
+Function PageInstallScopeShow
+  !insertmacro MUI_HEADER_TEXT "Choose Installation Options" "Who should this application be installed for?"
+
+  nsDialogs::Create 1018
+  Pop $DialogInstallScope
+  ${If} $DialogInstallScope == error
+    Abort
+  ${EndIf}
+
+  ${NSD_CreateLabel} 0u 0u 300u 28u "Please select whether you wish to make Queez CBT Suite available to all users on this computer or only for yourself."
+  Pop $0
+
+  ${NSD_CreateRadioButton} 15u 35u 285u 14u "Anyone who uses this computer (all users)"
+  Pop $RadioAllUsers
+
+  ${NSD_CreateRadioButton} 15u 55u 285u 14u "Only for me (current user)"
+  Pop $RadioCurrentUser
+
+  ${If} $InstallScope == "current"
+    ${NSD_Check} $RadioCurrentUser
+  ${Else}
+    ${NSD_Check} $RadioAllUsers
+  ${EndIf}
+
+  nsDialogs::Show
+FunctionEnd
+
+Function PageInstallScopeLeave
+  ${NSD_GetState} $RadioAllUsers $0
+  ${If} $0 == ${BST_CHECKED}
+    StrCpy $InstallScope "all"
+    SetShellVarContext all
+    StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+  ${Else}
+    StrCpy $InstallScope "current"
+    SetShellVarContext current
+    StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Queez CBT Suite"
+  ${EndIf}
+FunctionEnd
+
 Function .onInit
+  StrCpy $InstallScope "all"
   SetShellVarContext all
 FunctionEnd
 
 Function un.onInit
-  SetShellVarContext all
+  ReadRegStr $0 HKLM "Software\Quizeen\Queez CBT Suite" "InstallScope"
+  ${If} $0 == "all"
+    SetShellVarContext all
+  ${Else}
+    ReadRegStr $0 HKCU "Software\Quizeen\Queez CBT Suite" "InstallScope"
+    ${If} $0 == "current"
+      SetShellVarContext current
+    ${Else}
+      SetShellVarContext all
+    ${EndIf}
+  ${EndIf}
 FunctionEnd
 
 ; Launch helper
@@ -181,9 +261,21 @@ FunctionEnd
 ; ------------------------------------------------------------------------------
 
 Section "Uninstall"
-  SetShellVarContext all
   !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
 
+  ; Delete shortcuts in active context
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
+  RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
+
+  Delete "$DESKTOP\Queez Local Server.lnk"
+  Delete "$DESKTOP\Queez Assessment Manager.lnk"
+  Delete "$DESKTOP\Queez Student Portal.lnk"
+
+  ; Clean current context as well to prevent stray shortcuts
+  SetShellVarContext current
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
@@ -202,6 +294,8 @@ Section "Uninstall"
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"
   DeleteRegKey HKLM "Software\Quizeen\Queez CBT Suite"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"
+  DeleteRegKey HKCU "Software\Quizeen\Queez CBT Suite"
 
   System::Call 'shell32.dll::SHChangeNotify(i, i, p, p) v (0x08000000, 0, 0, 0)'
 SectionEnd
