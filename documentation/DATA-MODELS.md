@@ -14,7 +14,7 @@ An assessment represents a complete test or examination paper.
 | `title` | `string` | Yes | Display title (for example, `Mathematics - SSS 2 (2024/2025)`). |
 | `subject` | `string` | Yes | Subject name (for example, `Mathematics`, `English`). |
 | `session` | `string` | No | Academic session (for example, `2024/2025`). |
-| `assessmentType` | `'test' | 'exam' | string` | No | Distinguishes periodic tests from major term exams. |
+| `assessmentType` | `'test' \| 'exam' \| string` | No | Distinguishes periodic tests from major term exams. |
 | `educationLevel` | `EducationLevel` | Yes | `primary`, `junior_secondary`, or `senior_secondary`. |
 | `targetClasses` | `string[]` | Yes | Targeted classes (for example, `['SSS 1', 'SSS 2']`). |
 | `department` | `Department` | No | Academic stream: `science`, `arts`, or `commercial`. |
@@ -64,7 +64,7 @@ Records a completed candidate exam attempt, scoring metrics, and integrity count
 | `score` | `number` | Yes | Total points earned. |
 | `totalPoints` | `number` | Yes | Total points possible. |
 | `percentage` | `number` | Yes | Score divided by total points, multiplied by 100. |
-| `status` | `'awaiting_result' | 'graded'` | Yes | Grading lifecycle status. |
+| `status` | `'awaiting_result' \| 'graded'` | Yes | Grading lifecycle status. |
 | `timeSpentSeconds` | `number` | Yes | Elapsed test duration in seconds. |
 | `windowSwitchCount` | `number` | Yes | Count of window blur events recorded during the test. |
 | `submittedAt` | `string` | Yes | ISO 8601 submission timestamp. |
