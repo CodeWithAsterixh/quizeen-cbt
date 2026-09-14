@@ -2,6 +2,7 @@ import React from 'react';
 import { EducationLevel, Department, AssessmentType } from '@cbt/shared';
 import { AssessmentMetaFields } from './AssessmentMetaFields';
 import { AssessmentScheduleFields } from './AssessmentScheduleFields';
+import { AssessmentShuffleFields } from './AssessmentShuffleFields';
 
 interface AssessmentSettingsTabProps {
   subject: string; setSubject: (v: string) => void;
@@ -15,6 +16,8 @@ interface AssessmentSettingsTabProps {
   isAvailable: boolean; setIsAvailable: (v: boolean) => void;
   availableFrom: string; setAvailableFrom: (v: string) => void;
   availableTo: string; setAvailableTo: (v: string) => void;
+  shuffleQuestions: boolean; setShuffleQuestions: (v: boolean) => void;
+  shuffleOptions: boolean; setShuffleOptions: (v: boolean) => void;
 }
 
 export const AssessmentSettingsTab: React.FC<AssessmentSettingsTabProps> = (props) => {
@@ -29,6 +32,10 @@ export const AssessmentSettingsTab: React.FC<AssessmentSettingsTabProps> = (prop
         educationLevel={props.educationLevel} onLevelChange={props.onLevelChange}
         selectedClasses={props.selectedClasses} onToggleClass={props.onToggleClass}
         department={props.department} setDepartment={props.setDepartment}
+      />
+      <AssessmentShuffleFields
+        shuffleQuestions={props.shuffleQuestions} setShuffleQuestions={props.setShuffleQuestions}
+        shuffleOptions={props.shuffleOptions} setShuffleOptions={props.setShuffleOptions}
       />
       <AssessmentScheduleFields
         isAvailable={props.isAvailable} setIsAvailable={props.setIsAvailable}

@@ -21,6 +21,8 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
   const [educationLevel, setEducationLevel] = useState<EducationLevel>(initialExam?.educationLevel ?? 'senior_secondary');
   const [selectedClasses, setSelectedClasses] = useState<string[]>(initialExam?.targetClasses ?? ['SSS 2']);
   const [department, setDepartment] = useState<Department | undefined>(initialExam?.department);
+  const [shuffleQuestions, setShuffleQuestions] = useState(initialExam?.shuffleQuestions ?? true);
+  const [shuffleOptions, setShuffleOptions] = useState(initialExam?.shuffleOptions ?? true);
   const [questions, setQuestions] = useState<Question[]>(initialExam?.questions ?? [{ ...defaultQ, id: `q_${Date.now()}` }]);
 
   useEffect(() => {
@@ -38,6 +40,8 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
       setEducationLevel(initialExam?.educationLevel ?? 'senior_secondary');
       setSelectedClasses(initialExam?.targetClasses ?? ['SSS 2']);
       setDepartment(initialExam?.department);
+      setShuffleQuestions(initialExam?.shuffleQuestions ?? true);
+      setShuffleOptions(initialExam?.shuffleOptions ?? true);
       setQuestions(initialExam?.questions ?? [{ ...defaultQ, id: `q_${Date.now()}` }]);
     }
   }, [isOpen, initialExam, initialTab]);
@@ -50,5 +54,6 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
     durationMinutes, setDurationMinutes, passingScore, setPassingScore,
     educationLevel, setEducationLevel, selectedClasses, setSelectedClasses,
     department, setDepartment, questions, setQuestions,
+    shuffleQuestions, setShuffleQuestions, shuffleOptions, setShuffleOptions,
   };
 }

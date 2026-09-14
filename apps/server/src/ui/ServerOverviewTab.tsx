@@ -6,13 +6,15 @@ import { ServerStats } from './ServerStats';
 interface Props {
   status: ServerStatus;
   onToggle: (port: number) => void;
+  errorMessage?: string | null;
+  infoMessage?: string | null;
 }
 
-export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle }) => {
+export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle, errorMessage, infoMessage }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div className="server-cards-grid">
-        <ServerControls status={status} onToggle={onToggle} />
+        <ServerControls status={status} onToggle={onToggle} errorMessage={errorMessage} infoMessage={infoMessage} />
         <ServerStats status={status} />
       </div>
 

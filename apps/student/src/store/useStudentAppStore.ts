@@ -53,7 +53,15 @@ export function useStudentAppStore() {
 
   const importAssessments = async (items: Assessment[]) => {
     await assessmentStore.saveBatch(items);
-    setAssessments(await assessmentStore.getAll());
+    try {
+      if (await apiClient.isAvailable()) {
+        for (const item of items) {
+          try { await apiClient.createAssessment(item); } catch {}
+        }
+      }
+    } catch {}
+    const all = await assessmentStore.getAll();
+    setAssessments(all);
   };
 
   const resetToDefaults = async () => {

@@ -1,6 +1,15 @@
 import http from 'node:http';
 import { createApp, RequestLogEntry } from '../src/app.js';
 import { ServerBeacon, getLocalIpAddresses } from './discovery.js';
+import { findFallbackPort, probeQueezServer } from './port-fallback.js';
+
+export interface StartServerResult {
+  success: boolean;
+  port: number;
+  error?: string;
+  fallbackFrom?: number;
+  message?: string;
+}
 
 export class ServerManager {
   private server: http.Server | null = null;
@@ -11,34 +20,66 @@ export class ServerManager {
 
   constructor(private onLog: (entry: RequestLogEntry) => void) {}
 
-  start(port = 4000): Promise<{ success: boolean; port: number; error?: string }> {
+  public async detectExisting(port = 4000) {
+    const probe = await probeQueezServer(port);
+    if (probe.active) return { active: true, url: probe.url, port };
+    for (const p of [4050, 4500, 5000]) {
+      const alt = await probeQueezServer(p);
+      if (alt.active) return { active: true, url: alt.url, port: p };
+    }
+    return { active: false, url: '' };
+  }
+
+  private tryListen(port: number): Promise<{ success: boolean; port: number; error?: string }> {
     return new Promise((resolve) => {
-      this.stop();
-      this.currentPort = port;
-      const app = createApp((entry) => {
-        this.requestCount++;
-        this.onLog(entry);
-      });
-
-      this.server = app.listen(port, () => {
-        this.startedAt = Date.now();
-        this.beacon.start(port);
-        resolve({ success: true, port });
-      });
-
-      this.server.on('error', (err: any) => {
+      try {
+        const app = createApp((entry) => {
+          this.requestCount++;
+          this.onLog(entry);
+        });
+        const srv = http.createServer(app);
+        this.server = srv;
+        srv.on('error', (err: any) => {
+          this.server = null;
+          resolve({ success: false, port, error: err?.message || 'Server error' });
+        });
+        srv.listen(port, '0.0.0.0', () => {
+          this.startedAt = Date.now();
+          try { this.beacon.start(port); } catch {}
+          resolve({ success: true, port });
+        });
+      } catch (err: any) {
         this.server = null;
-        resolve({ success: false, port, error: err.message });
-      });
+        resolve({ success: false, port, error: err?.message || 'Start failed' });
+      }
     });
+  }
+
+  async start(requestedPort = 4000): Promise<StartServerResult> {
+    this.stop();
+    this.currentPort = requestedPort;
+    const initial = await this.tryListen(requestedPort);
+    if (initial.success) return { success: true, port: requestedPort };
+
+    const probe = await probeQueezServer(requestedPort);
+    const fallbackPort = await findFallbackPort(requestedPort);
+    if (fallbackPort !== requestedPort) {
+      const fallback = await this.tryListen(fallbackPort);
+      if (fallback.success) {
+        this.currentPort = fallbackPort;
+        const msg = probe.active
+          ? `Another Queez Server is already active on port ${requestedPort}. Started on port ${fallbackPort}.`
+          : `Port ${requestedPort} is in use by another app or restricted by Windows. Started on port ${fallbackPort}.`;
+        return { success: true, port: fallbackPort, fallbackFrom: requestedPort, message: msg };
+      }
+    }
+    this.currentPort = requestedPort;
+    return { success: false, port: requestedPort, error: initial.error };
   }
 
   stop(): void {
     this.beacon.stop();
-    if (this.server) {
-      try { this.server.close(); } catch {}
-      this.server = null;
-    }
+    if (this.server) { try { this.server.close(); } catch {} this.server = null; }
     this.startedAt = 0;
   }
 

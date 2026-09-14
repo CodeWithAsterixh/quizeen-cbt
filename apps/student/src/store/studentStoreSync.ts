@@ -10,15 +10,22 @@ export async function fetchAndSyncStudentData(
         apiClient.getAssessments(),
         apiClient.getSubmissions(),
       ]);
+      const stored = await assessmentStore.getAll();
+      const mergedMap = new Map<string, Assessment>();
+      stored.forEach((a) => mergedMap.set(a.id, a));
       if (remote) {
-        await assessmentStore.clear();
-        if (remote.length > 0) await assessmentStore.saveBatch(remote);
+        remote.forEach((a) => mergedMap.set(a.id, a));
       }
+      const mergedAssessments = Array.from(mergedMap.values());
+      if (mergedAssessments.length > 0) {
+        await assessmentStore.saveBatch(mergedAssessments);
+      }
+
       if (remoteSubs) {
         await submissionStore.clear();
         if (remoteSubs.length > 0) await submissionStore.saveBatch(remoteSubs);
       }
-      return { assessments: remote || [], submissions: remoteSubs || [] };
+      return { assessments: mergedAssessments, submissions: remoteSubs || [] };
     }
   } catch {}
 

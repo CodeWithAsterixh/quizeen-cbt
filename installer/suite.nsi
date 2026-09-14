@@ -18,6 +18,7 @@ Var DialogInstallScope
 Var RadioAllUsers
 Var RadioCurrentUser
 Var InstallScope
+Var Relaunched
 
 ; Define defaults if not passed via command line
 !ifndef VERSION
@@ -58,12 +59,20 @@ BrandingText "Quizeen CBT Systems"
 ; Wizard Pages
 ; ------------------------------------------------------------------------------
 
+Function SkipIfRelaunched
+  ${If} $Relaunched == 1
+    Abort
+  ${EndIf}
+FunctionEnd
+
 ; Page 1: Welcome
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfRelaunched
 !define MUI_WELCOMEPAGE_TITLE "Welcome to Queez CBT Suite Setup"
 !define MUI_WELCOMEPAGE_TEXT "This setup wizard will install the Queez Computer Based Testing System on your computer.$\r$\n$\r$\nQueez is an offline assessment suite built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
 !insertmacro MUI_PAGE_WELCOME
 
 ; Page 2: License Agreement
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfRelaunched
 !define MUI_LICENSEPAGE_CHECKBOX
 !define MUI_LICENSEPAGE_TEXT_TOP "Please review the license terms before proceeding. You must accept these terms to install Queez CBT Suite."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "If you accept the terms of the agreement, select the checkbox below and click Next."
@@ -160,6 +169,10 @@ Section -Post
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ${If} $InstallScope == "all"
+    CreateDirectory "$COMMONAPPDATA\Queez CBT Suite\data"
+    ExecWait 'icacls "$COMMONAPPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    CreateDirectory "$INSTDIR\data"
+    ExecWait 'icacls "$INSTDIR\data" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
@@ -168,6 +181,8 @@ Section -Post
     WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
     WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "InstallScope" "all"
   ${Else}
+    CreateDirectory "$APPDATA\Queez CBT Suite\data"
+    CreateDirectory "$INSTDIR\data"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
@@ -189,6 +204,10 @@ SectionEnd
 
 ; Installation Scope Page callbacks
 Function PageInstallScopeShow
+  ${If} $Relaunched == 1
+    Abort
+  ${EndIf}
+
   !insertmacro MUI_HEADER_TEXT "Choose Installation Options" "Who should this application be installed for?"
 
   nsDialogs::Create 1018
@@ -250,6 +269,7 @@ Function .onInit
   ClearErrors
   ${GetOptions} $R0 "/allusers" $R1
   ${IfNot} ${Errors}
+    StrCpy $Relaunched 1
     StrCpy $InstallScope "all"
     SetShellVarContext all
     ReadRegStr $1 HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
@@ -260,6 +280,8 @@ Function .onInit
     ${EndIf}
     Return
   ${EndIf}
+
+  StrCpy $Relaunched 0
 
   ; Check current account type
   UserInfo::GetAccountType

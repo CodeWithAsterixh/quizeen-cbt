@@ -4,6 +4,7 @@ const serverApi = {
   startServer: (port?: number) => ipcRenderer.invoke('server:start', port),
   stopServer: () => ipcRenderer.invoke('server:stop'),
   getStatus: () => ipcRenderer.invoke('server:get-status'),
+  detectExisting: (port?: number) => ipcRenderer.invoke('server:detect', port),
   onRequestLogged: (callback: (entry: any) => void) => {
     const handler = (_e: any, entry: any) => callback(entry);
     ipcRenderer.on('server:request-logged', handler);

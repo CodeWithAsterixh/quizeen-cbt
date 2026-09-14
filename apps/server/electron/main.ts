@@ -44,11 +44,18 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (app.isPackaged && !process.env.QUEEZ_DATA_DIR) {
+    const common = process.env.PROGRAMDATA || process.env.ALLUSERSPROFILE;
+    process.env.QUEEZ_DATA_DIR = common
+      ? path.join(common, 'Queez CBT Suite', 'data')
+      : path.join(app.getPath('userData'), 'data');
+  }
   createWindow();
 
   ipcMain.handle('server:start', async (_e, port) => serverManager.start(port));
   ipcMain.handle('server:stop', async () => { serverManager.stop(); return true; });
   ipcMain.handle('server:get-status', async () => serverManager.getStatus());
+  ipcMain.handle('server:detect', async (_e, port) => serverManager.detectExisting(port));
 
   ipcMain.on('window:minimize', () => mainWindow?.minimize());
   ipcMain.handle('window:maximize', () => {

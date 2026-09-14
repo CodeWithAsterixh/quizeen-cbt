@@ -46,14 +46,24 @@ export class PackageService {
     const manifest: ExamPackageManifest = JSON.parse(manifestText);
 
     let importedCount = 0;
-    const examsFolder = zip.folder('exams');
-    if (examsFolder) {
-      for (const [filename, fileObj] of Object.entries(examsFolder.files)) {
-        if (filename.endsWith('.json') && !fileObj.dir) {
-          const content = await fileObj.async('text');
-          const exam = JSON.parse(content) as Exam;
-          db.saveExam(exam);
-          importedCount++;
+    const examsFile = zip.file('exams.json');
+    if (examsFile) {
+      const content = await examsFile.async('text');
+      const exams = JSON.parse(content) as Exam[];
+      for (const exam of exams) {
+        db.saveExam(exam);
+        importedCount++;
+      }
+    } else {
+      const examsFolder = zip.folder('exams');
+      if (examsFolder) {
+        for (const [filename, fileObj] of Object.entries(examsFolder.files)) {
+          if (filename.endsWith('.json') && !fileObj.dir) {
+            const content = await fileObj.async('text');
+            const exam = JSON.parse(content) as Exam;
+            db.saveExam(exam);
+            importedCount++;
+          }
         }
       }
     }

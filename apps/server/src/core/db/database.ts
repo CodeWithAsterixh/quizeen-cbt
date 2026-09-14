@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Exam, Submission, Student } from '@cbt/shared';
@@ -7,7 +8,32 @@ import { SubmissionStore } from './submission-store.js';
 import { runLegacyMigration } from './database-migration.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../../data');
+
+function resolveDataDir(): string {
+  if (process.env.QUEEZ_DATA_DIR && fs.existsSync(process.env.QUEEZ_DATA_DIR)) {
+    return process.env.QUEEZ_DATA_DIR;
+  }
+  const candidates = [
+    path.resolve(process.cwd(), 'data'),
+    path.resolve(process.cwd(), 'apps/server/data'),
+    path.resolve(__dirname, '../data'),
+    path.resolve(__dirname, '../../../data'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  const baseDir = process.env.PROGRAMDATA || process.env.APPDATA || process.env.LOCALAPPDATA;
+  if (baseDir) {
+    const pData = path.join(baseDir, 'Queez CBT Suite', 'data');
+    try {
+      if (!fs.existsSync(pData)) fs.mkdirSync(pData, { recursive: true });
+      return pData;
+    } catch {}
+  }
+  return path.resolve(process.cwd(), 'data');
+}
+
+const DATA_DIR = resolveDataDir();
 
 class DatabaseStore {
   private assessments = new AssessmentStore(path.join(DATA_DIR, 'assessments'));

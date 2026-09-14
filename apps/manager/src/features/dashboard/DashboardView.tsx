@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, DownloadSimple } from '@cbt/shared';
+import { Plus, DownloadSimple, FileArchive } from '@cbt/shared';
 import { Assessment, Submission, Button, isAssessmentAvailable } from '@cbt/shared';
 import { ManagerTab } from '../../components/layout/Sidebar';
 import { DashboardMetrics } from './DashboardMetrics';
@@ -11,6 +11,7 @@ interface DashboardViewProps {
   submissions: Submission[];
   onNavigate: (tab: ManagerTab) => void;
   onOpenCreateExam: () => void;
+  onOpenLoader?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -18,6 +19,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   submissions,
   onNavigate,
   onOpenCreateExam,
+  onOpenLoader,
 }) => {
   const availableCount = exams.filter((exam) => isAssessmentAvailable(exam)).length;
   const pendingGrading = submissions.filter((s) => s.status === 'awaiting_result').length;
@@ -32,6 +34,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          {onOpenLoader && (
+            <Button variant="outline" onClick={onOpenLoader} icon={<FileArchive size={18} />}>
+              Load Package (.qzn)
+            </Button>
+          )}
           <Button variant="secondary" onClick={() => onNavigate('compiler')} icon={<DownloadSimple size={18} />}>
             Export Package (.qzn)
           </Button>

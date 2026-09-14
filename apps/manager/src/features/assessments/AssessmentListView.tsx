@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from '@cbt/shared';
+import { Plus, FileArchive } from '@cbt/shared';
 import { Assessment, Button } from '@cbt/shared';
 import { AssessmentFiltersBar } from './AssessmentFiltersBar';
 import { AssessmentCard } from './AssessmentCard';
@@ -11,10 +11,11 @@ interface AssessmentListViewProps {
   onEditAssessment: (assessment: Assessment) => void;
   onDuplicateAssessment: (assessment: Assessment) => void;
   onDeleteAssessment: (id: string) => void;
+  onOpenLoader?: () => void;
 }
 
 export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
-  assessments, onOpenCreate, onOpenAssessment, onEditAssessment, onDuplicateAssessment, onDeleteAssessment,
+  assessments, onOpenCreate, onOpenAssessment, onEditAssessment, onDuplicateAssessment, onDeleteAssessment, onOpenLoader,
 }) => {
   const exams = assessments;
   const onOpenExam = onOpenAssessment;
@@ -44,9 +45,16 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
             Create questions and oversee your school tests and examinations.
           </p>
         </div>
-        <Button variant="primary" onClick={onOpenCreate} icon={<Plus size={18} weight="bold" />}>
-          Create Assessment
-        </Button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {onOpenLoader && (
+            <Button variant="secondary" onClick={onOpenLoader} icon={<FileArchive size={18} />}>
+              Load Package (.qzn)
+            </Button>
+          )}
+          <Button variant="primary" onClick={onOpenCreate} icon={<Plus size={18} weight="bold" />}>
+            Create Assessment
+          </Button>
+        </div>
       </header>
 
       <AssessmentFiltersBar

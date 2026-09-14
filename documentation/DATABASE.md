@@ -1,159 +1,197 @@
-# Database architecture and storage management
+# Database Architecture and Storage Management
 
-This document explains the database system used by Quizeen CBT, how records are structured on disk, and how the server manages read and write operations.
-
----
-
-## Storage engine overview
-
-Quizeen uses an embedded, file-based JSON document store paired with an in-memory cache.
-
-### Why this design was chosen
-
-1. **Complete offline independence**: Schools often run exams in computer rooms without internet connectivity. A file-based store runs locally without external database software such as PostgreSQL, MySQL, or MongoDB.
-2. **Zero installation overhead**: The server starts instantly on any Windows desktop without configuring database services, ports, users, or background daemons.
-3. **Inspectable records**: Teachers and administrators can open any data file in a text editor to verify records, verify student codes, or create manual backups.
-4. **Simple backup and recovery**: Copying the `data` directory to a USB flash drive creates a complete snapshot of all exams, registered students, and student submissions.
+This document describes the embedded database engine used by the Quizeen CBT Server, directory organization on disk, Windows permissions handling in production, and how the storage layer manages read and write operations.
 
 ---
 
-## Directory layout and file structure
+## 1. Storage Engine Overview
 
-The server stores all persistent data in the `data` directory located at the project root:
+The Quizeen CBT Server uses an embedded, file-based JSON document store paired with an in-memory cache. It eliminates the need for external database servers like PostgreSQL, MySQL, SQLite native binaries, or MongoDB.
+
+### 1.1. Why This Storage Architecture Was Chosen
+
+1. **Complete Offline Independence**:
+   School examinations frequently take place in computer rooms without active internet connections. A file-based store operates completely offline without needing cloud services or remote database connections.
+
+2. **Zero Operating System Service Dependencies**:
+   Third-party database management systems require background services, user accounts, authentication passwords, and port configurations that can fail or become blocked by school firewalls. The file-based JSON engine runs directly inside the Node.js runtime process.
+
+3. **Human-Readable and Auditable Records**:
+   All assessment papers, student candidate registrations, and submitted answer sheets are saved as standard JSON files. Proctors and school IT administrators can inspect any file using a text editor to verify records or troubleshoot issues directly.
+
+4. **Rapid Disaster Recovery and Backups**:
+   Creating a complete system backup requires copying the `data` directory to a USB flash drive. Restoring from a backup involves pasting the directory back into place.
+
+---
+
+## 2. Directory Layout and Partitioning Strategy
+
+Records are partitioned into three dedicated subdirectories under the resolved data folder:
 
 ```
-cbt-system-prototype/
-└── data/
-    ├── assessments/
-    │   ├── exam_17892348912.json
-    │   └── exam_sss2_physics.json
-    ├── students/
-    │   ├── primary.json
-    │   ├── junior.json
-    │   ├── senior.json
-    │   └── general.json
-    ├── submissions/
-    │   ├── exam_17892348912.json
-    │   └── exam_sss2_physics.json
-    └── cbt-store.json.bak (optional legacy backup)
+data/
+├── assessments/
+│   ├── exam_17892348912.json
+│   └── exam_sss2_physics.json
+├── students/
+│   ├── primary.json
+│   ├── junior.json
+│   ├── senior.json
+│   └── general.json
+└── submissions/
+    ├── exam_17892348912.json
+    └── exam_sss2_physics.json
 ```
 
-### 1. Assessments store (`data/assessments/`)
-
-Every assessment is stored in its own standalone JSON file named after its identifier: `[assessmentId].json`.
+### 2.1. Assessments Store (`data/assessments/`)
+Every assessment is saved into its own standalone JSON file named using its unique identifier: `[assessmentId].json`.
 
 - **File name format**: `exam_17892348912.json`
-- **File content**: A single JSON object containing:
-  - Header data: `id`, `title`, `subject`, `session`, `educationLevel`, `targetClasses`, `durationMinutes`, `passingScore`, and `unlockPin`.
-  - Question bank: An array of questions with prompt HTML, option choices, correct answers, point values, and explanations.
-- **Isolation benefit**: Saving or editing one exam only touches that single file on disk. Other exams remain untouched.
+- **Contents**: A single JSON object containing:
+  - Assessment metadata: `id`, `title`, `subject`, `session`, `educationLevel`, `targetClasses`, `department`, `durationMinutes`, and `passingScore`.
+  - Scheduling parameters: `isAvailable`, `availableFrom`, `availableTo`, and `unlockPin`.
+  - Shuffling preferences: `shuffleQuestions` and `shuffleOptions`.
+  - Question bank: An array of questions with prompt HTML, option choices, correct answers, point weights, and explanations.
+- **Isolation Benefit**: Saving or modifying an assessment writes only to that specific file. An issue in one file never affects other exams.
 
-### 2. Students store (`data/students/`)
-
+### 2.2. Students Store (`data/students/`)
 Student candidate records are categorized by educational level into dedicated partition files:
 
-- `primary.json`: Students in primary school classes (Primary 1 to Primary 6).
-- `junior.json`: Students in junior secondary school (JSS 1 to JSS 3).
-- `senior.json`: Students in senior secondary school (SSS 1 to SSS 3).
-- `general.json`: Students with unspecified or custom educational levels.
+- `primary.json`: Candidates enrolled in primary grades (Primary 1 through Primary 6).
+- `junior.json`: Candidates enrolled in junior secondary classes (JSS 1 through JSS 3).
+- `senior.json`: Candidates enrolled in senior secondary classes (SSS 1 through SSS 3).
+- `general.json`: Candidates with custom, remedial, or unassigned educational levels.
 
-Each file contains an array of student objects with their registration code, full name, assigned class, department (science, arts, or commercial), and active status.
+Each partition file contains an array of student candidate objects with their registration code, full name, assigned class group, academic stream, and creation timestamp. Partitioning candidates by educational level keeps individual file sizes small and prevents read latency degradation.
 
-### 3. Submissions store (`data/submissions/`)
+#### Level Reclassification
+When an administrator edits a candidate in the Manager application and changes their educational level (for example, promoting a student from JSS 3 to SSS 1):
+1. The server removes the student record from `data/students/junior.json`.
+2. The server appends the updated student record to `data/students/senior.json`.
+3. Both partition files are rewritten atomically, preventing duplicate entries.
 
-Candidate submissions are partitioned by assessment identifier: `[examId].json`.
+### 2.3. Submissions Store (`data/submissions/`)
+Candidate submissions are grouped by assessment identifier into individual files: `[examId].json`.
 
-- **File name format**: `exam_sss2_physics.json` (special characters replaced with underscores).
-- **File content**: An array of submission records for that specific examination.
-- **Record data**: Candidate name, class group, answers map, calculated point total, final percentage score, elapsed time in seconds, window focus switch count, and submission timestamp.
-- **Aggregation benefit**: When grading or viewing results for a class test, the server reads only the submission file for that exam instead of scanning submissions from every exam across the school.
-
----
-
-## Storage management and lifecycle
-
-The storage layer is implemented in `apps/server/src/core/db/` using four TypeScript classes:
-
-- `AssessmentStore` (`assessment-store.ts`)
-- `StudentStore` (`student-store.ts`)
-- `SubmissionStore` (`submission-store.ts`)
-- `DatabaseStore` (`database.ts`)
-
-### 1. In-memory read caching
-
-During an active exam session, hundreds of student computers may request questions or verify registration codes at the same time.
-
-- On server startup, each store reads its JSON files from disk and populates an in-memory `Map<string, T>`.
-- All read operations (`getAll`, `getById`, `getByCode`, `getByExamId`) return records directly from memory.
-- This eliminates disk read operations during peak examination traffic.
-
-### 2. Synchronous write-through updates
-
-When a mutation occurs:
-
-1. The in-memory `Map` is updated immediately.
-2. The specific target file is written to disk using synchronous file system calls (`fs.writeFileSync`).
-3. Only the affected partition file is updated. For example, saving a senior student record only rewrites `data/students/senior.json`.
-
-### 3. Student category reclassification
-
-If an administrator edits an existing student and changes their educational level (for instance, moving from junior to senior):
-
-1. The store removes the student from the old category cache.
-2. The store adds the student to the new category cache.
-3. Both category files (`junior.json` and `senior.json`) are updated on disk to keep records consistent.
-
-### 4. Automatic legacy migration
-
-Older versions of Quizeen stored all exams, students, and submissions in a single monolithic file (`data/cbt-store.json`).
-
-On server boot, the migration service (`database-migration.ts`) checks for this legacy file:
-
-1. If `data/cbt-store.json` is found, the migration reads all records into memory.
-2. It writes each exam to `data/assessments/[id].json`.
-3. It sorts students by class level and writes them to `data/students/[category].json`.
-4. It groups submissions by exam and writes them to `data/submissions/[examId].json`.
-5. It renames `data/cbt-store.json` to `data/cbt-store.json.bak` to prevent repeated migrations and keep a safe copy of the original data.
+- **File name format**: `exam_17892348912.json` (with non-alphanumeric characters replaced by underscores).
+- **Contents**: An array of submission records representing candidate attempts for that specific exam.
+- **Record Data**: Candidate name, class group, stream, answer map, calculated score, total points, percentage, elapsed time, infraction count, and timestamp.
+- **Query Efficiency**: When generating class score sheets or opening the grading queue for an exam, the server reads only the submission file for that exam instead of scanning submissions from every test across the school.
 
 ---
 
-## Client-side storage
+## 3. Data Directory Resolution and Windows Permissions
 
-The Student and Manager applications also maintain local client storage:
+### 3.1. The Program Files Permission Problem
+When an application is installed for all users on Windows, it is placed in `C:\Program Files\Queez CBT Suite\`. Under standard Windows user account controls (UAC), normal non-administrator accounts do not have write permissions to `C:\Program Files\`.
 
-- **Browser and Electron Web Storage**: Active test state, unsaved answers, student session info, and network settings persist in `localStorage` and `LocalStore` to guarantee zero data loss during temporary network drops.
-- **Optional encrypted package archives (.qzn)**: Complete exam packages exported from Manager are packaged as AES-encrypted ZIP archives. In air-gapped classrooms without a local area network, the Student app can import these `.qzn` packages directly without an active server connection.
+If the server attempts to create or update files in `C:\Program Files\Queez CBT Suite\data\`, the operating system denies the request with error `EACCES: permission denied`.
 
----
+### 3.2. Dynamic Data Directory Resolution Algorithm
+To resolve this issue reliably across both development and production environments, the server implements dynamic path resolution in `apps/server/src/core/db/database.ts`:
 
-## Database operations guide
+```typescript
+function resolveDataDir(): string {
+  // 1. Explicit override via environment variable
+  if (process.env.QUEEZ_DATA_DIR) {
+    return path.resolve(process.env.QUEEZ_DATA_DIR);
+  }
 
-### How to backup data
-To create a complete backup, copy the entire `data` folder to your backup location:
+  // 2. Development candidates checked in order
+  const devCandidates = [
+    path.resolve(process.cwd(), 'apps/server/data'),
+    path.resolve(process.cwd(), 'data'),
+    path.resolve(process.cwd(), '../data'),
+  ];
+  for (const candidate of devCandidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
 
-```bash
-# Windows PowerShell example
-Copy-Item -Recurse -Path ".\data" -Destination "D:\Quizeen-Backups\data-$(Get-Date -Format 'yyyy-MM-dd')"
+  // 3. Windows production environment resolution
+  if (process.platform === 'win32') {
+    const programData = process.env.ALLUSERSPROFILE || process.env.ProgramData;
+    if (programData) {
+      return path.join(programData, 'Queez CBT Suite', 'data');
+    }
+    const appData = process.env.APPDATA;
+    if (appData) {
+      return path.join(appData, 'Queez CBT Suite', 'data');
+    }
+  }
+
+  // 4. Fallback for non-Windows operating systems
+  return path.resolve(process.cwd(), 'data');
+}
 ```
 
-### How to restore data
-1. Stop the Quizeen Server application.
-2. Copy the backed-up JSON files into their respective subfolders (`data/assessments/`, `data/students/`, `data/submissions/`).
-3. Start the Quizeen Server application. The server will automatically load the restored files into memory.
+### 3.3. Installer Access Control Configuration (`icacls`)
+During installation via the NSIS installer script (`installer/suite.nsi`), the installer creates the `%PROGRAMDATA%\Queez CBT Suite\data` directory and runs the Windows `icacls` command:
 
-### How to reset to empty state
-To clear all data and start fresh:
-1. Stop the server.
-2. Delete the JSON files inside `data/assessments/`, `data/students/`, and `data/submissions/`.
-3. Restart the server. The folders will be recreated automatically if they are missing.
+```nsis
+CreateDirectory "$COMMONPROGRAMDATA\Queez CBT Suite\data"
+ExecWait 'icacls "$COMMONPROGRAMDATA\Queez CBT Suite\data" /grant "Users":(OI)(CI)M /T /C'
+```
+
+This permission grant (`Users:(OI)(CI)M`) provides modify rights to all standard Windows user accounts, inheriting down to all subdirectories (`(OI)(CI)`). When students or teachers launch the server application on a computer, the server creates, updates, and deletes data files without requiring administrator elevation.
 
 ---
 
-## Idempotent write safety
+## 4. In-Memory Caching and Write-Through Lifecycle
 
-To prevent duplicate records from network retries, client reconnects, or repeated button clicks, all mutating operations (`POST`, `PUT`, `PATCH`, `DELETE`) pass through server idempotency middleware:
+The storage engine implements a two-tier architecture: an in-memory cache for fast read operations and synchronous file writes for durability.
 
-- **Keyed requests**: Requests with an `Idempotency-Key` header are deduplicated for 15 minutes.
-- **Payload signatures**: Unkeyed mutating requests automatically hash their method, endpoint, and payload to prevent duplicate writes.
-- **Cache replay**: Replayed requests return the original status and data with `Idempotent-Replayed: true` without duplicating records in the data store.
+```mermaid
+flowchart TD
+    Request[Incoming Client Request] --> MethodCheck{Request Method?}
+    MethodCheck -- GET (Read) --> MemoryLookup["In-Memory Cache (Map&lt;string, T&gt;)"]
+    MemoryLookup --> FastResponse[Instant O(1) JSON Response]
+    MethodCheck -- POST / PUT / DELETE (Mutation) --> UpdateMap["Update In-Memory Cache (Map&lt;string, T&gt;)"]
+    UpdateMap --> SyncWrite[Synchronous Write: fs.writeFileSync to Specific File]
+    SyncWrite --> DiskPersist[("Durable Disk Partition File in %PROGRAMDATA%")]
+    SyncWrite --> AckResponse[HTTP 200 / 201 Acknowledged Response]
+```
 
+### 4.1. Startup Initialization
+When the Central Server launches:
+1. `DatabaseStore` calls `initialize()` on each specialized store: `AssessmentStore`, `StudentStore`, and `SubmissionStore`.
+2. Each store verifies that its target directory exists, creating the directory if missing.
+3. The store scans the directory, reads every `.json` file, parses the JSON payload, and loads all entities into an internal `Map<string, T>`.
+4. If a file contains invalid or corrupted JSON, an error is caught and logged, preserving the remaining valid files.
+
+### 4.2. Read Operations
+All query operations are satisfied directly from memory:
+- `getAssessmentById(id)`: O(1) hash map lookup.
+- `getAllAssessments()`: Returns an array of cached assessment objects.
+- `getStudentByCode(code)`: Iterates through the in-memory candidate map, returning the matching student in sub-millisecond time.
+- `getSubmissionsByExamId(examId)`: Returns cached submissions for the specified test.
+
+This design enables the server to handle hundreds of concurrent candidate requests during examination start times without disk I/O bottlenecks.
+
+### 4.3. Write-Through Durability
+When an entity is created, updated, or deleted:
+1. The internal `Map<string, T>` is updated immediately to reflect the change.
+2. The specific affected partition file is serialized to formatted JSON with 2-space indentation.
+3. The file is written to disk synchronously using `fs.writeFileSync`.
+4. Writing synchronously guarantees that if the server process terminates abruptly, records from previously acknowledged HTTP requests are already persisted on the storage device.
+
+---
+
+## 5. Backup, Archival, and Migration Procedures
+
+### 5.1. Creating a Manual Snapshot Backup
+To create a complete backup of the testing system:
+1. Stop the server in the Server GUI application to ensure no write operations are in flight.
+2. Navigate to the data folder:
+   - In production: `%PROGRAMDATA%\Queez CBT Suite\data`
+   - In development: `cbt-system-prototype/data`
+3. Copy the entire `data` directory to a backup drive or external USB storage device.
+
+### 5.2. Restoring from a Snapshot Backup
+1. Close the Server application.
+2. Replace the contents of the active data directory with the backup copy.
+3. Restart the Server application. The database engine scans the restored files and repopulates the in-memory cache automatically.
+
+### 5.3. Resetting Data to Clean Initial State
+Administrators can reset the system between academic terms:
+- From the Manager application or API: Send `POST /api/analytics/reset`.
+- The server clears all in-memory caches, deletes existing files in `data/assessments/`, `data/students/`, and `data/submissions/`, and recreates empty directory structures.

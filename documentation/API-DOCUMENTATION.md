@@ -7,12 +7,15 @@ This document provides a complete inventory of all network requests called by th
 ## 1. System Overview
 
 - Default Server Base URL: `http://localhost:4000`
+- Automatic Fallback Ports: `4050`, `4100`, `4200`, `4500`, `5000`, `5050`, `8080` (used when port 4000 is occupied or restricted by Windows)
+- UDP Discovery Beacon Port: `4001` (broadcasts server network coordinates to LAN clients every 2 seconds)
 - API Root Prefix: `/api`
 - Health Endpoint: `/health`
 - Client Calling Modules:
   - `serverConfig` (`packages/shared/src/api/server-config.ts`)
   - `apiClient` (`packages/shared/src/api/api-client.ts`)
   - `studentApi` (`packages/shared/src/api/student-api.ts`)
+  - `packageApi` (`packages/shared/src/api/package-api.ts`)
 
 ---
 

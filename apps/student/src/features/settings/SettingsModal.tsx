@@ -32,8 +32,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       const buffer = await file.arrayBuffer();
       const result = await unpackExamZip(buffer);
       if (result.success && result.exams) {
-        setStatusMsg({ type: 'success', text: `Loaded ${result.exams.length} test papers from "${result.manifest?.packageName}".` });
-        onExamsUpdated(result.exams);
+        const normalized = result.exams.map((e) => ({
+          ...e,
+          isPublished: e.isPublished ?? true,
+          isAvailable: e.isAvailable ?? true,
+        }));
+        setStatusMsg({ type: 'success', text: `Loaded ${normalized.length} test papers from "${result.manifest?.packageName}".` });
+        onExamsUpdated(normalized);
       } else {
         setStatusMsg({ type: 'error', text: result.message });
       }

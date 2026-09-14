@@ -21,6 +21,7 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
     durationMinutes, setDurationMinutes, passingScore, setPassingScore,
     educationLevel, setEducationLevel, selectedClasses, setSelectedClasses,
     department, setDepartment, questions, setQuestions,
+    shuffleQuestions, setShuffleQuestions, shuffleOptions, setShuffleOptions,
   } = useAssessmentForm(initialExam, isOpen, initialTab);
 
   const handleAddQ = () => {
@@ -42,6 +43,7 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
       department: EDUCATION_LEVELS.find((l) => l.id === educationLevel)?.hasDepartments ? department : undefined,
       durationMinutes, passingScore, totalPoints, questions, createdAt: initialExam?.createdAt ?? new Date().toISOString(), isPublished: true,
       isAvailable, availableFrom: availableFrom || undefined, availableTo: availableTo || undefined,
+      shuffleQuestions, shuffleOptions,
     });
   };
 
@@ -55,7 +57,7 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
         {activeTab === 'questions' ? (
           <QuestionsListTab questions={questions} editingIndex={editingQIndex} setEditingIndex={setEditingQIndex} onAddQuestion={handleAddQ} onUpdateQuestion={(i, upd) => { const copy = [...questions]; copy[i] = { ...copy[i], ...upd }; setQuestions(copy); }} onDeleteQuestion={(i) => { setQuestions(questions.filter((_, idx) => idx !== i)); setEditingQIndex(null); }} />
         ) : (
-          <AssessmentSettingsTab subject={subject} setSubject={setSubject} session={session} setSession={setSession} assessmentType={assessmentType} setAssessmentType={setAssessmentType} durationMinutes={durationMinutes} setDurationMinutes={setDurationMinutes} passingScore={passingScore} setPassingScore={setPassingScore} educationLevel={educationLevel} onLevelChange={(l) => { setEducationLevel(l); setSelectedClasses(EDUCATION_LEVELS.find((c) => c.id === l)?.classes.slice(0, 1) ?? []); }} selectedClasses={selectedClasses} onToggleClass={(c) => setSelectedClasses(selectedClasses.includes(c) ? selectedClasses.filter((x) => x !== c) : [...selectedClasses, c])} department={department} setDepartment={setDepartment} isAvailable={isAvailable} setIsAvailable={setIsAvailable} availableFrom={availableFrom} setAvailableFrom={setAvailableFrom} availableTo={availableTo} setAvailableTo={setAvailableTo} />
+          <AssessmentSettingsTab subject={subject} setSubject={setSubject} session={session} setSession={setSession} assessmentType={assessmentType} setAssessmentType={setAssessmentType} durationMinutes={durationMinutes} setDurationMinutes={setDurationMinutes} passingScore={passingScore} setPassingScore={setPassingScore} educationLevel={educationLevel} onLevelChange={(l) => { setEducationLevel(l); setSelectedClasses(EDUCATION_LEVELS.find((c) => c.id === l)?.classes.slice(0, 1) ?? []); }} selectedClasses={selectedClasses} onToggleClass={(c) => setSelectedClasses(selectedClasses.includes(c) ? selectedClasses.filter((x) => x !== c) : [...selectedClasses, c])} department={department} setDepartment={setDepartment} isAvailable={isAvailable} setIsAvailable={setIsAvailable} availableFrom={availableFrom} setAvailableFrom={setAvailableFrom} availableTo={availableTo} setAvailableTo={setAvailableTo} shuffleQuestions={shuffleQuestions} setShuffleQuestions={setShuffleQuestions} shuffleOptions={shuffleOptions} setShuffleOptions={setShuffleOptions} />
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{questions.length} questions • {durationMinutes} mins • {isAvailable ? 'Active' : 'Hidden'}</span>

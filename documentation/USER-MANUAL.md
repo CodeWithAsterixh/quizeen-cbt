@@ -1,169 +1,184 @@
-# Quizeen CBT user manual
+# Quizeen CBT User Manual
 
-This manual provides instructions for educators authoring tests, exam proctors managing local servers, and students sitting for examinations using the Quizeen Computer-Based Testing platform.
+This manual provides operating instructions for exam proctors running the Central Server, educators creating tests in the Assessment Manager, and candidates taking exams in the Student Station.
 
 ---
 
-## Exam proctor manual (Server app)
+## 1. Exam Proctor Manual (Central Server Application)
 
-The Server application acts as the local examination hub. It hosts tests, collects submissions, provides real-time traffic monitoring, and broadcasts network discovery beacons across the examination room.
+The Central Server application serves as the examination hub in the testing hall. It manages student data, stores test definitions, records completed submissions, streams real-time traffic statistics, and broadcasts network discovery beacons across the room.
 
-### Starting and stopping the server
+### 1.1. Starting and Stopping the Server
 
-1. Open the Quizeen Server application.
-2. In the "Server Control & Network" card, verify the port number (default is 4000).
-3. Select "Start Server" to begin listening for examination traffic. The status badge will change to "Active (Listening)".
-4. Select "Stop Server" to temporarily pause network traffic.
+1. Launch the Quizeen Server application from your desktop shortcut or application folder.
+2. In the "Server Control & Network" card, check the port number (default is `4000`).
+3. Click "Start Server":
+   - If port 4000 is available, the server starts listening on port 4000.
+   - If another instance of Queez Server is already running on the computer or network, an informational banner notifies you:
+     `Active Queez Server detected at http://127.0.0.1:4000.`
+   - If port 4000 is occupied by another software application or restricted by Windows dynamic port reservations, the server automatically finds an open fallback port (such as `4050`, `4100`, or `4500`) and displays:
+     `Port 4000 is in use by another app or restricted by Windows. Started on fallback port 4050.`
+   - The port input box and active IP address pills update automatically to reflect the running port.
+4. To stop the service temporarily, click "Stop Server".
 
-### Configuring auto-start
+### 1.2. Finding and Sharing Your Server Address
 
-If you want the server to launch automatically every time you open the application, enable the "Auto-start server when app opens" checkbox under the server control card. Leave this unchecked if you prefer to start the server manually for each exam session.
+1. Once the server is active, review the list of IP address pills displayed in the control card (for example, `http://192.168.1.150:4000`).
+2. Click the "Copy" button next to your primary network IP address to copy the URL to your clipboard.
+3. In most networks, you do not need to share this URL manually because the server automatically transmits discovery beacons over UDP port 4001. Student stations and Manager workstations will locate and connect to the server automatically.
+4. If network firewall rules block discovery broadcasts, provide the copied URL to proctors so they can type it into the connection settings dialog on client machines.
 
-### Finding your server network address
+### 1.3. Configuring Auto-Start
 
-The server automatically scans your computer network adapters and lists all available IP addresses:
-1. Locate the IP address list in the server control card (for example, `http://192.168.1.150:4000`).
-2. Select "Copy" next to the primary LAN IP address to copy the URL to your clipboard.
-3. Share this address with test candidates or rely on the automatic zero-configuration discovery built into the Student and Manager apps.
+If you want the server to start automatically whenever the computer boots or the app opens:
+1. Check the box labeled "Auto-start server when app opens" in the control card.
+2. The preference is stored in local configuration. When you open the application in future sessions, the server begins listening immediately on port 4000 (or the first available fallback port).
 
-### Navigating the server dashboard
+### 1.4. Navigating the Server Dashboard
 
-The Server GUI provides a navigation sidebar with three primary views:
+The Server GUI navigation sidebar provides three primary views:
 
-1. **Overview tab**:
-   - Contains server status, port controls, and Start/Stop actions.
-   - Shows active local IP addresses with copy buttons.
-   - Includes the auto-start toggle and quick status summary.
-2. **Visual Graph tab**:
-   - Visualizes request latency and traffic frequency over time as an interactive chart.
-   - Helps proctors spot connectivity slowdowns or traffic spikes during peak exam start times.
-3. **Live tab (Live requests)**:
+1. **Overview Tab**:
+   - Displays running state, active port, network IP addresses, and Start/Stop controls.
+   - Summarizes active examinees, total tests loaded, and submissions collected.
+   - Shows quick instructions for connecting client workstations.
+2. **Visual Graph Tab**:
+   - Visualizes request volume and response latency over time as an interactive chart.
+   - Helps proctors spot connectivity spikes during examination start times or identify network bottlenecks.
+3. **Live Requests Tab**:
    - Displays an auto-scrolling log of incoming HTTP requests with real-time badges showing request counts.
-   - Shows timestamp, HTTP method (GET, POST), path, status code, latency in milliseconds, and client IP address.
-   - Provides a search bar to filter logs by endpoint (for example, `/submissions` or `/assessments`).
-   - Includes "Export" to download captured logs as a JSON file and "Clear" to reset the log display.
+   - Each row details the timestamp (with local timezone offset), HTTP method (GET, POST), path, response status code, latency in milliseconds, and client IP address.
+   - Routine `/health` check pings are filtered out automatically so the log focuses on real test traffic.
+   - Use the search bar to filter logs by endpoint (for example, `/submissions` or `/students`).
+   - Click "Export" to download captured logs as a JSON file for archival, or click "Clear" to reset the log display.
 
-### Exiting the application safely
+### 1.5. Exiting the Application Safely
 
-If you click the window close button while the server is actively running, a confirmation prompt appears warning that closing the window will stop the server and disconnect active student sessions. Select "Keep Server Running" to cancel or "Stop Server & Exit" to proceed.
+If you click the window close button while the server is active, a confirmation prompt appears warning that closing the window will terminate the server service and disconnect active examinees. Choose "Keep Server Running" to cancel or "Stop Server & Exit" to shut down.
 
 ---
 
-## Educator and administrator manual (Manager app)
+## 2. Educator and Administrator Manual (Assessment Manager Application)
 
-The Manager application enables teachers and administrators to create tests, manage schedules, compile offline packages, and review class performance.
+The Assessment Manager application enables teachers, subject heads, and school administrators to create tests, manage student candidate rosters, monitor exams in progress, grade submissions, and analyze class performance.
 
-### Connecting to the central server
+### 2.1. Connecting to the Central Server
 
-1. Open the Manager application.
-2. Select "Server Connection" at the bottom of the navigation sidebar.
-3. If the Server app is running on the same network, a banner displays "Discovered server". Select "Use Discovered" to connect automatically.
-4. Alternatively, enter the server URL manually and select "Test Connection" to confirm availability.
+1. Open the Assessment Manager application.
+2. Click "Server Connection" at the bottom of the navigation sidebar.
+3. If the Central Server is running on the local network, the dialog displays:
+   `Discovered server at http://192.168.1.150:4000.`
+4. Click "Use Discovered" to connect instantly.
+5. If the server is on a different subnet, enter the server URL manually and click "Test Connection" to confirm that the server is reachable.
 
-### Creating an assessment
+### 2.2. Creating an Assessment
 
-1. Select the "Create Assessment" button from the top navigation bar.
-2. In the "Settings and Availability" tab:
-   - Enter the subject name (for example, Mathematics or Biology) and academic session (for example, 2024/2025).
+1. Click "Create Assessment" on the top navigation bar.
+2. Under the **Settings and Availability** tab:
+   - Enter the subject name (for example, *Biology* or *Mathematics*) and the academic session (for example, *2024/2025*).
    - Select the assessment type: Periodic Test or Major Exam.
-   - Choose the education level: Primary, Junior Secondary, or Senior Secondary.
-   - Select the target classes permitted to take this test (for example, SSS 2, SSS 3).
-   - For Senior Secondary, select the department stream if applicable (Science, Arts, or Commercial).
-   - Set the duration in minutes and the minimum passing score percentage.
-   - Configure availability: enable the Active status toggle and set optional start or deadline timestamps.
-3. Switch to the "Questions" tab:
-   - Select "Add Question" to create a new question.
-   - Choose the question format (Multiple Choice, True/False, or Short Answer).
-   - Enter the question text and answer options.
-   - Mark the correct answer option.
-   - Select "Done" on the question card to collapse it into a preview item.
-4. Select "Save Assessment" to finalize the paper.
+   - Choose the educational level: Primary, Junior Secondary, or Senior Secondary.
+   - Select the target classes permitted to write this paper (for example, `SSS 2A`, `SSS 2B`).
+   - For Senior Secondary, select the department stream if applicable (`Science`, `Arts`, or `Commercial`).
+   - Set the duration in minutes and the minimum passing percentage.
+   - Set the availability window: toggle the Active switch, and set optional opening date/time and closing deadlines.
+   - If desired, set an invigilator unlock PIN (for example, `4321`) to prevent students from starting the test until authorized.
+   - Configure anti-cheat randomization:
+     - Enable "Shuffle Question Order" so each candidate sees questions in a different sequence.
+     - Enable "Shuffle Option Choices" so multiple-choice options are randomized per student.
+3. Switch to the **Questions** tab:
+   - Click "Add Question" to insert a new question card.
+   - Choose the format: Multiple Choice, True/False, or Short Answer.
+   - Enter the question prompt using the rich text editor.
+   - For Multiple Choice, type option choices, click the radio button next to the correct answer, and assign the point value.
+   - Click "Done" on the question card to collapse it into a preview item.
+4. Click "Save Assessment" to persist the paper. The assessment syncs directly to the Central Server.
 
-### Managing students and generating student IDs
+### 2.3. Managing Students and Access Codes
 
 1. Select "Students" from the navigation sidebar.
-2. Select "Add Student".
-3. In the single-stage creation modal:
-   - Enter the student full name.
-   - A unique 6-character alphanumeric ID is generated automatically. You can select "Generate" to create a new code or type a custom 6-character code.
-   - Toggle the education level: Primary, Junior Secondary, or Senior Secondary.
-   - Toggle the student's class group.
-   - For Senior Secondary, toggle the department stream (Science, Arts, or Commercial).
-4. Select "Create Student" to save the candidate account.
-5. Use the copy button next to any student ID in the list to distribute the code to the candidate.
-6. Alternatively, select "Generate Codes" to assign IDs in batch to all students in a class.
+2. To add a candidate individually:
+   - Click "Add Student".
+   - Enter the candidate's full name, educational level, class cohort, and department.
+   - A unique 6-character alphanumeric code is generated automatically. You can accept it, click "Generate" for another, or type a custom 6-character code.
+   - Click "Create Student" to save.
+3. To generate codes in batch for an entire class:
+   - Click "Generate Codes" to assign codes to all registered students currently lacking access codes.
+   - Copy or print the code list to distribute to students on examination day.
 
-### Live monitoring and marking student answers
+### 2.4. Live Monitoring and Marking Submissions
 
-1. Select "Mark Student Answers" from the navigation sidebar.
-2. The marking queue displays all active and completed tests:
-   - Active students appear with an "In Progress" badge and live infraction warnings indicating app switches.
-   - Submitted tests show percentage scores and status badges ("Needs Marking" or "Marked").
-3. Select "Mark" on any completed submission to open the review interface:
-   - Multiple-choice questions are scored automatically by the system.
-   - Short-answer questions display the student's response alongside the question prompt and point weight.
-   - Enter awarded marks and select "Save Marking" to finalize the score.
+1. Click "Mark Student Answers" in the navigation sidebar.
+2. **Live Queue**:
+   - Displays all students currently taking assessments in real time.
+   - Shows elapsed time and progress through the test.
+   - If an examinee switches windows (Alt+Tab or minimizes the kiosk), an alert badge displays the number of recorded window blur infractions.
+3. **Marking Queue**:
+   - Displays submitted papers ready for scoring.
+   - Objective questions are marked automatically by the server.
+   - For theory or short-answer questions, review the student's text, assign points, and type optional feedback remarks.
+   - Click "Save Grade" to finalize the score.
 
-### Synchronizing data with the central server
+### 2.5. Offline Package Management (.qzn)
 
-The Manager application keeps data current through multiple sync mechanisms:
-- **Automatic polling**: The app checks the server every 3 seconds for new submissions and active sessions.
-- **Window focus sync**: Clicking into the Manager window triggers an instant sync.
-- **Manual refresh**: Click "Sync Data" in the bottom sidebar or press `F5` / `Ctrl+R` on your keyboard at any time.
+#### Exporting Packages
+1. In the assessment list, locate the test you wish to export.
+2. Click "Export Package (.qzn)".
+3. The application downloads an encrypted archive containing the complete test definition and media. Save this file to a USB flash drive for distribution to air-gapped classrooms.
 
-### Optional offline package export (.qzn)
-
-When conducting exams in rooms without a local network or Wi-Fi router:
-1. Select "Compile Assessments" from the navigation menu.
-2. Choose the assessments to bundle into the package.
-3. Set examination date and time windows for each paper.
-4. Select "Export .qzn Package" and save the file to a USB flash drive to copy onto student workstations.
+#### Importing Packages
+1. On the dashboard or assessment list, click "Load Package (.qzn)".
+2. Select a `.qzn` or `.zip` file from your computer or flash drive.
+3. The loader extracts the assessment, marks it active and published, and saves it to the Central Server database.
 
 ---
 
-## Candidate and student manual (Student portal)
+## 3. Student Examination Manual (Student Station Application)
 
-The Student portal provides a clean interface for entering your student ID, selecting papers, and completing assessments.
+The Student Station application is the candidate test-taking kiosk. It can run as an installed desktop app or inside a web browser.
 
-### Server connection and auto-discovery
+### 3.1. Connecting to the Examination Server
 
-Candidate computers connected to the same local area network as the Server will automatically discover the server. To review or change the connection:
-1. From the start screen, select "Settings".
-2. Enter supervisor credentials if prompted.
-3. Review the "Network Server Connection" card. If an active server is detected, select "Connect" to link directly to the teacher's station.
+1. Open the Student Station application.
+2. The application listens for UDP discovery beacons and connects to the active server automatically.
+3. If the station does not detect a server, click the Settings gear icon in the corner, enter the server address provided by your proctor (for example, `http://192.168.1.150:4000`), and click "Test Connection".
 
-### Taking an assessment
+### 3.2. Logging In with Your Student ID Code
 
-1. Open the Quizeen Student application.
-2. Select "Enter Student ID".
-3. Enter your 6-character Student ID code in the OTP-style input boxes. The code is case-insensitive and can be typed or pasted.
-4. When verified, your name, class, and department stream are confirmed. Select "Start Assessments".
-5. Review the list of available assessments filtered for your class and department stream. You can select "Refresh" if your teacher just published a new test.
-6. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
-7. Read each question carefully. Use the question grid buttons to jump between questions.
-8. Open the built-in calculator from the side menu if you need to perform calculations.
-9. Focus and anti-cheat protection: Do not switch applications, open new tabs, or minimize the window. Every app switch is recorded and sent to the teacher station in real time.
-10. When finished, select "Submit Assessment" and confirm your submission.
+Candidates log in using their assigned 6-character access code:
+1. Click "Start Exam" or "Enter Exam Room" on the start screen.
+2. In the Candidate Exam Login dialog, enter the 6-character Student ID code provided by your teacher (for example, `K7M9P2`).
+3. The station automatically checks your code against the Central Server and displays your verified name, class group, and department.
+4. Click "Start Assessments" to open your personalized assessment catalog.
+5. If you need to switch candidate accounts or leave the station, click "Leave Exam Room" in the top header.
 
-### Leaving the exam room
+### 3.3. Choosing an Assessment
 
-If you need to change your name, class, or department, select the "Leave Exam Room" button in the upper corner of the catalog view. This clears the current student session and returns you to the initial start screen.
+1. The catalog displays tests scheduled for your class cohort.
+2. Locate the paper you are writing.
+3. If the paper requires an invigilator PIN, ask your proctor to enter the 4-digit code.
+4. Click "Start Assessment" to launch the exam runner.
 
----
+### 3.4. Taking the Examination
 
-## Frequently asked questions and troubleshooting
+1. **Fullscreen Mode**: The examination opens in fullscreen mode. Keep this window open and focused throughout the exam.
+2. **Countdown Timer**: A timer at the top counts down your remaining time. When the timer reaches 0:00, your answers submit automatically.
+3. **Question Navigation**:
+   - Click "Next" and "Previous" to step through questions.
+   - Use the question index grid to jump directly to any question.
+   - Answered questions appear highlighted in the grid.
+4. **Scientific Calculator**:
+   - For science and mathematics tests, click the Calculator button to open an on-screen scientific calculator.
+5. **Anti-Cheat Rules**:
+   - Do not press Alt+Tab, do not press the Windows key, and do not click outside the exam window.
+   - Leaving the exam window triggers an on-screen warning and records an infraction on your test record. Proctors can see these infractions in real time.
+6. **Local Answer Preservation**:
+   - Your answers save automatically on your computer. If the network disconnects temporarily during the test, continue answering questions normally.
 
-### What happens if a computer shuts down or loses power during a test?
+### 3.5. Submitting Your Assessment
 
-The student application saves your answers locally as you answer each question. When you reopen the application on the same computer, your answers and remaining time are restored.
-
-### Why is an assessment not visible in the student catalog?
-
-Check the following settings in the Manager app:
-1. Ensure the assessment is set to Active under Availability.
-2. Check that the current date and time fall within the scheduled start and deadline times.
-3. Verify that the student registered with the exact class group and education level targeted by the assessment.
-
-### Can a student retake an assessment that has already been submitted?
-
-No. Once an assessment has been submitted, its status updates to "Already Submitted" and the start button is disabled to prevent repeated attempts.
+1. Once you have answered all questions, click "Submit Assessment".
+2. Review the confirmation dialog showing your total answered questions.
+3. Click "Confirm Submit".
+4. If results are published immediately, your final score and percentage appear on screen. Otherwise, a confirmation message indicates that your submission was received and is awaiting teacher marking.
+5. Click "Return to Catalog" to finish. Completed assessments display an "Already Submitted" badge and cannot be reopened.

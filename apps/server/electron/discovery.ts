@@ -22,24 +22,29 @@ export class ServerBeacon {
 
   start(httpPort: number) {
     this.stop();
-    this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
-    this.socket.bind(() => {
-      this.socket?.setBroadcast(true);
-    });
-
-    this.timer = setInterval(() => {
-      if (!this.socket) return;
-      const ips = getLocalIpAddresses();
-      const payload = JSON.stringify({
-        service: 'quizeen-cbt-server',
-        ips,
-        primaryIp: ips[0],
-        port: httpPort,
-        timestamp: Date.now(),
+    try {
+      this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
+      this.socket.on('error', () => { this.stop(); });
+      this.socket.bind(() => {
+        try { this.socket?.setBroadcast(true); } catch {}
       });
-      const message = Buffer.from(payload);
-      this.socket.send(message, 0, message.length, DISCOVERY_PORT, '255.255.255.255');
-    }, 2000);
+
+      this.timer = setInterval(() => {
+        if (!this.socket) return;
+        const ips = getLocalIpAddresses();
+        const payload = JSON.stringify({
+          service: 'quizeen-cbt-server',
+          ips,
+          primaryIp: ips[0],
+          port: httpPort,
+          timestamp: Date.now(),
+        });
+        const message = Buffer.from(payload);
+        try {
+          this.socket.send(message, 0, message.length, DISCOVERY_PORT, '255.255.255.255', () => {});
+        } catch {}
+      }, 2000);
+    } catch {}
   }
 
   stop() {

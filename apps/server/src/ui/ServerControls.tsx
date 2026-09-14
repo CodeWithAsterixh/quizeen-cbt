@@ -5,9 +5,11 @@ import { ServerStatus } from './types';
 interface Props {
   status: ServerStatus;
   onToggle: (port: number) => void;
+  errorMessage?: string | null;
+  infoMessage?: string | null;
 }
 
-export const ServerControls: React.FC<Props> = ({ status, onToggle }) => {
+export const ServerControls: React.FC<Props> = ({ status, onToggle, errorMessage, infoMessage }) => {
   const [port, setPort] = useState(status.port || 4000);
   const [copiedIp, setCopiedIp] = useState<string | null>(null);
   const [autoStart, setAutoStart] = useState(false);
@@ -16,13 +18,18 @@ export const ServerControls: React.FC<Props> = ({ status, onToggle }) => {
     setAutoStart(localStorage.getItem('cbt_server_autostart') === 'true');
   }, []);
 
+  useEffect(() => {
+    if (status.port) setPort(status.port);
+  }, [status.port]);
+
   const handleAutoStartChange = (checked: boolean) => {
     setAutoStart(checked);
     localStorage.setItem('cbt_server_autostart', checked ? 'true' : 'false');
   };
 
   const handleCopy = (ip: string) => {
-    navigator.clipboard.writeText(`http://${ip}:${status.port}`);
+    const activePort = status.running ? status.port : port;
+    navigator.clipboard.writeText(`http://${ip}:${activePort}`);
     setCopiedIp(ip);
     setTimeout(() => setCopiedIp(null), 2000);
   };
@@ -30,6 +37,16 @@ export const ServerControls: React.FC<Props> = ({ status, onToggle }) => {
   return (
     <div className="server-card">
       <div className="server-card-label">Server Control & Network</div>
+      {errorMessage && (
+        <div style={{ background: '#fee2e2', color: '#dc2626', padding: '6px 10px', borderRadius: 4, fontSize: '0.8rem', marginBottom: 10 }}>
+          {errorMessage}
+        </div>
+      )}
+      {infoMessage && (
+        <div style={{ background: '#eff6ff', color: '#1d4ed8', padding: '6px 10px', borderRadius: 4, fontSize: '0.8rem', marginBottom: 10, border: '1px solid #bfdbfe' }}>
+          {infoMessage}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
         <input
           type="number"
@@ -52,7 +69,7 @@ export const ServerControls: React.FC<Props> = ({ status, onToggle }) => {
       <div className="ip-list">
         {(status.ips || []).map((ip) => (
           <div key={ip} className="ip-pill">
-            <span>http://{ip}:{status.port}</span>
+            <span>http://{ip}:{status.running ? status.port : port}</span>
             <button className="btn-copy" onClick={() => handleCopy(ip)}>
               {copiedIp === ip ? <Check size={12} /> : <Copy size={12} />}
               {copiedIp === ip ? ' Copied' : ' Copy'}

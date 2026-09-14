@@ -16,51 +16,63 @@ export const App: React.FC = () => {
   const [status, setStatus] = useState<ServerStatus>(defaultStatus);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const api = (window as any).serverApi;
     if (!api) return;
     if (localStorage.getItem('cbt_server_autostart') === 'true') api.startServer(4000);
 
+    api.detectExisting?.(4000).then((res: any) => {
+      if (res?.active) setInfoMessage(`Active Queez Server detected at ${res.url}.`);
+    }).catch(() => {});
+
     const poll = async () => {
       try {
         const s = await api.getStatus();
-        if (s) setStatus(s);
+        if (s) {
+          setStatus(s);
+          if (s.running) setErrorMessage(null);
+        }
       } catch {}
     };
     poll();
     const interval = setInterval(poll, 1000);
-
-    const cleanupLogs = api.onRequestLogged?.((entry: LogEntry) => {
+    const cleanup = api.onRequestLogged?.((entry: LogEntry) => {
       setLogs((prev) => [...prev.slice(-499), entry]);
     });
-
-    return () => { clearInterval(interval); cleanupLogs?.(); };
+    return () => { clearInterval(interval); cleanup?.(); };
   }, []);
 
   const handleToggle = async (port: number) => {
     const api = (window as any).serverApi;
     if (!api) return;
-    if (status.running) await api.stopServer();
-    else await api.startServer(port);
-    const s = await api.getStatus();
-    if (s) setStatus(s);
+    setErrorMessage(null);
+    setInfoMessage(null);
+    try {
+      if (status.running) await api.stopServer();
+      else {
+        const res = await api.startServer(port);
+        if (res && !res.success && res.error) setErrorMessage(res.error);
+        if (res?.fallbackFrom) setInfoMessage(res.message || `Started on fallback port ${res.port}.`);
+      }
+      const s = await api.getStatus();
+      if (s) setStatus(s);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to communicate with server');
+    }
   };
 
-  const handleCloseAttempt = () => {
-    if (status.running) setIsWarningOpen(true);
-    else (window as any).electronApi?.closeWindow();
-  };
-
-  const handleConfirmExit = async () => {
-    const api = (window as any).serverApi;
-    if (api) await api.stopServer();
+  const handleClose = () => status.running ? setIsWarningOpen(true) : (window as any).electronApi?.closeWindow();
+  const handleExit = async () => {
+    await (window as any).serverApi?.stopServer();
     (window as any).electronApi?.closeWindow();
   };
 
   return (
     <div className="server-window">
-      <TitleBar title="Queez" badge="CBT Server" onClose={handleCloseAttempt} />
+      <TitleBar title="Queez" badge="CBT Server" onClose={handleClose} />
       <div className="server-body">
         <ServerSidebar
           currentTab={currentTab}
@@ -70,16 +82,12 @@ export const App: React.FC = () => {
           port={status?.port || 4000}
         />
         <main className="server-content">
-          {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} />}
+          {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
           {currentTab === 'graph' && <ServerVisualGraphTab logs={logs || []} />}
           {currentTab === 'requests' && <ServerLiveRequestsTab logs={logs || []} onClear={() => setLogs([])} />}
         </main>
       </div>
-      <CloseWarningModal
-        isOpen={isWarningOpen}
-        onClose={() => setIsWarningOpen(false)}
-        onConfirm={handleConfirmExit}
-      />
+      <CloseWarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} onConfirm={handleExit} />
     </div>
   );
 };

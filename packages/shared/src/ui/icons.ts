@@ -63,6 +63,7 @@ export {
   Trophy,
   Trash,
   Trash as TrashIcon,
+  UploadSimple,
   UserCircle,
   UserPlus,
   Users,
