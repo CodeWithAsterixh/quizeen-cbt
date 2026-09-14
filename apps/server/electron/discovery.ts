@@ -34,6 +34,7 @@ export class ServerBeacon {
         const ips = getLocalIpAddresses();
         const payload = JSON.stringify({
           service: 'quizeen-cbt-server',
+          serverName: os.hostname(),
           ips,
           primaryIp: ips[0],
           port: httpPort,
@@ -42,6 +43,9 @@ export class ServerBeacon {
         const message = Buffer.from(payload);
         try {
           this.socket.send(message, 0, message.length, DISCOVERY_PORT, '255.255.255.255', () => {});
+        } catch {}
+        try {
+          this.socket.send(message, 0, message.length, DISCOVERY_PORT, '127.0.0.1', () => {});
         } catch {}
       }, 2000);
     } catch {}

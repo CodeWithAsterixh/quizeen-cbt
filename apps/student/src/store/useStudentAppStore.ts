@@ -21,9 +21,11 @@ export function useStudentAppStore() {
     const interval = setInterval(refresh, 4000);
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
+    window.addEventListener('cbt:server-changed', refresh);
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('cbt:server-changed', refresh);
     };
   }, []);
 

@@ -11,17 +11,26 @@ function getStoredUrl(): string {
 let activeUrl = getStoredUrl();
 let lastCheckTime = 0;
 let lastCheckResult: { ok: boolean; latencyMs: number } | null = null;
+const urlListeners = new Set<(url: string) => void>();
 
 export const serverConfig = {
   getUrl: (): string => activeUrl,
   getApiBase: (): string => `${activeUrl}/api`,
   setUrl: (url: string): void => {
-    activeUrl = url.replace(/\/+$/, '');
+    const clean = url.trim().replace(/\/+$/, '');
+    if (!clean) return;
+    activeUrl = clean;
     lastCheckTime = 0;
     lastCheckResult = null;
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem('cbt_server_url', activeUrl);
+      window.dispatchEvent(new CustomEvent('cbt:server-changed', { detail: activeUrl }));
     }
+    urlListeners.forEach((fn) => { try { fn(activeUrl); } catch {} });
+  },
+  onUrlChange: (callback: (url: string) => void): (() => void) => {
+    urlListeners.add(callback);
+    return () => { urlListeners.delete(callback); };
   },
   testConnection: async (url?: string, forceRefresh = false): Promise<{ ok: boolean; latencyMs: number }> => {
     const now = Date.now();

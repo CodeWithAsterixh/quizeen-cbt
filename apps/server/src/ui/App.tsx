@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TitleBar } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
+import { ServerDevicesTab } from './ServerDevicesTab';
 import { ServerVisualGraphTab } from './ServerVisualGraphTab';
 import { ServerLiveRequestsTab } from './ServerLiveRequestsTab';
 import { CloseWarningModal } from './CloseWarningModal';
@@ -83,6 +84,7 @@ export const App: React.FC = () => {
         />
         <main className="server-content">
           {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
+          {currentTab === 'devices' && <ServerDevicesTab />}
           {currentTab === 'graph' && <ServerVisualGraphTab logs={logs || []} />}
           {currentTab === 'requests' && <ServerLiveRequestsTab logs={logs || []} onClear={() => setLogs([])} />}
         </main>

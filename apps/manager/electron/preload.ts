@@ -7,7 +7,7 @@ export interface ElectronApi {
   maximizeWindow: () => Promise<boolean>;
   closeWindow: () => Promise<void>;
   isMaximized: () => Promise<boolean>;
-  onServerDiscovered: (callback: (data: { ip: string; port: number }) => void) => () => void;
+  onServerDiscovered: (callback: (data: { ip: string; port: number; serverName?: string }) => void) => () => void;
 }
 
 const api: ElectronApi = {
@@ -17,7 +17,7 @@ const api: ElectronApi = {
   maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
   closeWindow: () => ipcRenderer.invoke('window:close'),
   isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
-  onServerDiscovered: (callback: (data: { ip: string; port: number }) => void) => {
+  onServerDiscovered: (callback: (data: { ip: string; port: number; serverName?: string }) => void) => {
     const handler = (_e: any, data: any) => callback(data);
     ipcRenderer.on('server:discovered', handler);
     return () => { ipcRenderer.removeListener('server:discovered', handler); };

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Broadcast, CheckCircle, XCircle } from '@cbt/shared';
-import { Modal, Button, Badge, apiClient } from '@cbt/shared';
+import React, { useState } from 'react';
+import { Broadcast, CheckCircle, XCircle, Modal, Button, Badge, apiClient, useDiscoveredServers } from '@cbt/shared';
 
 interface Props {
   isOpen: boolean;
@@ -8,61 +7,68 @@ interface Props {
 }
 
 export const ServerSettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const [url, setUrl] = useState(apiClient.getServerUrl());
-  const [discovered, setDiscovered] = useState<{ ip: string; port: number } | null>(null);
+  const { servers, activeUrl, connectTo } = useDiscoveredServers();
+  const [manualUrl, setManualUrl] = useState(activeUrl);
   const [testResult, setTestResult] = useState<{ ok: boolean; latencyMs: number } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
-  useEffect(() => {
-    const electron = (window as any).electronApi;
-    if (electron?.onServerDiscovered) {
-      return electron.onServerDiscovered((data: { ip: string; port: number }) => {
-        setDiscovered(data);
-      });
-    }
-  }, []);
-
-  const handleTest = async () => {
+  const handleTest = async (target?: string) => {
     setIsTesting(true);
-    const res = await apiClient.testConnection(url);
+    const res = await apiClient.testConnection(target || manualUrl);
     setTestResult(res);
     setIsTesting(false);
   };
 
-  const handleApply = (newUrl: string) => {
-    setUrl(newUrl);
-    apiClient.setServerUrl(newUrl);
-    setTestResult(null);
+  const handleConnect = (url: string) => {
+    setManualUrl(url);
+    connectTo(url);
+    handleTest(url);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Central Server & Network Connection">
       <div style={{ padding: '0.5rem 0' }}>
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>
-          Specify the central CBT server endpoint for synchronizing assessments and collecting candidate scores.
+        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: '0 0 10px' }}>
+          Active Server: <strong style={{ color: 'var(--color-text)' }}>{activeUrl}</strong>
         </p>
 
-        {discovered && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ecfdf5', padding: '8px 12px', borderRadius: 6, marginBottom: 14 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#047857', fontSize: '0.85rem' }}>
-              <Broadcast size={16} /> Discovered server: http://{discovered.ip}:{discovered.port}
-            </span>
-            <Button size="sm" variant="primary" onClick={() => handleApply(`http://${discovered.ip}:${discovered.port}`)}>
-              Use Discovered
-            </Button>
+        {servers.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>
+              Discovered Servers ({servers.length})
+            </div>
+            {servers.map((s) => {
+              const isConnected = s.url === activeUrl;
+              return (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isConnected ? '#ecfdf5' : 'var(--color-surface-2)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 600, color: isConnected ? '#047857' : 'var(--color-text)' }}>
+                      <Broadcast size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />{s.serverName}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', fontFamily: 'monospace' }}>{s.url}</span>
+                  </div>
+                  {isConnected ? (
+                    <Badge color="emerald">Active</Badge>
+                  ) : (
+                    <Button size="sm" variant="primary" onClick={() => handleConnect(s.url)}>Connect</Button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           <input
             type="text"
-            value={url}
-            onChange={(e) => handleApply(e.target.value)}
+            value={manualUrl}
+            onChange={(e) => setManualUrl(e.target.value)}
             placeholder="http://localhost:4000"
             style={{ flex: 1, padding: '8px 10px', borderRadius: 4, border: '1px solid var(--color-border)', fontSize: '0.875rem' }}
           />
-          <Button variant="secondary" onClick={handleTest} disabled={isTesting}>
-            {isTesting ? 'Testing...' : 'Test Connection'}
+          <Button variant="primary" onClick={() => handleConnect(manualUrl)}>Save</Button>
+          <Button variant="secondary" onClick={() => handleTest()} disabled={isTesting}>
+            {isTesting ? 'Testing...' : 'Test'}
           </Button>
         </div>
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Assessment, StudentSession, Submission, apiClient } from '@cbt/shared';
+import React, { useState } from 'react';
+import { Assessment, StudentSession, Submission } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { AppModals } from './components/layout/AppModals';
 import { StartScreen } from './features/start/StartScreen';
@@ -7,8 +7,10 @@ import { AssessmentCatalog } from './features/catalog/AssessmentCatalog';
 import { AssessmentRunner } from './features/runner/AssessmentRunner';
 import { AssessmentCompletedScreen } from './features/completion/AssessmentCompletedScreen';
 import { useStudentAppStore } from './store/useStudentAppStore';
-
 import { useStudentSync } from './features/profile/useStudentSync';
+import { useDeviceHeartbeat } from './features/device/useDeviceHeartbeat';
+import { useStationUpdater } from './features/device/useStationUpdater';
+import { UpdateProgressModal } from './features/device/UpdateProgressModal';
 
 export const App: React.FC = () => {
   const { assessments, submissions, refresh, saveSubmission, importAssessments, clearAllAssessments } = useStudentAppStore();
@@ -22,6 +24,20 @@ export const App: React.FC = () => {
   const [isPinOpen, setPinOpen] = useState(false);
 
   const { isRefreshing, handleRefresh } = useStudentSync(session, setSession, refresh);
+  const isExamActive = view === 'running';
+  const updater = useStationUpdater(isExamActive);
+
+  useDeviceHeartbeat({
+    status: isExamActive ? 'in_exam' : updater.phase === 'downloading' || updater.phase === 'installing' ? 'updating' : 'online',
+    currentExam: activeAssessment ? {
+      examId: activeAssessment.id,
+      examTitle: activeAssessment.title,
+      studentName: session ? session.studentName : 'Candidate',
+    } : null,
+    updateStatus: updater.phase,
+    updateProgress: updater.progress,
+    onPushUpdateTriggered: () => { if (!isExamActive) updater.startDownload(); },
+  });
 
   const handleExit = () => { setSession(null); setLatestSub(null); setView('start'); };
   const handleSelect = (a: Assessment) => {
@@ -66,6 +82,12 @@ export const App: React.FC = () => {
             setActiveAssessment(pendingPinAssessment); setPendingPinAssessment(null); setPinOpen(false); setView('running');
           }
         }}
+      />
+
+      <UpdateProgressModal
+        isOpen={updater.showModal} phase={updater.phase} progress={updater.progress}
+        latestVersion={updater.latestVersion} error={updater.error}
+        onStart={updater.startDownload} onDismiss={updater.dismissModal}
       />
     </div>
   );
