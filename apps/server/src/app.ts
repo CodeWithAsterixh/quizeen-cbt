@@ -9,6 +9,7 @@ import { analyticsRouter } from './features/analytics/analytics.routes.js';
 import { studentsRouter } from './features/students/students.routes.js';
 import { deviceRouter } from './features/devices/device.routes.js';
 import { updateRouter } from './features/updates/update.routes.js';
+import { licenseRouter } from './features/license/license.routes.js';
 
 export interface RequestLogEntry {
   id: string;
@@ -66,6 +67,7 @@ export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express
   app.use('/api/students', studentsRouter);
   app.use('/api/devices', deviceRouter);
   app.use('/api/updates', updateRouter);
+  app.use('/api/license', licenseRouter);
 
   return app;
 };

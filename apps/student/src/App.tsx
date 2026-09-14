@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assessment, StudentSession, Submission } from '@cbt/shared';
+import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { AppModals } from './components/layout/AppModals';
 import { StartScreen } from './features/start/StartScreen';
@@ -23,6 +23,7 @@ export const App: React.FC = () => {
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isPinOpen, setPinOpen] = useState(false);
 
+  const { licenseState, isLocked, refreshLicense } = useAppLicense();
   const { isRefreshing, handleRefresh } = useStudentSync(session, setSession, refresh);
   const isExamActive = view === 'running';
   const updater = useStationUpdater(isExamActive);
@@ -30,12 +31,10 @@ export const App: React.FC = () => {
   useDeviceHeartbeat({
     status: isExamActive ? 'in_exam' : updater.phase === 'downloading' || updater.phase === 'installing' ? 'updating' : 'online',
     currentExam: activeAssessment ? {
-      examId: activeAssessment.id,
-      examTitle: activeAssessment.title,
+      examId: activeAssessment.id, examTitle: activeAssessment.title,
       studentName: session ? session.studentName : 'Candidate',
     } : null,
-    updateStatus: updater.phase,
-    updateProgress: updater.progress,
+    updateStatus: updater.phase, updateProgress: updater.progress,
     onPushUpdateTriggered: () => { if (!isExamActive) updater.startDownload(); },
   });
 
@@ -47,6 +46,10 @@ export const App: React.FC = () => {
   const handleSubmit = async (sub: Submission) => {
     await saveSubmission(sub); setLatestSub(sub); setActiveAssessment(null); setView('completed');
   };
+
+  if (isLocked) {
+    return <LicenseLockoutScreen licenseState={licenseState} onRetry={refreshLicense} />;
+  }
 
   return (
     <div className="app-shell">

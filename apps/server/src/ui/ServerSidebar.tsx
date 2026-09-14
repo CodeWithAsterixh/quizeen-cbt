@@ -1,7 +1,7 @@
 import React from 'react';
-import { Badge, HardDrives, ChartBar, Pulse, Broadcast } from '@cbt/shared';
+import { Badge, HardDrives, ChartBar, Pulse, Broadcast, LockKey } from '@cbt/shared';
 
-export type ServerTab = 'overview' | 'devices' | 'graph' | 'requests';
+export type ServerTab = 'overview' | 'devices' | 'license' | 'graph' | 'requests';
 
 interface Props {
   currentTab: ServerTab;
@@ -17,6 +17,7 @@ export const ServerSidebar: React.FC<Props> = ({
   const items = [
     { id: 'overview' as ServerTab, label: 'Overview', icon: HardDrives },
     { id: 'devices' as ServerTab, label: 'Devices', icon: Broadcast },
+    { id: 'license' as ServerTab, label: 'License', icon: LockKey },
     { id: 'graph' as ServerTab, label: 'Visual Graph', icon: ChartBar },
     {
       id: 'requests' as ServerTab,

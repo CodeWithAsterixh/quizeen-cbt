@@ -3,6 +3,7 @@ import { TitleBar } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
+import { ServerLicenseTab } from './ServerLicenseTab';
 import { ServerVisualGraphTab } from './ServerVisualGraphTab';
 import { ServerLiveRequestsTab } from './ServerLiveRequestsTab';
 import { CloseWarningModal } from './CloseWarningModal';
@@ -85,6 +86,7 @@ export const App: React.FC = () => {
         <main className="server-content">
           {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
           {currentTab === 'devices' && <ServerDevicesTab />}
+          {currentTab === 'license' && <ServerLicenseTab port={status?.port || 4000} />}
           {currentTab === 'graph' && <ServerVisualGraphTab logs={logs || []} />}
           {currentTab === 'requests' && <ServerLiveRequestsTab logs={logs || []} onClear={() => setLogs([])} />}
         </main>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Assessment } from '@cbt/shared';
+import { Assessment, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { Sidebar, ManagerTab } from './components/layout/Sidebar';
 import { ManagerModals } from './components/layout/ManagerModals';
@@ -20,9 +20,11 @@ export const App: React.FC = () => {
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLoaderOpen, setIsLoaderOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const { licenseState, isLocked, refreshLicense } = useAppLicense();
   const isAuthoring = isEditorOpen || isStudentModalOpen;
   const updater = useManagerUpdater(isAuthoring);
 
@@ -45,6 +47,10 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [refresh, refreshStudents]);
 
+  if (isLocked) {
+    return <LicenseLockoutScreen licenseState={licenseState} onRetry={refreshLicense} />;
+  }
+
   return (
     <div className="app-shell">
       <TitleBar title="Queez" badge="Management" />
@@ -57,6 +63,7 @@ export const App: React.FC = () => {
         <Sidebar
           currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }}
           onOpenServerSettings={() => setIsServerModalOpen(true)}
+          onOpenThemeSettings={() => setIsThemeModalOpen(true)}
           pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length}
           onRefresh={handleRefresh} isSyncing={isSyncing}
         />
@@ -89,6 +96,8 @@ export const App: React.FC = () => {
         isStudentModalOpen={isStudentModalOpen} onCloseStudentModal={() => setIsStudentModalOpen(false)}
         onSaveStudent={async (s) => { const r = await saveStudent(s); setIsStudentModalOpen(false); notify(r.message); }}
         isServerModalOpen={isServerModalOpen} onCloseServerModal={() => setIsServerModalOpen(false)}
+        isThemeModalOpen={isThemeModalOpen} onCloseThemeModal={() => setIsThemeModalOpen(false)}
+        currentTheme={licenseState?.license?.theme} schoolName={licenseState?.license?.branding?.schoolName}
         isLoaderOpen={isLoaderOpen} onCloseLoader={() => setIsLoaderOpen(false)}
         onImportQzn={async (items) => { for (const item of items) await saveAssessment(item); await handleRefresh(); notify(`Imported ${items.length} assessment(s) successfully.`); }}
       />

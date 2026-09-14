@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear, ArrowsClockwise,
+  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear, ArrowsClockwise, MagicWand,
 } from '@cbt/shared';
 import { Badge, Button } from '@cbt/shared';
 
@@ -10,6 +10,7 @@ interface SidebarProps {
   currentTab: ManagerTab;
   onSelectTab: (tab: ManagerTab) => void;
   onOpenServerSettings: () => void;
+  onOpenThemeSettings?: () => void;
   pendingGradingCount: number;
   onRefresh?: () => void;
   isSyncing?: boolean;
@@ -19,6 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
   onOpenServerSettings,
+  onOpenThemeSettings,
   pendingGradingCount,
   onRefresh,
   isSyncing = false,
@@ -76,6 +78,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Gear size={18} />
           <span>Server Connection</span>
         </Button>
+        {onOpenThemeSettings && (
+          <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenThemeSettings}>
+            <MagicWand size={18} />
+            <span>Theme Preview</span>
+          </Button>
+        )}
       </div>
     </aside>
   );

@@ -9,7 +9,7 @@ import { runLegacyMigration } from './database-migration.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function resolveDataDir(): string {
+export function resolveDataDir(): string {
   if (process.env.QUEEZ_DATA_DIR && fs.existsSync(process.env.QUEEZ_DATA_DIR)) {
     return process.env.QUEEZ_DATA_DIR;
   }
