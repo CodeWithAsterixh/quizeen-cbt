@@ -1,13 +1,16 @@
 {
   "name": "@cbt/manager",
-  "version": "1.0.0",
+  "version": "1.2.0",
+  "description": "Quizeen CBT Manager desktop application",
+  "author": "Quizeen",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "electron:dev": "vite",
-    "electron:build": "tsc && vite build && electron-builder"
+    "electron:build": "tsc && vite build && electron-builder",
+    "electron:pack": "tsc && vite build && electron-builder --dir"
   },
   "dependencies": {
     "@cbt/shared": "*",
@@ -21,7 +24,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "electron": "^44.3.0",
+    "electron": "44.3.0",
     "electron-builder": "^26.15.3",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",

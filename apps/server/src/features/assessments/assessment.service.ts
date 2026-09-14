@@ -1,4 +1,4 @@
-import { Assessment, Exam } from '@cbt/shared';
+import { Assessment, Exam, getLocalIsoTimestamp } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 import { ExamQueryFilter } from '../../core/types/contracts.js';
 
@@ -22,22 +22,25 @@ export class AssessmentService {
     return db.getExamById(id);
   }
 
-  public createAssessment(data: Omit<Assessment, 'id' | 'createdAt'>): Assessment {
-    const totalPoints = data.questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
+  public createAssessment(data: Omit<Assessment, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): Assessment {
+    const questions = data.questions || [];
+    const totalPoints = questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
     const newAssessment: Assessment = {
       ...data,
-      id: `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      id: data.id || `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       totalPoints,
-      createdAt: new Date().toISOString(),
+      createdAt: data.createdAt || getLocalIsoTimestamp(),
       isPublished: true,
-    };
+    } as Assessment;
     db.saveExam(newAssessment);
     return newAssessment;
   }
 
-  public updateAssessment(id: string, updates: Partial<Assessment>): Assessment | null {
+  public updateAssessment(id: string, updates: Partial<Assessment>): Assessment {
     const existing = db.getExamById(id);
-    if (!existing) return null;
+    if (!existing) {
+      return this.createAssessment({ ...updates, id } as any);
+    }
     const questions = updates.questions ?? existing.questions;
     const totalPoints = questions.reduce((sum: number, q: Assessment['questions'][0]) => sum + (q.points || 0), 0);
     const updated: Assessment = { ...existing, ...updates, id, questions, totalPoints };
@@ -57,7 +60,7 @@ export class AssessmentService {
 
   public listExams(filters: ExamQueryFilter = {}): Exam[] { return this.listAssessments(filters); }
   public getExam(id: string): Exam | undefined { return this.getAssessment(id); }
-  public createExam(data: Omit<Exam, 'id' | 'createdAt'>): Exam { return this.createAssessment(data); }
+  public createExam(data: Omit<Exam, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): Exam { return this.createAssessment(data); }
   public updateExam(id: string, updates: Partial<Exam>): Exam | null { return this.updateAssessment(id, updates); }
   public deleteExam(id: string): boolean { return this.deleteAssessment(id); }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, ArrowRight } from '@phosphor-icons/react';
+import { CheckCircle, ArrowRight } from '@cbt/shared';
 import { Submission, Card, Button } from '@cbt/shared';
 import { CompletionReceipt } from './CompletionReceipt';
 

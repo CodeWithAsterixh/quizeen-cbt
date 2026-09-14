@@ -11,7 +11,7 @@ export interface AssessmentAvailabilityInfo {
 }
 
 export function isAssessmentAvailable(assessment: Assessment, now: Date = new Date()): boolean {
-  if (assessment.isAvailable === false) return false;
+  if (assessment.isAvailable === false || assessment.isPublished === false) return false;
   const nowMs = now.getTime();
 
   if (assessment.availableFrom) {
@@ -31,8 +31,8 @@ export function getAssessmentAvailabilityInfo(
   assessment: Assessment,
   now: Date = new Date()
 ): AssessmentAvailabilityInfo {
-  if (assessment.isAvailable === false) {
-    return { isAvailable: false, status: 'unavailable', label: 'Unavailable', badgeColor: 'rose' };
+  if (assessment.isAvailable === false || assessment.isPublished === false) {
+    return { isAvailable: false, status: 'unavailable', label: 'Hidden', badgeColor: 'rose' };
   }
   const nowMs = now.getTime();
 

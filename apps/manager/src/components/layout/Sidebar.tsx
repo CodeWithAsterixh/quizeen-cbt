@@ -1,30 +1,32 @@
 import React from 'react';
 import {
-  Gauge,
-  BookOpen,
-  Archive,
-  ClipboardText,
-  ChartBar,
-  ShieldCheck,
-} from '@phosphor-icons/react';
+  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear, ArrowsClockwise,
+} from '@cbt/shared';
 import { Badge, Button } from '@cbt/shared';
 
-export type ManagerTab = 'dashboard' | 'exams' | 'compiler' | 'grading' | 'analytics';
+export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics';
 
 interface SidebarProps {
   currentTab: ManagerTab;
   onSelectTab: (tab: ManagerTab) => void;
+  onOpenServerSettings: () => void;
   pendingGradingCount: number;
+  onRefresh?: () => void;
+  isSyncing?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
+  onOpenServerSettings,
   pendingGradingCount,
+  onRefresh,
+  isSyncing = false,
 }) => {
   const navItems = [
     { id: 'dashboard' as ManagerTab, label: 'Overview', icon: Gauge },
     { id: 'exams' as ManagerTab, label: 'Assessments', icon: BookOpen },
+    { id: 'students' as ManagerTab, label: 'Students', icon: Users },
     { id: 'compiler' as ManagerTab, label: 'Compile Assessments', icon: Archive },
     {
       id: 'grading' as ManagerTab,
@@ -63,6 +65,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
+      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {onRefresh && (
+          <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onRefresh} disabled={isSyncing}>
+            <ArrowsClockwise size={18} className={isSyncing ? 'cbt-spin' : ''} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+          </Button>
+        )}
+        <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenServerSettings}>
+          <Gear size={18} />
+          <span>Server Connection</span>
+        </Button>
+      </div>
     </aside>
   );
 };

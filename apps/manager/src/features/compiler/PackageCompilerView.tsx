@@ -3,6 +3,8 @@ import { Exam, ExamScheduleConfig, compileExamZip, Card, TextInput } from '@cbt/
 import { CompilerHeader } from './CompilerHeader';
 import { CompilerScheduleRow } from './CompilerScheduleRow';
 
+import { createInitialSchedules, downloadCompiledPackage } from './packageCompilerUtils';
+
 interface PackageCompilerViewProps {
   exams: Exam[];
 }
@@ -10,45 +12,14 @@ interface PackageCompilerViewProps {
 export const PackageCompilerView: React.FC<PackageCompilerViewProps> = ({ exams }) => {
   const [packageName, setPackageName] = useState(`Term_Assessment_${new Date().toISOString().split('T')[0]}`);
   const [selectedIds, setSelectedIds] = useState<string[]>(exams.map((e) => e.id));
-  const [schedules, setSchedules] = useState<Record<string, ExamScheduleConfig>>(() => {
-    const map: Record<string, ExamScheduleConfig> = {};
-    const today = new Date().toISOString().split('T')[0];
-    exams.forEach((e) => {
-      map[e.id] = {
-        examId: e.id,
-        examTitle: e.title,
-        targetClass: e.targetClasses[0] || 'All',
-        department: e.department,
-        scheduledDate: today,
-        startTime: '08:30',
-        endTime: '17:00',
-        unlockPin: e.unlockPin || '',
-      };
-    });
-    return map;
-  });
+  const [schedules, setSchedules] = useState<Record<string, ExamScheduleConfig>>(() => createInitialSchedules(exams));
   const [isCompiling, setIsCompiling] = useState(false);
 
   const handleCompileZip = async () => {
     if (!packageName.trim() || selectedIds.length === 0) return;
     setIsCompiling(true);
     try {
-      const selectedExams = exams.filter((e) => selectedIds.includes(e.id));
-      const activeSchedules = selectedIds.map((id) => schedules[id]);
-      const { blob, filename } = await compileExamZip({
-        packageName,
-        compiledBy: { id: 'mgr', name: 'Chief Invigilator' },
-        exams: selectedExams,
-        schedules: activeSchedules,
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await downloadCompiledPackage(exams, selectedIds, schedules, packageName);
     } catch (err: unknown) {
       alert(`Could not save file: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {

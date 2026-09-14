@@ -1,87 +1,56 @@
 .cbt-btn, .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 150ms ease;
-  white-space: nowrap;
-  font-family: inherit;
-  min-height: 38px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-sm);
+  border: 1px solid transparent; cursor: pointer; transition: all 150ms ease;
+  white-space: nowrap; font-family: inherit; min-height: 38px;
 }
-
-.cbt-btn:disabled, .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.cbt-btn:disabled, .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .cbt-btn-primary, .btn-primary {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-primary-content);
-  font-weight: 600;
+  background-color: var(--color-primary); border-color: var(--color-primary);
+  color: var(--color-primary-content); font-weight: 600;
 }
 .cbt-btn-primary:hover:not(:disabled), .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background-color: var(--color-primary-hover); border-color: var(--color-primary-hover);
 }
 
 .cbt-btn-secondary, .btn-secondary {
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
+  background-color: var(--color-surface); border-color: var(--color-border); color: var(--color-text);
 }
 .cbt-btn-secondary:hover:not(:disabled), .btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-surface-hover);
-  border-color: var(--color-border-dark);
+  background-color: var(--color-surface-hover); border-color: var(--color-border-dark);
 }
 
 .cbt-btn-outline, .btn-outline {
-  background-color: transparent;
-  border-color: var(--color-border);
-  color: var(--color-text-muted);
+  background-color: transparent; border-color: var(--color-border); color: var(--color-text-muted);
 }
 .cbt-btn-outline:hover:not(:disabled), .btn-outline:hover:not(:disabled) {
-  border-color: var(--color-border-dark);
-  color: var(--color-text);
-  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-dark); color: var(--color-text); background-color: var(--color-surface-hover);
 }
 
 .cbt-btn-danger, .btn-danger {
-  background-color: var(--color-danger);
-  border-color: var(--color-danger);
-  color: #ffffff;
+  background-color: var(--color-danger); border-color: var(--color-danger); color: #ffffff;
 }
 .cbt-btn-danger:hover:not(:disabled), .btn-danger:hover:not(:disabled) {
-  background-color: #b91c1c;
-  border-color: #b91c1c;
+  background-color: #b91c1c; border-color: #b91c1c;
 }
 
 .cbt-btn-success, .btn-success {
-  background-color: var(--color-success);
-  border-color: var(--color-success);
-  color: #ffffff;
+  background-color: var(--color-success); border-color: var(--color-success); color: #ffffff;
 }
 .cbt-btn-success:hover:not(:disabled), .btn-success:hover:not(:disabled) {
-  background-color: #467933;
-  border-color: #467933;
+  background-color: #467933; border-color: #467933;
 }
 
 .cbt-btn-ghost, .btn-ghost {
-  background-color: transparent;
-  border-color: transparent;
-  color: var(--color-text-muted);
+  background-color: transparent; border-color: transparent; color: var(--color-text-muted);
 }
 .cbt-btn-ghost:hover:not(:disabled), .btn-ghost:hover:not(:disabled) {
-  background-color: var(--color-surface-hover);
-  color: var(--color-text);
+  background-color: var(--color-surface-hover); color: var(--color-text);
 }
 
 .cbt-btn-sm, .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; min-height: 32px; }
 .cbt-btn-lg, .btn-lg { padding: 0.55rem 1.15rem; font-size: 0.9rem; font-weight: 600; min-height: 42px; }
 .cbt-btn-pill { border-radius: var(--radius-full); }
+@keyframes cbt-spin { to { transform: rotate(360deg); } }
+.cbt-spin { animation: cbt-spin 0.8s linear infinite; }

@@ -1,16 +1,20 @@
 import React from 'react';
-import { SignOut, UserCircle } from '@phosphor-icons/react';
+import { SignOut, UserCircle, ArrowsClockwise } from '@cbt/shared';
 import { StudentSession, DEPARTMENTS, Button } from '@cbt/shared';
 
 interface AssessmentCatalogHeaderProps {
   student: StudentSession;
   onExit: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
   onChangeProfile?: () => void;
 }
 
 export const AssessmentCatalogHeader: React.FC<AssessmentCatalogHeaderProps> = ({
   student,
   onExit,
+  onRefresh,
+  isRefreshing,
 }) => {
   const departmentName = DEPARTMENTS.find((d) => d.id === student.department)?.name;
 
@@ -34,6 +38,20 @@ export const AssessmentCatalogHeader: React.FC<AssessmentCatalogHeaderProps> = (
             </div>
           </div>
         </div>
+
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="md"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            title="Refresh Assessments"
+            icon={<ArrowsClockwise size={18} weight="bold" className={isRefreshing ? 'cbt-spin' : ''} />}
+            style={{ padding: '0.65rem 1rem', fontWeight: 600 }}
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        )}
 
         <Button
           variant="danger"

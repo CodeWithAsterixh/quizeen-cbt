@@ -1,0 +1,31 @@
+QUEEZ COMPUTER BASED TESTING SYSTEM
+END USER LICENSE AGREEMENT AND TERMS OF USE
+
+Please read these terms carefully before installing or using the Queez CBT System.
+
+1. SCOPE AND ACCEPTANCE
+By installing, copying, or using this software, you agree to be bound by these terms. If you do not agree to these terms, click "Cancel" to abort the installation.
+
+2. SOFTWARE DESCRIPTION
+Queez CBT System is an offline computer based testing platform designed for educational institutions. It includes three interconnected applications:
+- Queez Local Server: The local network assessment and database engine.
+- Queez Assessment Manager: The administration portal for creating tests, managing students, and marking submissions.
+- Queez Student Portal: The examination client used by students to take tests.
+
+3. LICENSE GRANT
+You are granted a non-exclusive, non-transferable license to install and run the software on computers within your institution or testing center for educational and assessment purposes.
+
+4. OFFLINE DATA AND PRIVACY
+All student records, exam questions, credentials, and test submissions are processed and stored locally on your institution's host computer and network. Queez does not transmit your student records or examination content to external third-party cloud servers without your explicit action. Your institution remains the sole custodian of your local assessment data.
+
+5. RESTRICTIONS
+You may not:
+- Reverse engineer, decompile, or disassemble the binary packages except as permitted by applicable law.
+- Use the software to compromise, forge, or tamper with examination records or student scores.
+- Resell or sublicense the software to third parties without prior written authorization.
+
+6. DISCLAIMER OF WARRANTIES
+The software is provided "as is" without warranty of any kind, express or implied. While Queez is engineered for reliable examination administration, you are advised to verify test configurations, battery backups, and local network connectivity before conducting live examinations.
+
+7. LIMITATION OF LIABILITY
+Under no circumstances shall the authors or copyright holders be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use this software.

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { LockKey, Play } from '@phosphor-icons/react';
-import { Assessment, Exam, Modal, Button, TextInput } from '@cbt/shared';
+import { LockKey, Play } from '@cbt/shared';
+import { Assessment, Exam, Modal, Button, TextInput, apiClient } from '@cbt/shared';
 
 interface AssessmentPinModalProps {
   assessment: Assessment | null;
@@ -21,20 +21,18 @@ export const AssessmentPinModal: React.FC<AssessmentPinModalProps> = ({
 
   if (!isOpen || !exam) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!exam.unlockPin || exam.unlockPin.trim() === '') {
-      onConfirm();
+    if (!exam.unlockPin?.trim()) { onConfirm(); return; }
+    const cleanPin = pinInput.trim();
+    if (await apiClient.isAvailable()) {
+      const res = await apiClient.verifyPin(exam.id, cleanPin);
+      if (res.valid) { setErrorMsg(''); setPinInput(''); onConfirm(); onClose(); }
+      else setErrorMsg(res.message || 'Incorrect PIN. Please check with your teacher.');
       return;
     }
-    if (pinInput.trim() === exam.unlockPin.trim()) {
-      setErrorMsg('');
-      setPinInput('');
-      onConfirm();
-      onClose();
-    } else {
-      setErrorMsg('Incorrect PIN. Please raise your hand and ask your teacher.');
-    }
+    if (cleanPin === exam.unlockPin.trim()) { setErrorMsg(''); setPinInput(''); onConfirm(); onClose(); }
+    else setErrorMsg('Incorrect PIN. Please check with your teacher.');
   };
 
   return (

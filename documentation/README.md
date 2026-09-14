@@ -1,6 +1,6 @@
 # Quizeen CBT System Prototype
 
-Quizeen is an offline-capable Computer-Based Testing (CBT) platform for secondary and primary schools. It packages assessments into encrypted archive files (.qzn), runs exams locally without active internet access, monitors window focus during test sessions, and aggregates grading analytics across multiple class levels.
+Quizeen is a client-server Computer-Based Testing (CBT) platform for secondary and primary schools. It operates over a school Local Area Network (LAN) connected to a central server, with optional offline package distribution (.qzn) for air-gapped classrooms. The platform provides real-time test monitoring, automatic and manual marking, live anti-cheat tracking, and comprehensive class analytics.
 
 ## Repository layout
 
@@ -11,7 +11,7 @@ cbt-system-prototype/
 ├── apps/
 │   ├── manager/          # Administrator and teacher desktop application
 │   ├── student/          # Student examination client (Desktop and Web)
-│   └── server/           # Central synchronization and distribution service
+│   └── server/           # Central examination hub and sync service (Desktop GUI and API)
 ├── packages/
 │   └── shared/           # Core models, UI components, and .qzn archive utilities
 ├── scripts/              # Build, release, and icon generation scripts
@@ -42,17 +42,20 @@ Start any application with the following npm workspace commands:
 # Student examination client (Web browser interface)
 npm run student:dev       # http://localhost:5174
 
-# Student examination client (Electron desktop container)
+# Student examination client (Electron desktop application)
 npm run student:electron
 
 # Manager dashboard (Web browser interface)
 npm run manager:dev       # http://localhost:5175
 
-# Manager dashboard (Electron desktop container)
+# Manager dashboard (Electron desktop application)
 npm run manager:electron
 
-# Backend synchronization server
-npm run server:dev        # http://localhost:3001
+# Central server (Electron desktop GUI)
+npm run server:electron   # GUI: http://localhost:5176, API: http://localhost:4000
+
+# Central server (Command line interface)
+npm run server:dev
 ```
 
 ## Building production releases
@@ -63,7 +66,7 @@ The build pipeline packages Electron applications into standalone Windows instal
 # Interactive release build (prompts for version update level)
 npm run release
 
-# Generate Windows application icons (.ico and .png)
+# Generate Windows application icons (.ico, .png, and .svg)
 npm run release:icons
 
 # Version bump only with duplicate release protection
@@ -71,17 +74,18 @@ npm run release:bump
 ```
 
 Compiled installers are placed in `.qzn-releases/v{version}/`:
-- `Queez CBT Manager-Setup-{version}.exe`
-- `Queez CBT Student-Setup-{version}.exe`
+- `Queez-CBT-Suite-Setup-v{version}.exe` (unified suite installer containing Manager, Student, and Server)
 - `release-manifest.json`
 
 ## Documentation index
 
 - [System architecture](ARCHITECTURE.md): System layout, offline model, and security controls.
+- [Database architecture](DATABASE.md): File-based storage engine, directory partitioning, and data lifecycle management.
 - [REST API specification](API-SPEC.md): Endpoints, payloads, and response structures.
 - [Data models](DATA-MODELS.md): TypeScript definitions and entity schemas.
 - [User flows](USER-FLOWS.md): Student registration, runner lifecycle, and authoring workflows.
 - [Environment configuration](ENVIRONMENT-SPEC.md): Environment variables and port assignments.
 - [Security policy](SECURITY.md): Vulnerability reporting instructions and response timelines.
 - [Testing and seeding](TESTING-AND-SEEDING.md): Verification commands and sample data generators.
-- [User manual](USER-MANUAL.md): Step-by-step instructions for teachers and students.
+- [User manual](USER-MANUAL.md): Step-by-step instructions for teachers, students, and proctors.
+

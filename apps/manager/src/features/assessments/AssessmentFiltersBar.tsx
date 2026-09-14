@@ -1,5 +1,5 @@
 import React from 'react';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { MagnifyingGlass } from '@cbt/shared';
 import { EDUCATION_LEVELS, DEPARTMENTS, Card, TextInput, SelectDropdown } from '@cbt/shared';
 
 interface AssessmentFiltersBarProps {

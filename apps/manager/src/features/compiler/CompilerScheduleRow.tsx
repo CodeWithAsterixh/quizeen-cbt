@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, Square } from '@phosphor-icons/react';
+import { CheckSquare, Square } from '@cbt/shared';
 import { Exam, ExamScheduleConfig, DEPARTMENTS, Card, Badge, TextInput, SelectDropdown, Button } from '@cbt/shared';
 
 interface CompilerScheduleRowProps {

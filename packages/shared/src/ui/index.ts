@@ -9,3 +9,8 @@ export * from './RichContent.js';
 export * from './TitleBar.js';
 export * from './useTitleBar.js';
 export * from './NumberInput.js';
+export * from './LevelSelector.js';
+export * from './ClassSelector.js';
+export * from './DepartmentSelector.js';
+export * from './icons.js';
+

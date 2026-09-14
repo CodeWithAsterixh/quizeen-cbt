@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { WarningCircle } from '@phosphor-icons/react';
-import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge } from '@cbt/shared';
+import { WarningCircle } from '@cbt/shared';
+import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge, apiClient } from '@cbt/shared';
 import { FloatingCalculator } from '../calculator';
 import { RunnerHeader } from './RunnerHeader';
 import { RunnerQuestionCard } from './RunnerQuestionCard';
 import { RunnerPalette } from './RunnerPalette';
 import { RunnerModals } from './RunnerModals';
 import { useAntiCheatTracker } from './useAntiCheatTracker';
+
+import { buildExamSubmission } from './runnerSubmissionHelper';
 
 interface AssessmentRunnerProps {
   assessment: Assessment;
@@ -27,36 +29,29 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [isQuitOpen, setIsQuitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { infractionCount, warningBanner } = useAntiCheatTracker();
+
+  const handleInfraction = useCallback((count: number) => {
+    apiClient.reportLiveSession({
+      examId: exam.id, studentName: student.studentName,
+      classGroup: student.classGroup, department: student.department,
+      infractionCount: count, timeSpentSeconds: Math.max(0, exam.durationMinutes * 60 - secondsLeft),
+    });
+  }, [exam.id, exam.durationMinutes, secondsLeft, student.classGroup, student.department, student.studentName]);
+
+  const { infractionCount, warningBanner } = useAntiCheatTracker(handleInfraction);
+
+  useEffect(() => {
+    apiClient.reportLiveSession({
+      examId: exam.id, studentName: student.studentName,
+      classGroup: student.classGroup, department: student.department, infractionCount: 0,
+    });
+  }, [exam.id, student.classGroup, student.department, student.studentName]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    let autoScore = 0;
-    const formattedAnswers: Record<string, AnswerItem> = {};
-
-    exam.questions.forEach((q) => {
-      const selected = answers[q.id] ?? '';
-      const isCorrect = (q.type === 'multiple_choice' || q.type === 'true_false') &&
-        selected.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase();
-      const points = isCorrect ? q.points : 0;
-      autoScore += points;
-      formattedAnswers[q.id] = { questionId: q.id, selectedAnswer: selected, awardedPoints: points };
-    });
-
-    const hasShort = exam.questions.some((q) => q.type === 'short_answer');
-    const pct = exam.totalPoints > 0 ? Math.round((autoScore / exam.totalPoints) * 100) : 0;
-
-    await onSubmitExam({
-      id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      examId: exam.id, examTitle: exam.title, studentName: student.studentName,
-      educationLevel: student.educationLevel, classGroup: student.classGroup,
-      department: student.department, answers: formattedAnswers,
-      timeSpentSeconds: Math.max(0, exam.durationMinutes * 60 - secondsLeft),
-      score: autoScore, totalPoints: exam.totalPoints, percentage: pct,
-      status: hasShort ? 'awaiting_result' : 'graded',
-      submittedAt: new Date().toISOString(), infractionCount,
-    });
+    const submission = buildExamSubmission(exam, student, answers, secondsLeft, infractionCount);
+    await onSubmitExam(submission);
   }, [answers, exam, infractionCount, isSubmitting, onSubmitExam, secondsLeft, student]);
 
   useEffect(() => {

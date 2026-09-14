@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock } from '@phosphor-icons/react';
+import { Lock } from '@cbt/shared';
 import { unpackExamZip, Exam, Modal, Badge } from '@cbt/shared';
 import { SettingsAuthForm } from './SettingsAuthForm';
 import { SettingsActions } from './SettingsActions';
@@ -9,7 +9,6 @@ interface SettingsModalProps {
   onClose: () => void;
   onExamsUpdated: (exams: Exam[]) => void;
   currentExamCount: number;
-  onResetToDefaults: () => Promise<void>;
   onClearAll: () => Promise<void>;
 }
 
@@ -18,7 +17,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onExamsUpdated,
   currentExamCount,
-  onResetToDefaults,
   onClearAll,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -73,7 +71,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           currentExamCount={currentExamCount}
           isProcessing={isProcessing}
           onFileSelect={handleFileSelect}
-          onResetToDefaults={onResetToDefaults}
           onClearAll={onClearAll}
           onClose={handleClose}
         />

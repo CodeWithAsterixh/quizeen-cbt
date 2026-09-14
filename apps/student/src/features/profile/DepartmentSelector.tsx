@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass } from '@phosphor-icons/react';
+import { Compass } from '@cbt/shared';
 import { DEPARTMENTS, Department, Button } from '@cbt/shared';
 
 interface DepartmentSelectorProps {

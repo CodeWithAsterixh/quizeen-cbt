@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, TextInput, Button } from '@cbt/shared';
-import { CheckCircle, XCircle, CalendarBlank } from '@phosphor-icons/react';
+import { CheckCircle, XCircle, CalendarBlank } from '@cbt/shared';
 
 interface AssessmentScheduleFieldsProps {
   isAvailable: boolean;

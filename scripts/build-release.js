@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const { promptVersion } = require('./bump-version.js');
 
 const root = path.resolve(__dirname, '..');
@@ -10,63 +10,74 @@ function run(cmd, cwd = root) {
   execSync(cmd, { cwd, stdio: 'inherit', env: process.env });
 }
 
-function copyInstaller(appDir, destDir) {
-  const relDir = path.join(appDir, 'release');
-  if (!fs.existsSync(relDir)) return;
-  const files = fs.readdirSync(relDir);
-  const exe = files.find((f) => f.endsWith('.exe') && !f.includes('unins'));
-  if (exe) {
-    const src = path.join(relDir, exe);
-    const dest = path.join(destDir, exe);
-    fs.copyFileSync(src, dest);
-    console.log(`Installer saved: ${exe} (${(fs.statSync(dest).size / 1024 / 1024).toFixed(1)} MB)`);
+function runAsync(cmd, cwd = root) {
+  return new Promise((resolve, reject) => {
+    console.log(`\n> ${cmd} (started in parallel)`);
+    const [c, ...args] = cmd.split(' ');
+    const child = spawn(c, args, { cwd, shell: true, stdio: 'inherit', env: process.env });
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Command failed (${code}): ${cmd}`));
+    });
+  });
+}
+
+function findMakeNsis() {
+  try {
+    const out = execSync('where.exe makensis', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    if (out) return out.split(/\r?\n/)[0];
+  } catch {}
+  const cacheDir = path.join(process.env.LOCALAPPDATA || '', 'electron-builder', 'Cache');
+  if (fs.existsSync(cacheDir)) {
+    for (const entry of fs.readdirSync(cacheDir).filter(e => e.startsWith('nsis-'))) {
+      const nsisDir = path.join(cacheDir, entry);
+      for (const s of fs.readdirSync(nsisDir)) {
+        for (const p of [path.join(nsisDir, s, 'Bin', 'makensis.exe'), path.join(nsisDir, s, 'makensis.exe')]) {
+          if (fs.existsSync(p)) return p;
+        }
+      }
+    }
   }
-  fs.rmSync(relDir, { recursive: true, force: true });
+  throw new Error('makensis.exe not found. Please ensure NSIS is installed.');
 }
 
 async function main() {
-  console.log('=== Quizeen CBT Release Builder ===');
+  console.log('=== Queez CBT Unified Suite Release Builder ===');
   const version = await promptVersion();
   const releaseDir = path.join(root, '.qzn-releases', `v${version}`);
   fs.mkdirSync(releaseDir, { recursive: true });
 
-  run('node scripts/generate-icons.js', root);
+  console.log('\n--- Step 1: Generating Icons ---');
+  run('node scripts/generate-icons.js');
 
-  console.log('\n--- Building Server ---');
-  run('npm --workspace=apps/server run build', root);
-  const srvDist = path.join(root, 'apps', 'server', 'dist');
-  const srvDest = path.join(releaseDir, 'server');
-  if (fs.existsSync(srvDist)) {
-    fs.mkdirSync(srvDest, { recursive: true });
-    fs.cpSync(srvDist, path.join(srvDest, 'dist'), { recursive: true });
-    fs.copyFileSync(path.join(root, 'apps', 'server', 'package.json'), path.join(srvDest, 'package.json'));
-    console.log('Server build saved to release.');
-  }
+  console.log('\n--- Step 2: Packaging Server, Manager, and Student in Parallel ---');
+  await Promise.all([
+    runAsync('npm --workspace=apps/server run electron:pack'),
+    runAsync('npm --workspace=apps/manager run electron:pack'),
+    runAsync('npm --workspace=apps/student run electron:pack'),
+  ]);
 
-  console.log('\n--- Building Manager Electron App ---');
-  run('npm --workspace=apps/manager run electron:build', root);
-  copyInstaller(path.join(root, 'apps', 'manager'), releaseDir);
+  console.log('\n--- Step 3: Compiling Unified Suite Installer ---');
+  const makensis = findMakeNsis();
+  const outInstaller = path.join(releaseDir, `Queez-CBT-Suite-Setup-v${version}.exe`);
+  const nsisCmd = `"${makensis}" /DVERSION="${version}" /DOUT_FILE="${outInstaller}" ` +
+    `/DSERVER_DIR="${path.join(root, 'apps/server/release/win-unpacked')}" ` +
+    `/DMANAGER_DIR="${path.join(root, 'apps/manager/release/win-unpacked')}" ` +
+    `/DSTUDENT_DIR="${path.join(root, 'apps/student/release/win-unpacked')}" ` +
+    `/DICON_PATH="${path.join(root, 'apps/manager/resources/icon.ico')}" ` +
+    `/DLICENSE_PATH="${path.join(root, 'installer/LICENSE.txt')}" ` +
+    `"${path.join(root, 'installer/suite.nsi')}"`;
+  run(nsisCmd);
 
-  console.log('\n--- Building Student Electron App ---');
-  run('npm --workspace=apps/student run electron:build', root);
-  copyInstaller(path.join(root, 'apps', 'student'), releaseDir);
+  ['apps/server/release', 'apps/manager/release', 'apps/student/release'].forEach(dir => {
+    fs.rmSync(path.join(root, dir), { recursive: true, force: true });
+  });
 
-  const manifest = {
-    version,
-    releaseDate: new Date().toISOString(),
-    outputFolder: `.qzn-releases/v${version}`,
-    files: fs.readdirSync(releaseDir).map((name) => {
-      const p = path.join(releaseDir, name);
-      const stat = fs.statSync(p);
-      return { name, isDirectory: stat.isDirectory(), sizeBytes: stat.size };
-    }),
-  };
+  const sizeMb = (fs.statSync(outInstaller).size / 1024 / 1024).toFixed(1);
+  const manifest = { productName: 'Queez CBT Suite', version, releaseDate: new Date().toISOString(), installer: path.basename(outInstaller), sizeMb, components: ['Queez Local Server', 'Queez Assessment Manager', 'Queez Student Portal'] };
   fs.writeFileSync(path.join(releaseDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
 
-  console.log(`\nRelease v${version} created successfully in: ${releaseDir}\n`);
+  console.log(`\nQueez CBT Suite v${version} built successfully!\nInstaller: ${outInstaller} (${sizeMb} MB)\n`);
 }
 
-main().catch((err) => {
-  console.error('\nRelease build failed:', err.message);
-  process.exit(1);
-});
+main().catch((err) => { console.error('\nRelease build failed:', err.message); process.exit(1); });

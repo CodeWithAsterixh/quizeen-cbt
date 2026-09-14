@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.quizeen.cbt.student",
+  "electronVersion": "44.3.0",
   "productName": "Queez CBT Student",
   "copyright": "Copyright © 2026 Quizeen",
   "directories": {

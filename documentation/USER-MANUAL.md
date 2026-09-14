@@ -1,6 +1,51 @@
 # Quizeen CBT user manual
 
-This manual provides instructions for educators authoring tests and students sitting for examinations using the Quizeen Computer-Based Testing platform.
+This manual provides instructions for educators authoring tests, exam proctors managing local servers, and students sitting for examinations using the Quizeen Computer-Based Testing platform.
+
+---
+
+## Exam proctor manual (Server app)
+
+The Server application acts as the local examination hub. It hosts tests, collects submissions, provides real-time traffic monitoring, and broadcasts network discovery beacons across the examination room.
+
+### Starting and stopping the server
+
+1. Open the Quizeen Server application.
+2. In the "Server Control & Network" card, verify the port number (default is 4000).
+3. Select "Start Server" to begin listening for examination traffic. The status badge will change to "Active (Listening)".
+4. Select "Stop Server" to temporarily pause network traffic.
+
+### Configuring auto-start
+
+If you want the server to launch automatically every time you open the application, enable the "Auto-start server when app opens" checkbox under the server control card. Leave this unchecked if you prefer to start the server manually for each exam session.
+
+### Finding your server network address
+
+The server automatically scans your computer network adapters and lists all available IP addresses:
+1. Locate the IP address list in the server control card (for example, `http://192.168.1.150:4000`).
+2. Select "Copy" next to the primary LAN IP address to copy the URL to your clipboard.
+3. Share this address with test candidates or rely on the automatic zero-configuration discovery built into the Student and Manager apps.
+
+### Navigating the server dashboard
+
+The Server GUI provides a navigation sidebar with three primary views:
+
+1. **Overview tab**:
+   - Contains server status, port controls, and Start/Stop actions.
+   - Shows active local IP addresses with copy buttons.
+   - Includes the auto-start toggle and quick status summary.
+2. **Visual Graph tab**:
+   - Visualizes request latency and traffic frequency over time as an interactive chart.
+   - Helps proctors spot connectivity slowdowns or traffic spikes during peak exam start times.
+3. **Live tab (Live requests)**:
+   - Displays an auto-scrolling log of incoming HTTP requests with real-time badges showing request counts.
+   - Shows timestamp, HTTP method (GET, POST), path, status code, latency in milliseconds, and client IP address.
+   - Provides a search bar to filter logs by endpoint (for example, `/submissions` or `/assessments`).
+   - Includes "Export" to download captured logs as a JSON file and "Clear" to reset the log display.
+
+### Exiting the application safely
+
+If you click the window close button while the server is actively running, a confirmation prompt appears warning that closing the window will stop the server and disconnect active student sessions. Select "Keep Server Running" to cancel or "Stop Server & Exit" to proceed.
 
 ---
 
@@ -8,61 +53,97 @@ This manual provides instructions for educators authoring tests and students sit
 
 The Manager application enables teachers and administrators to create tests, manage schedules, compile offline packages, and review class performance.
 
-### Creating an assessment
+### Connecting to the central server
 
 1. Open the Manager application.
-2. Select the "Create Assessment" button from the top navigation bar.
-3. In the "Settings and Availability" tab:
-   - Enter the subject name (for example, Mathematics or Biology) and the academic session (for example, 2024/2025).
+2. Select "Server Connection" at the bottom of the navigation sidebar.
+3. If the Server app is running on the same network, a banner displays "Discovered server". Select "Use Discovered" to connect automatically.
+4. Alternatively, enter the server URL manually and select "Test Connection" to confirm availability.
+
+### Creating an assessment
+
+1. Select the "Create Assessment" button from the top navigation bar.
+2. In the "Settings and Availability" tab:
+   - Enter the subject name (for example, Mathematics or Biology) and academic session (for example, 2024/2025).
    - Select the assessment type: Periodic Test or Major Exam.
    - Choose the education level: Primary, Junior Secondary, or Senior Secondary.
    - Select the target classes permitted to take this test (for example, SSS 2, SSS 3).
    - For Senior Secondary, select the department stream if applicable (Science, Arts, or Commercial).
    - Set the duration in minutes and the minimum passing score percentage.
    - Configure availability: enable the Active status toggle and set optional start or deadline timestamps.
-4. Switch to the "Questions" tab:
+3. Switch to the "Questions" tab:
    - Select "Add Question" to create a new question.
    - Choose the question format (Multiple Choice, True/False, or Short Answer).
    - Enter the question text and answer options.
    - Mark the correct answer option.
    - Select "Done" on the question card to collapse it into a preview item.
-5. Select "Save Assessment" to finalize the paper.
+4. Select "Save Assessment" to finalize the paper.
 
-### Editing an assessment
+### Managing students and generating student IDs
 
-1. Navigate to the class or subject listing in the Manager dashboard.
-2. Open the assessment and select "Edit".
-3. Modify settings or individual questions. To edit an existing question, select "Edit Question" on its preview card, make updates, and select "Done".
-4. Select "Save Assessment" to apply updates.
+1. Select "Students" from the navigation sidebar.
+2. Select "Add Student".
+3. In the single-stage creation modal:
+   - Enter the student full name.
+   - A unique 6-character alphanumeric ID is generated automatically. You can select "Generate" to create a new code or type a custom 6-character code.
+   - Toggle the education level: Primary, Junior Secondary, or Senior Secondary.
+   - Toggle the student's class group.
+   - For Senior Secondary, toggle the department stream (Science, Arts, or Commercial).
+4. Select "Create Student" to save the candidate account.
+5. Use the copy button next to any student ID in the list to distribute the code to the candidate.
+6. Alternatively, select "Generate Codes" to assign IDs in batch to all students in a class.
 
-### Exporting assessments for offline exam rooms (.qzn)
+### Live monitoring and marking student answers
 
-1. Select "Compile Packages (.qzn)" from the navigation menu.
-2. Check the boxes next to the assessments you want to include in the package.
-3. Enter an archive filename (for example, Term1_Final_Exams).
-4. Select "Save .qzn Package" to generate the package file.
-5. Copy the `.qzn` file to a USB drive to distribute to candidate computers.
+1. Select "Mark Student Answers" from the navigation sidebar.
+2. The marking queue displays all active and completed tests:
+   - Active students appear with an "In Progress" badge and live infraction warnings indicating app switches.
+   - Submitted tests show percentage scores and status badges ("Needs Marking" or "Marked").
+3. Select "Mark" on any completed submission to open the review interface:
+   - Multiple-choice questions are scored automatically by the system.
+   - Short-answer questions display the student's response alongside the question prompt and point weight.
+   - Enter awarded marks and select "Save Marking" to finalize the score.
+
+### Synchronizing data with the central server
+
+The Manager application keeps data current through multiple sync mechanisms:
+- **Automatic polling**: The app checks the server every 3 seconds for new submissions and active sessions.
+- **Window focus sync**: Clicking into the Manager window triggers an instant sync.
+- **Manual refresh**: Click "Sync Data" in the bottom sidebar or press `F5` / `Ctrl+R` on your keyboard at any time.
+
+### Optional offline package export (.qzn)
+
+When conducting exams in rooms without a local network or Wi-Fi router:
+1. Select "Compile Assessments" from the navigation menu.
+2. Choose the assessments to bundle into the package.
+3. Set examination date and time windows for each paper.
+4. Select "Export .qzn Package" and save the file to a USB flash drive to copy onto student workstations.
 
 ---
 
 ## Candidate and student manual (Student portal)
 
-The Student portal provides a clean interface for registering, selecting papers, and completing assessments.
+The Student portal provides a clean interface for entering your student ID, selecting papers, and completing assessments.
+
+### Server connection and auto-discovery
+
+Candidate computers connected to the same local area network as the Server will automatically discover the server. To review or change the connection:
+1. From the start screen, select "Settings".
+2. Enter supervisor credentials if prompted.
+3. Review the "Network Server Connection" card. If an active server is detected, select "Connect" to link directly to the teacher's station.
 
 ### Taking an assessment
 
 1. Open the Quizeen Student application.
-2. Select "Start Examination".
-3. Complete the registration steps:
-   - Step 1: Enter your full name.
-   - Step 2: Select your school level (Primary, Junior Secondary, or Senior Secondary).
-   - Step 3: Select your class group (for example, SSS 2).
-   - Step 4: If in Senior Secondary, select your department stream (Science, Arts, or Commercial).
-4. Review the list of available assessments for your class.
-5. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
-6. Read each question carefully. Use the question grid buttons to jump between questions.
-7. Open the built-in calculator from the side menu if you need to perform calculations.
-8. When finished, select "Submit Assessment" and confirm your submission.
+2. Select "Enter Student ID".
+3. Enter your 6-character Student ID code in the OTP-style input boxes. The code is case-insensitive and can be typed or pasted.
+4. When verified, your name, class, and department stream are confirmed. Select "Start Assessments".
+5. Review the list of available assessments filtered for your class and department stream. You can select "Refresh" if your teacher just published a new test.
+6. Select "Start Test" or "Start Exam" on the desired assessment. If the test requires an invigilator PIN, enter the code provided by your teacher.
+7. Read each question carefully. Use the question grid buttons to jump between questions.
+8. Open the built-in calculator from the side menu if you need to perform calculations.
+9. Focus and anti-cheat protection: Do not switch applications, open new tabs, or minimize the window. Every app switch is recorded and sent to the teacher station in real time.
+10. When finished, select "Submit Assessment" and confirm your submission.
 
 ### Leaving the exam room
 

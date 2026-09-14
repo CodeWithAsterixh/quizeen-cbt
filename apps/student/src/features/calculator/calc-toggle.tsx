@@ -1,4 +1,4 @@
-import { Calculator as CalculatorIcon } from '@phosphor-icons/react';
+import { Calculator as CalculatorIcon } from '@cbt/shared';
 
 interface CalcToggleProps {
   isOpen: boolean;

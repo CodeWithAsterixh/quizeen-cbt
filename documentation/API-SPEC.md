@@ -222,3 +222,154 @@ Records a candidate attempt at an assessment.
   "submittedAt": "2026-09-13T05:20:00.000Z"
 }
 ```
+
+---
+
+## Students
+
+### List students
+
+```http
+GET /students
+```
+
+Returns all registered candidate student profiles.
+
+#### Response: 200 OK
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "stu_1789290000000_a1b2",
+      "code": "K8P2X4",
+      "name": "Ibrahim Chukwuemeka",
+      "educationLevel": "senior_secondary",
+      "classGroup": "SSS 2",
+      "department": "science",
+      "createdAt": "2026-09-13T07:50:00.000Z"
+    }
+  ]
+}
+```
+
+### Lookup student by login code
+
+```http
+GET /students/code/:code
+```
+
+Finds a student profile matching the provided 6-character case-insensitive login code.
+
+#### Response: 200 OK
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "stu_1789290000000_a1b2",
+    "code": "K8P2X4",
+    "name": "Ibrahim Chukwuemeka",
+    "educationLevel": "senior_secondary",
+    "classGroup": "SSS 2",
+    "department": "science",
+    "createdAt": "2026-09-13T07:50:00.000Z"
+  }
+}
+```
+
+### Create or update student
+
+```http
+POST /students
+```
+
+#### Request body
+
+```json
+{
+  "name": "Ibrahim Chukwuemeka",
+  "educationLevel": "senior_secondary",
+  "classGroup": "SSS 2",
+  "department": "science"
+}
+```
+
+#### Response: 201 Created
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "stu_1789290000000_a1b2",
+    "name": "Ibrahim Chukwuemeka",
+    "educationLevel": "senior_secondary",
+    "classGroup": "SSS 2",
+    "department": "science",
+    "createdAt": "2026-09-13T07:50:00.000Z"
+  }
+}
+```
+
+### Generate student login code
+
+```http
+POST /students/:id/generate-code
+```
+
+Generates a fresh unique 6-character alphanumeric login code for the specified student.
+
+#### Response: 200 OK
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "stu_1789290000000_a1b2",
+    "code": "K8P2X4",
+    "name": "Ibrahim Chukwuemeka",
+    "educationLevel": "senior_secondary",
+    "classGroup": "SSS 2",
+    "department": "science"
+  }
+}
+```
+
+### Generate codes for class or all students
+
+```http
+POST /students/generate-all
+```
+
+#### Request body
+
+```json
+{
+  "classGroup": "SSS 2"
+}
+```
+
+#### Response: 200 OK
+
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
+### Delete student
+
+```http
+DELETE /students/:id
+```
+
+#### Response: 200 OK
+
+```json
+{
+  "success": true
+}
+```
+

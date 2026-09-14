@@ -1,5 +1,5 @@
 import React from 'react';
-import { PencilSimple, Trash, CheckCircle } from '@phosphor-icons/react';
+import { PencilSimple, Trash, CheckCircle } from '@cbt/shared';
 import { Question, Card, Badge, Button } from '@cbt/shared';
 import { QuestionItemEditor } from './QuestionItemEditor';
 

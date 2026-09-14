@@ -43,7 +43,7 @@ export interface AnswerItem {
   teacherRemarks?: string;
 }
 
-export type SubmissionStatus = 'awaiting_result' | 'graded';
+export type SubmissionStatus = 'in_progress' | 'awaiting_result' | 'graded';
 
 export interface Submission {
   id: string;
@@ -66,32 +66,10 @@ export interface Submission {
 }
 
 export interface StudentSession {
-  studentName: string;
-  educationLevel: EducationLevel;
-  classGroup: string;
-  department?: Department;
+  studentId?: string; studentCode?: string;
+  studentName: string; educationLevel: EducationLevel;
+  classGroup: string; department?: Department;
   loggedInAt: string;
 }
 
-export interface ExamScheduleConfig {
-  examId: string;
-  examTitle: string;
-  targetClass: string;
-  department?: Department;
-  scheduledDate: string;
-  startTime: string;
-  endTime: string;
-  unlockPin?: string;
-}
-
-export interface ExamPackageManifest {
-  packageId: string;
-  packageName: string;
-  version: string;
-  createdAt: string;
-  compiledBy: { id: string; name: string };
-  examCount: number;
-  targetClasses: string[];
-  schedules: ExamScheduleConfig[];
-  checksum: string;
-}
+export * from './package.js';

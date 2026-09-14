@@ -8,9 +8,9 @@ import {
   Equals as EqualsIcon,
   PlusMinus as PlusMinusIcon,
   Percent as PercentIcon,
-  Pi as PiIcon,
-} from '@phosphor-icons/react';
+} from '@cbt/shared';
 import { AngleMode } from './types';
+import { CalcSciGrid } from './calc-sci-grid';
 
 interface CalcKeypadProps {
   angleMode: AngleMode;
@@ -27,23 +27,12 @@ export function CalcKeypad({
 }: CalcKeypadProps) {
   return (
     <div className="calc-keypad">
-      <div className="calc-sci-grid">
-        <button type="button" className="calc-btn calc-btn-mode" onClick={onToggleAngleMode} title="Toggle Angle Mode">
-          {angleMode}
-        </button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('sin')}>sin</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('cos')}>cos</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('tan')}>tan</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onInputChar('π')} title="Pi Constant">
-          <PiIcon weight="duotone" size={14} />
-        </button>
-
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('ln')}>ln</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('log')}>log</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('sqrt')}>√x</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onUnary('sqr')}>x²</button>
-        <button type="button" className="calc-btn calc-btn-sci" onClick={() => onInputChar('e')}>e</button>
-      </div>
+      <CalcSciGrid
+        angleMode={angleMode}
+        onToggleAngleMode={onToggleAngleMode}
+        onUnary={onUnary}
+        onInputChar={onInputChar}
+      />
 
       <div className="calc-main-grid">
         <button type="button" className="calc-btn calc-btn-action" onClick={onClear} title="Clear">

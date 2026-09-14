@@ -1,7 +1,7 @@
 import React from 'react';
 import { Assessment, StudentSession } from '@cbt/shared';
 import { SettingsModal } from '../../features/settings/SettingsModal';
-import { StudentProfileModal } from '../../features/profile/StudentProfileModal';
+import { StudentCodeModal } from '../../features/profile/StudentCodeModal';
 import { AssessmentPinModal } from '../../features/catalog/AssessmentPinModal';
 
 interface AppModalsProps {
@@ -9,7 +9,6 @@ interface AppModalsProps {
   onCloseSettings: () => void;
   onExamsUpdated: (exams: Assessment[]) => void;
   examCount: number;
-  onResetToDefaults: () => Promise<void>;
   onClearAll: () => Promise<void>;
   isProfileOpen: boolean;
   onCloseProfile: () => void;
@@ -23,7 +22,7 @@ interface AppModalsProps {
 
 export const AppModals: React.FC<AppModalsProps> = ({
   isSettingsOpen, onCloseSettings, onExamsUpdated, examCount,
-  onResetToDefaults, onClearAll, isProfileOpen, onCloseProfile,
+  onClearAll, isProfileOpen, onCloseProfile,
   onProfileSubmit, session, pendingPinExam, isPinOpen, onClosePin, onConfirmPin,
 }) => (
   <>
@@ -32,14 +31,12 @@ export const AppModals: React.FC<AppModalsProps> = ({
       onClose={onCloseSettings}
       onExamsUpdated={onExamsUpdated}
       currentExamCount={examCount}
-      onResetToDefaults={onResetToDefaults}
       onClearAll={onClearAll}
     />
-    <StudentProfileModal
+    <StudentCodeModal
       isOpen={isProfileOpen}
       onClose={onCloseProfile}
       onProfileSubmit={onProfileSubmit}
-      initialSession={session}
     />
     <AssessmentPinModal
       assessment={pendingPinExam}

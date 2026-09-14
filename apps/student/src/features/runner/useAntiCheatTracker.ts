@@ -1,22 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-export function useAntiCheatTracker() {
+export function useAntiCheatTracker(onInfraction?: (count: number) => void) {
   const [infractionCount, setInfractionCount] = useState(0);
   const [warningBanner, setWarningBanner] = useState('');
+  const cbRef = useRef(onInfraction);
+  cbRef.current = onInfraction;
 
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.hidden) {
-        setInfractionCount((c) => c + 1);
-        setWarningBanner('Security Warning: Tab switching and leaving test window is prohibited.');
-        setTimeout(() => setWarningBanner(''), 5000);
-      }
+    const recordInfraction = (msg: string) => {
+      setInfractionCount((c) => {
+        const next = c + 1;
+        cbRef.current?.(next);
+        return next;
+      });
+      setWarningBanner(msg);
+      setTimeout(() => setWarningBanner(''), 4500);
     };
 
+    const handleVisibility = () => {
+      if (document.hidden) recordInfraction('Security Warning: Tab switching and leaving test window is prohibited.');
+    };
     const handleBlur = () => {
-      setInfractionCount((c) => c + 1);
-      setWarningBanner('Notice: Window focus lost. Focus on your exam.');
-      setTimeout(() => setWarningBanner(''), 4000);
+      recordInfraction('Notice: Window focus lost. Focus on your exam.');
     };
 
     document.addEventListener('visibilitychange', handleVisibility);

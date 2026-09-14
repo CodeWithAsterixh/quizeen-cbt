@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendUp, CheckCircle, Trophy, Warning } from '@phosphor-icons/react';
+import { TrendUp, CheckCircle, Trophy, Warning } from '@cbt/shared';
 import { Card } from '@cbt/shared';
 
 interface AnalyticsSummaryCardsProps {

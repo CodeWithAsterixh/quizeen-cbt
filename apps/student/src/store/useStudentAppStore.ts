@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Assessment, Submission, LocalStore, SEED_EXAMS, apiClient } from '@cbt/shared';
+import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
+
+import { fetchAndSyncStudentData } from './studentStoreSync';
 
 const assessmentStore = new LocalStore<Assessment>('exams');
 const submissionStore = new LocalStore<Submission>('submissions');
@@ -8,33 +10,21 @@ export function useStudentAppStore() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
 
+  const refresh = async () => {
+    const data = await fetchAndSyncStudentData(assessmentStore, submissionStore);
+    setAssessments(data.assessments);
+    setSubmissions(data.submissions);
+  };
+
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (await apiClient.isAvailable()) {
-          const remote = await apiClient.getAssessments();
-          if (remote && remote.length > 0) {
-            setAssessments(remote);
-            await assessmentStore.saveBatch(remote);
-          }
-          const remoteSubs = await apiClient.getSubmissions();
-          if (remoteSubs && remoteSubs.length > 0) {
-            setSubmissions(remoteSubs);
-            await submissionStore.saveBatch(remoteSubs);
-          }
-        }
-      } catch {
-        // fallback to local storage
-      }
-      let stored = await assessmentStore.getAll();
-      if (stored.length === 0) {
-        await assessmentStore.saveBatch(SEED_EXAMS);
-        stored = SEED_EXAMS;
-      }
-      setAssessments(stored);
-      setSubmissions(await submissionStore.getAll());
+    refresh();
+    const interval = setInterval(refresh, 4000);
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
     };
-    init();
   }, []);
 
   const saveSubmission = async (sub: Submission) => {
@@ -68,8 +58,7 @@ export function useStudentAppStore() {
 
   const resetToDefaults = async () => {
     await assessmentStore.clear();
-    await assessmentStore.saveBatch(SEED_EXAMS);
-    setAssessments(SEED_EXAMS);
+    setAssessments([]);
   };
 
   const clearAllAssessments = async () => {
@@ -78,12 +67,9 @@ export function useStudentAppStore() {
   };
 
   return {
-    assessments, exams: assessments,
-    submissions,
-    saveSubmission,
-    importAssessments, importExams: importAssessments,
-    resetToDefaults,
-    clearAllAssessments, clearAllExams: clearAllAssessments,
+    assessments, exams: assessments, submissions, refresh,
+    saveSubmission, importAssessments, importExams: importAssessments,
+    resetToDefaults, clearAllAssessments, clearAllExams: clearAllAssessments,
   };
 }
 

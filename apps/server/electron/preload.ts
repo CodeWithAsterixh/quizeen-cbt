@@ -1,0 +1,22 @@
+import { contextBridge, ipcRenderer } from 'electron';
+
+const serverApi = {
+  startServer: (port?: number) => ipcRenderer.invoke('server:start', port),
+  stopServer: () => ipcRenderer.invoke('server:stop'),
+  getStatus: () => ipcRenderer.invoke('server:get-status'),
+  onRequestLogged: (callback: (entry: any) => void) => {
+    const handler = (_e: any, entry: any) => callback(entry);
+    ipcRenderer.on('server:request-logged', handler);
+    return () => { ipcRenderer.removeListener('server:request-logged', handler); };
+  },
+};
+
+const electronApi = {
+  minimizeWindow: () => ipcRenderer.send('window:minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+  closeWindow: () => ipcRenderer.send('window:close'),
+  isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+};
+
+contextBridge.exposeInMainWorld('serverApi', serverApi);
+contextBridge.exposeInMainWorld('electronApi', electronApi);

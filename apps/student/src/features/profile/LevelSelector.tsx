@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings } from '@phosphor-icons/react';
+import { Buildings } from '@cbt/shared';
 import { EDUCATION_LEVELS, EducationLevel, Button } from '@cbt/shared';
 
 interface LevelSelectorProps {

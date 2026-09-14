@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Assessment, Submission, LocalStore, SEED_EXAMS, apiClient } from '@cbt/shared';
+import { useState, useEffect, useCallback } from 'react';
+import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
+import { fetchAndSyncManagerData } from './managerStoreSync';
 
 const assessmentStore = new LocalStore<Assessment>('exams');
 const submissionStore = new LocalStore<Submission>('submissions');
@@ -7,60 +8,52 @@ const submissionStore = new LocalStore<Submission>('submissions');
 export function useManagerAppStore() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        if (await apiClient.isAvailable()) {
-          const [remoteAssessments, remoteSubs] = await Promise.all([
-            apiClient.getAssessments(),
-            apiClient.getSubmissions(),
-          ]);
-          setAssessments(remoteAssessments);
-          setSubmissions(remoteSubs);
-          await assessmentStore.saveBatch(remoteAssessments);
-          await submissionStore.saveBatch(remoteSubs);
-          return;
-        }
-      } catch {
-        // fallback to local storage
-      }
-      let stored = await assessmentStore.getAll();
-      if (stored.length === 0) {
-        await assessmentStore.saveBatch(SEED_EXAMS);
-        stored = SEED_EXAMS;
-      }
-      setAssessments(stored);
-      setSubmissions(await submissionStore.getAll());
-    };
-    init();
+  const refresh = useCallback(async () => {
+    setIsSyncing(true);
+    const data = await fetchAndSyncManagerData(assessmentStore, submissionStore);
+    setAssessments(data.assessments);
+    setSubmissions(data.submissions);
+    setIsSyncing(false);
   }, []);
 
-  const saveAssessment = async (assessment: Assessment) => {
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(refresh, 3000);
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [refresh]);
+
+  const saveAssessment = async (assessment: Assessment): Promise<{ success: boolean; message: string }> => {
+    let message = 'Assessment updates saved successfully.';
     try {
       if (await apiClient.isAvailable()) {
         const existing = assessments.find((e) => e.id === assessment.id);
-        if (existing) {
-          await apiClient.updateAssessment(assessment.id, assessment);
-        } else {
-          await apiClient.createAssessment(assessment);
-        }
+        const res = existing ? await apiClient.updateAssessment(assessment.id, assessment) : await apiClient.createAssessment(assessment);
+        if (res?.message) message = res.message;
       }
-    } catch {
-      // offline save
-    }
+    } catch {}
     await assessmentStore.save(assessment);
     setAssessments(await assessmentStore.getAll());
+    return { success: true, message };
   };
 
-  const deleteAssessment = async (id: string) => {
+  const deleteAssessment = async (id: string): Promise<{ success: boolean; message: string }> => {
+    let message = 'Assessment was removed successfully.';
     try {
-      if (await apiClient.isAvailable()) await apiClient.deleteAssessment(id);
-    } catch {
-      // offline delete
-    }
+      if (await apiClient.isAvailable()) {
+        const res = await apiClient.deleteAssessment(id);
+        if (res?.message) message = res.message;
+      }
+    } catch {}
     await assessmentStore.delete(id);
     setAssessments(await assessmentStore.getAll());
+    return { success: true, message };
   };
 
   const duplicateAssessment = async (assessment: Assessment) => {
@@ -68,25 +61,23 @@ export function useManagerAppStore() {
     await saveAssessment(copy);
   };
 
-  const updateSubmission = async (sub: Submission) => {
+  const updateSubmission = async (sub: Submission): Promise<{ success: boolean; message: string }> => {
+    let message = 'Grades and review updated successfully.';
     try {
       if (await apiClient.isAvailable()) {
         const answersRecord: Record<string, { awardedPoints: number }> = {};
-        Object.values(sub.answers).forEach((a) => {
-          answersRecord[a.questionId] = { awardedPoints: a.awardedPoints ?? 0 };
-        });
-        await apiClient.gradeSubmission(sub.id, answersRecord);
+        Object.values(sub.answers).forEach((a) => { answersRecord[a.questionId] = { awardedPoints: a.awardedPoints ?? 0 }; });
+        const res = await apiClient.gradeSubmission(sub.id, answersRecord);
+        if (res?.message) message = res.message;
       }
-    } catch {
-      // offline grade save
-    }
+    } catch {}
     await submissionStore.save(sub);
     setSubmissions(await submissionStore.getAll());
+    return { success: true, message };
   };
 
   return {
-    assessments, exams: assessments,
-    submissions,
+    assessments, exams: assessments, submissions, isSyncing, refresh,
     saveAssessment, saveExam: saveAssessment,
     deleteAssessment, deleteExam: deleteAssessment,
     duplicateAssessment, duplicateExam: duplicateAssessment,

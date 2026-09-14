@@ -1,17 +1,17 @@
 import React from 'react';
-import { BookOpen, Archive, Users, ClipboardText } from '@phosphor-icons/react';
+import { BookOpen, Archive, Users, ClipboardText } from '@cbt/shared';
 import { Card } from '@cbt/shared';
 
 interface DashboardMetricsProps {
   examCount: number;
-  questionCount: number;
+  availableCount: number;
   submissionCount: number;
   pendingGradingCount: number;
 }
 
 export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   examCount,
-  questionCount,
+  availableCount,
   submissionCount,
   pendingGradingCount,
 }) => {
@@ -32,8 +32,8 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
           <Archive size={26} weight="fill" />
         </div>
         <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{questionCount}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Questions Ready</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{availableCount}</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Available to Take</div>
         </div>
       </Card>
 
@@ -43,7 +43,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         </div>
         <div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>{submissionCount}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Students Tested</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Students Assessed</div>
         </div>
       </Card>
 

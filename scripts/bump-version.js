@@ -22,7 +22,10 @@ function getNextVersion(current, level) {
 function checkDuplicate(version) {
   const releaseDir = path.join(root, '.qzn-releases', `v${version}`);
   if (fs.existsSync(releaseDir)) {
-    throw new Error(`Version v${version} already exists in .qzn-releases! Duplicate versions are not allowed.`);
+    const files = fs.readdirSync(releaseDir).filter((f) => !f.startsWith('.'));
+    if (files.length > 0) {
+      throw new Error(`Version v${version} already exists in .qzn-releases! Duplicate versions are not allowed.`);
+    }
   }
 }
 
@@ -39,8 +42,13 @@ function updatePackages(newVersion) {
   return newVersion;
 }
 
-async function promptVersion() {
+async function promptVersion(targetVersion) {
   const current = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8')).version || '1.0.0';
+  const forced = targetVersion || process.env.BUILD_VERSION || (process.argv[2] && !process.argv[2].startsWith('-') ? process.argv[2] : null);
+  if (forced) {
+    const cleanVer = forced.trim().replace(/^v/, '');
+    return updatePackages(cleanVer);
+  }
   console.log(`\nCurrent version: ${current}`);
   console.log('Select update level:');
   console.log(`  1) Patch (${getNextVersion(current, 'patch')}) - Bug fixes & tweaks`);

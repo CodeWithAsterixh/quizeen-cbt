@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { Plus } from '@cbt/shared';
 import { Question, Button } from '@cbt/shared';
 import { QuestionPreviewCard } from './QuestionPreviewCard';
 

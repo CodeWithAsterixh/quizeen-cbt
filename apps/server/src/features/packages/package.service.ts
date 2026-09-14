@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import JSZip from 'jszip';
-import { ExamPackageManifest, Exam } from '@cbt/shared';
+import { ExamPackageManifest, Exam, getLocalIsoTimestamp } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 import { CompilePackagePayload } from '../../core/types/contracts.js';
 
@@ -15,7 +15,7 @@ export class PackageService {
       packageId: `pkg_${Date.now()}`,
       packageName: payload.packageName,
       version: '1.0.0',
-      createdAt: new Date().toISOString(),
+      createdAt: getLocalIsoTimestamp(),
       compiledBy: payload.compiledBy || { id: 'admin', name: 'Exam Administrator' },
       examCount: exams.length,
       targetClasses: Array.from(new Set(exams.flatMap((e) => e.targetClasses))),

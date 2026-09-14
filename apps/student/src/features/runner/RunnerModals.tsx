@@ -1,5 +1,5 @@
 import React from 'react';
-import { WarningCircle, DoorOpen } from '@phosphor-icons/react';
+import { WarningCircle, DoorOpen } from '@cbt/shared';
 import { Modal, Button, Badge } from '@cbt/shared';
 
 interface RunnerModalsProps {

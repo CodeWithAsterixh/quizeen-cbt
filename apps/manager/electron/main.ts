@@ -13,6 +13,7 @@ function createWindow() {
     minWidth: 950,
     minHeight: 650,
     title: 'Queez CBT Manager',
+    icon: path.join(__dirname, '../dist/icon.png'),
     backgroundColor: '#f2f7f4',
     frame: false,
     autoHideMenuBar: true,
@@ -44,9 +45,13 @@ function createWindow() {
   }
 }
 
+import { startDiscoveryListener } from './discovery-listener.js';
+import { setupIpc } from './ipc.js';
+
 app.whenReady().then(() => {
-  setupIpc();
+  setupIpc(() => mainWindow);
   createWindow();
+  startDiscoveryListener((d) => mainWindow?.webContents.send('server:discovered', d));
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -56,33 +61,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-
-function setupIpc() {
-  const getFilePath = (key: string) => path.join(app.getPath('userData'), `${key}.json`);
-
-  ipcMain.handle('storage:read', (_, key: string) => {
-    const p = getFilePath(key);
-    return fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : null;
-  });
-
-  ipcMain.handle('storage:write', (_, key: string, data: string) => {
-    try {
-      fs.writeFileSync(getFilePath(key), data, 'utf-8');
-      return true;
-    } catch {
-      return false;
-    }
-  });
-
-  ipcMain.handle('window:minimize', () => mainWindow?.minimize());
-  ipcMain.handle('window:maximize', () => {
-    if (mainWindow?.isMaximized()) {
-      mainWindow?.unmaximize();
-      return false;
-    }
-    mainWindow?.maximize();
-    return true;
-  });
-  ipcMain.handle('window:close', () => mainWindow?.close());
-  ipcMain.handle('window:isMaximized', () => mainWindow?.isMaximized() ?? false);
-}
