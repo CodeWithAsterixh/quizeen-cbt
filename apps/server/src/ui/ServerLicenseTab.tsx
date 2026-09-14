@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LicenseState, Badge, Button, Copy, Check, LockKey } from '@cbt/shared';
 
-interface Props {
-  port?: number;
-}
-
-export const ServerLicenseTab: React.FC<Props> = ({ port = 4000 }) => {
+export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) => {
   const [state, setState] = useState<LicenseState | null>(null);
   const [tokenInput, setTokenInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
-
   const getUrl = useCallback((path: string) => `http://127.0.0.1:${port}/api/${path}`, [port]);
 
   const fetchStatus = useCallback(async () => {
@@ -33,8 +28,7 @@ export const ServerLicenseTab: React.FC<Props> = ({ port = 4000 }) => {
     setMsg(null);
     try {
       const res = await fetch(getUrl('license/activate'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: tokenInput.trim() }),
       });
       const data = await res.json();
@@ -42,9 +36,7 @@ export const ServerLicenseTab: React.FC<Props> = ({ port = 4000 }) => {
         setMsg({ type: 'ok', text: 'License activated successfully.' });
         setState(data.state);
         setTokenInput('');
-      } else {
-        setMsg({ type: 'err', text: data.error || 'Activation failed.' });
-      }
+      } else setMsg({ type: 'err', text: data.error || 'Activation failed.' });
     } catch (err: any) {
       setMsg({ type: 'err', text: err?.message || 'Server connection failed.' });
     }
@@ -75,18 +67,16 @@ export const ServerLicenseTab: React.FC<Props> = ({ port = 4000 }) => {
 
         {state?.license && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 14 }}>
-            <div style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>School Name</span>
-              <strong style={{ fontSize: '0.9rem' }}>{state.license.branding.schoolName}</strong>
-            </div>
-            <div style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>Term & Validity</span>
-              <strong style={{ fontSize: '0.9rem' }}>{state.license.term} ({state.daysRemaining} days left)</strong>
-            </div>
-            <div style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>Station Quota</span>
-              <strong style={{ fontSize: '0.9rem' }}>{state.license.stationLimit} Student Stations</strong>
-            </div>
+            {[
+              ['School Name', state.license.branding.schoolName],
+              ['Term & Validity', `${state.license.term} (${state.daysRemaining} days left)`],
+              ['Station Quota', `${state.license.stationLimit} Student Stations`],
+            ].map(([lbl, val]) => (
+              <div key={lbl} style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>{lbl}</span>
+                <strong style={{ fontSize: '0.9rem' }}>{val}</strong>
+              </div>
+            ))}
           </div>
         )}
 

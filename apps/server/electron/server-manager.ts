@@ -1,14 +1,11 @@
 import http from 'node:http';
 import { createApp, RequestLogEntry } from '../src/app.js';
+import { getHardwareId } from '../src/features/license/hardware.service.js';
 import { ServerBeacon, getLocalIpAddresses } from './discovery.js';
 import { findFallbackPort, probeQueezServer } from './port-fallback.js';
 
 export interface StartServerResult {
-  success: boolean;
-  port: number;
-  error?: string;
-  fallbackFrom?: number;
-  message?: string;
+  success: boolean; port: number; error?: string; fallbackFrom?: number; message?: string;
 }
 
 export class ServerManager {
@@ -90,6 +87,7 @@ export class ServerManager {
       uptimeSeconds: this.startedAt ? Math.floor((Date.now() - this.startedAt) / 1000) : 0,
       ips: getLocalIpAddresses(),
       totalRequests: this.requestCount,
+      hardwareId: getHardwareId(),
     };
   }
 }

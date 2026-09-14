@@ -14,4 +14,5 @@ export interface ServerStatus {
   uptimeSeconds: number;
   ips: string[];
   totalRequests: number;
+  hardwareId?: string;
 }

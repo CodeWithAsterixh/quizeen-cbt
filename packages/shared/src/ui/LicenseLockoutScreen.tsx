@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LicenseState } from '../types/license.js';
 
 interface LicenseLockoutScreenProps {
@@ -24,9 +24,18 @@ export const LicenseLockoutScreen: React.FC<LicenseLockoutScreenProps> = ({
   licenseState,
   onRetry,
 }) => {
+  const [copied, setCopied] = useState(false);
   const status = licenseState?.status || 'unlicensed';
   const title = TITLES[status] || 'License Inactive';
   const desc = licenseState?.message || MESSAGES[status] || 'License verification failed.';
+  const hwId = licenseState?.hardwareId || '';
+
+  const handleCopy = () => {
+    if (!hwId) return;
+    navigator.clipboard.writeText(hwId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div style={{
@@ -51,9 +60,24 @@ export const LicenseLockoutScreen: React.FC<LicenseLockoutScreenProps> = ({
           background: '#0f172a', padding: '12px 16px', borderRadius: 8,
           marginBottom: 24, fontSize: 12, textAlign: 'left', border: '1px solid #334155'
         }}>
-          <div style={{ color: '#64748b', marginBottom: 4 }}>Server Hardware ID:</div>
-          <div style={{ fontFamily: 'monospace', color: '#38bdf8', wordBreak: 'break-all' }}>
-            {licenseState?.hardwareId || 'Resolving...'}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: '#64748b', fontWeight: 600 }}>Server Hardware ID:</span>
+            {hwId && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                style={{
+                  background: copied ? '#059669' : '#334155',
+                  color: '#fff', border: 'none', borderRadius: 4,
+                  padding: '2px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer'
+                }}
+              >
+                {copied ? 'Copied' : 'Copy ID'}
+              </button>
+            )}
+          </div>
+          <div style={{ fontFamily: 'monospace', color: '#38bdf8', wordBreak: 'break-all', fontWeight: 600, fontSize: 13 }}>
+            {hwId || 'Resolving...'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
