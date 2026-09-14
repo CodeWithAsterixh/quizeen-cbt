@@ -53,7 +53,6 @@ export const ServerSidebar: React.FC<Props> = ({
       </nav>
 
       <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div className={`status-dot ${isRunning ? 'active' : 'inactive'}`} />
         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>
           <div>{isRunning ? 'Listening on' : 'Server is'}</div>
           <strong style={{ color: 'var(--color-text)' }}>{isRunning ? `Port ${port}` : 'Stopped'}</strong>

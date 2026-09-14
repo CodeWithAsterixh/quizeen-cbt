@@ -21,7 +21,6 @@ export const ServerStats: React.FC<Props> = ({ status }) => {
       <div className="server-card">
         <div className="server-card-label">Operational State</div>
         <div className="server-status-val">
-          <div className={`status-dot ${status.running ? 'active' : 'inactive'}`} />
           <span>{status.running ? 'Active (Listening)' : 'Stopped'}</span>
         </div>
         <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-subtle)' }}>
