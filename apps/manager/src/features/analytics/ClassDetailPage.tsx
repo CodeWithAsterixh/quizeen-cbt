@@ -5,6 +5,8 @@ import { ClassSummary, ClassSubjectSummary, StudentClassSummary } from './analyt
 import { ClassSubjectsTab } from './ClassSubjectsTab';
 import { ClassStudentsTab } from './ClassStudentsTab';
 
+import { ClassDetailStats } from './ClassDetailStats';
+
 interface ClassDetailPageProps {
   className: string;
   summary?: ClassSummary;
@@ -45,25 +47,7 @@ export const ClassDetailPage: React.FC<ClassDetailPageProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-        <Card style={{ padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Class Average Score</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: (summary?.averageScore ?? 0) >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-            {summary?.averageScore ?? 0}%
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Pass Rate: {summary?.passRate ?? 0}%</div>
-        </Card>
-        <Card style={{ padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Students Tested</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)' }}>{students.length}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Total on roster</div>
-        </Card>
-        <Card style={{ padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Subjects Administered</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)' }}>{subjects.length}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>{summary?.totalSubmissions ?? 0} total submissions</div>
-        </Card>
-      </div>
+      <ClassDetailStats summary={summary} studentsCount={students.length} subjectsCount={subjects.length} />
 
       <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid var(--color-border)', paddingBottom: 10 }}>
         <Button

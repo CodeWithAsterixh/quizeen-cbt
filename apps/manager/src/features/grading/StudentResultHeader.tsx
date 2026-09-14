@@ -17,6 +17,8 @@ interface StudentResultHeaderProps {
   backLabel?: string;
 }
 
+import { GradingScoreSummaryPill } from './GradingScoreSummaryPill';
+
 export const StudentResultHeader: React.FC<StudentResultHeaderProps> = ({
   studentName,
   classGroup,
@@ -36,19 +38,7 @@ export const StudentResultHeader: React.FC<StudentResultHeaderProps> = ({
       <button
         type="button"
         onClick={onBack}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--color-primary)',
-          cursor: 'pointer',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          padding: 0,
-          width: 'fit-content',
-        }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: 0, width: 'fit-content' }}
       >
         <ArrowLeft size={16} weight="bold" />
         <span>{backLabel}</span>
@@ -75,16 +65,13 @@ export const StudentResultHeader: React.FC<StudentResultHeaderProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-surface-hover)', padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
-        <div>
-          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)' }}>Total Awarded: </span>
-          <strong style={{ fontSize: '1.15rem', color: 'var(--color-primary)' }}>{currentTotal} / {totalPoints} pts ({currentPct}%)</strong>
-          <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginLeft: '0.75rem' }}>Passing: {passingScore}%</span>
-        </div>
-        <span className={`badge ${isPassed ? 'badge-success' : 'badge-danger'}`}>
-          {isPassed ? 'Passed' : 'Failed'}
-        </span>
-      </div>
+      <GradingScoreSummaryPill
+        currentTotal={currentTotal}
+        totalPoints={totalPoints}
+        currentPct={currentPct}
+        passingScore={passingScore}
+        isPassed={isPassed}
+      />
     </div>
   );
 };

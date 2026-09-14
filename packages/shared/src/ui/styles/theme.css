@@ -55,28 +55,16 @@
   --shadow-lg: 0 10px 15px -3px rgba(77, 114, 152, 0.1);
 
   /* Compatibility aliases for design system tokens */
-  --cbt-bg: var(--color-bg);
-  --cbt-surface: var(--color-surface);
-  --cbt-surface-hover: var(--color-surface-hover);
-  --cbt-surface-card: var(--color-surface);
-  --cbt-border: var(--color-border);
-  --cbt-border-accent: var(--color-primary);
-  --cbt-text: var(--color-text);
-  --cbt-text-muted: var(--color-text-muted);
-  --cbt-blue: var(--color-primary);
-  --cbt-blue-hover: var(--color-primary-hover);
-  --cbt-blue-light: var(--color-primary-light);
-  --cbt-emerald: var(--color-success);
-  --cbt-emerald-hover: #467933;
-  --cbt-emerald-light: var(--color-success-light);
-  --cbt-amber: var(--color-warning);
-  --cbt-amber-light: var(--color-warning-light);
-  --cbt-rose: var(--color-danger);
-  --cbt-rose-light: var(--color-danger-light);
-  --cbt-cyan: var(--steel-blue);
-  --cbt-cyan-light: rgba(119, 166, 182, 0.15);
-  --cbt-purple: var(--rich-cerulean);
-  --cbt-purple-light: rgba(77, 114, 152, 0.12);
+  --cbt-bg: var(--color-bg); --cbt-surface: var(--color-surface);
+  --cbt-surface-hover: var(--color-surface-hover); --cbt-surface-card: var(--color-surface);
+  --cbt-border: var(--color-border); --cbt-border-accent: var(--color-primary);
+  --cbt-text: var(--color-text); --cbt-text-muted: var(--color-text-muted);
+  --cbt-blue: var(--color-primary); --cbt-blue-hover: var(--color-primary-hover); --cbt-blue-light: var(--color-primary-light);
+  --cbt-emerald: var(--color-success); --cbt-emerald-hover: #467933; --cbt-emerald-light: var(--color-success-light);
+  --cbt-amber: var(--color-warning); --cbt-amber-light: var(--color-warning-light);
+  --cbt-rose: var(--color-danger); --cbt-rose-light: var(--color-danger-light);
+  --cbt-cyan: var(--steel-blue); --cbt-cyan-light: rgba(119, 166, 182, 0.15);
+  --cbt-purple: var(--rich-cerulean); --cbt-purple-light: rgba(77, 114, 152, 0.12);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

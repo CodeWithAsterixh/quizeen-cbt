@@ -8,6 +8,8 @@ import { RunnerPalette } from './RunnerPalette';
 import { RunnerModals } from './RunnerModals';
 import { useAntiCheatTracker } from './useAntiCheatTracker';
 
+import { buildExamSubmission } from './runnerSubmissionHelper';
+
 interface AssessmentRunnerProps {
   assessment: Assessment;
   student: StudentSession;
@@ -32,31 +34,8 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    let autoScore = 0;
-    const formattedAnswers: Record<string, AnswerItem> = {};
-
-    exam.questions.forEach((q) => {
-      const selected = answers[q.id] ?? '';
-      const isCorrect = (q.type === 'multiple_choice' || q.type === 'true_false') &&
-        selected.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase();
-      const points = isCorrect ? q.points : 0;
-      autoScore += points;
-      formattedAnswers[q.id] = { questionId: q.id, selectedAnswer: selected, awardedPoints: points };
-    });
-
-    const hasShort = exam.questions.some((q) => q.type === 'short_answer');
-    const pct = exam.totalPoints > 0 ? Math.round((autoScore / exam.totalPoints) * 100) : 0;
-
-    await onSubmitExam({
-      id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      examId: exam.id, examTitle: exam.title, studentName: student.studentName,
-      educationLevel: student.educationLevel, classGroup: student.classGroup,
-      department: student.department, answers: formattedAnswers,
-      timeSpentSeconds: Math.max(0, exam.durationMinutes * 60 - secondsLeft),
-      score: autoScore, totalPoints: exam.totalPoints, percentage: pct,
-      status: hasShort ? 'awaiting_result' : 'graded',
-      submittedAt: new Date().toISOString(), infractionCount,
-    });
+    const submission = buildExamSubmission(exam, student, answers, secondsLeft, infractionCount);
+    await onSubmitExam(submission);
   }, [answers, exam, infractionCount, isSubmitting, onSubmitExam, secondsLeft, student]);
 
   useEffect(() => {

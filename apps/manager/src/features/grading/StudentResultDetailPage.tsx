@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Submission, Exam } from '@cbt/shared';
 import { StudentResultHeader } from './StudentResultHeader';
 import { GradeQuestionItem } from './GradeQuestionItem';
+import { useSubmissionGrading } from './useSubmissionGrading';
 
 interface StudentResultDetailPageProps {
   submission: Submission;
@@ -18,26 +19,11 @@ export const StudentResultDetailPage: React.FC<StudentResultDetailPageProps> = (
   onSave,
   backLabel,
 }) => {
-  const [scores, setScores] = useState<Record<string, number>>(() =>
-    exam.questions.reduce((acc, q) => ({ ...acc, [q.id]: submission.answers[q.id]?.awardedPoints ?? 0 }), {})
-  );
-  const [remarks, setRemarks] = useState<Record<string, string>>(() =>
-    exam.questions.reduce((acc, q) => ({ ...acc, [q.id]: submission.answers[q.id]?.teacherRemarks ?? '' }), {})
-  );
-
-  const currentTotal = Object.values(scores).reduce((a, b) => a + (Number(b) || 0), 0);
-  const currentPct = exam.totalPoints > 0 ? Math.round((currentTotal / exam.totalPoints) * 100) : 0;
-  const isPassed = currentPct >= (exam.passingScore || 50);
-
-  const handleAutoGradeMatches = () => {
-    const updated = { ...scores };
-    exam.questions.forEach((q) => {
-      const studentAns = (submission.answers[q.id]?.selectedAnswer || '').trim().toLowerCase();
-      const correctAns = (q.correctAnswer || '').trim().toLowerCase();
-      if (studentAns && correctAns && studentAns === correctAns) updated[q.id] = q.points;
-    });
-    setScores(updated);
-  };
+  const {
+    scores, setScores, remarks, setRemarks,
+    currentTotal, currentPct, isPassed,
+    handleAutoGradeMatches,
+  } = useSubmissionGrading(submission, exam);
 
   const handleFinalize = async () => {
     const updatedAnswers = { ...submission.answers };

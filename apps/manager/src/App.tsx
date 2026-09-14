@@ -26,7 +26,9 @@ export const App: React.FC = () => {
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
+  const notify = (m: string) => { setNotice(m); setTimeout(() => setNotice(null), 3500); };
   const pendingCount = submissions.filter((s) => s.status === 'awaiting_result').length;
   const activeSub = submissions.find((s) => s.id === selectedSubmissionId);
   const activeAssessment = assessments.find((e) => e.id === (activeSub ? activeSub.examId : selectedExamId));
@@ -38,57 +40,30 @@ export const App: React.FC = () => {
       <div className="manager-body">
         <Sidebar currentTab={currentTab} onSelectTab={handleTabChange} onOpenServerSettings={() => setIsServerModalOpen(true)} pendingGradingCount={pendingCount} />
         <main className="main-viewport">
+          {notice && (
+            <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 14, fontWeight: 600, fontSize: '0.88rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>{notice}</span><button onClick={() => setNotice(null)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+            </div>
+          )}
           {activeSub && activeAssessment ? (
-            <StudentResultDetailPage
-              submission={activeSub} exam={activeAssessment} onSave={updateSubmission}
-              onBack={() => setSelectedSubmissionId(null)}
-              backLabel={selectedExamId ? 'Back to Assessment Details' : 'Back to Marking Queue'}
-            />
+            <StudentResultDetailPage submission={activeSub} exam={activeAssessment} onSave={async (s) => { const r = await updateSubmission(s); notify(r.message); }} onBack={() => setSelectedSubmissionId(null)} backLabel={selectedExamId ? 'Back to Assessment Details' : 'Back to Marking Queue'} />
           ) : activeAssessment && currentTab === 'exams' ? (
-            <AssessmentDetailPage
-              assessment={activeAssessment} submissions={submissions}
-              onBack={() => setSelectedExamId(null)} onDuplicate={duplicateAssessment}
-              onEdit={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }}
-              onDelete={(id) => { deleteAssessment(id); setSelectedExamId(null); }}
-              onSelectSubmission={(s) => setSelectedSubmissionId(s.id)}
-            />
+            <AssessmentDetailPage assessment={activeAssessment} submissions={submissions} onBack={() => setSelectedExamId(null)} onDuplicate={duplicateAssessment} onEdit={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }} onDelete={async (id) => { const r = await deleteAssessment(id); setSelectedExamId(null); notify(r.message); }} onSelectSubmission={(s) => setSelectedSubmissionId(s.id)} />
           ) : (
             <>
-              {currentTab === 'dashboard' && (
-                <DashboardView
-                  exams={assessments} submissions={submissions} onNavigate={handleTabChange}
-                  onOpenCreateExam={() => { setEditingAssessment(null); setIsEditorOpen(true); }}
-                />
-              )}
-              {currentTab === 'exams' && (
-                <AssessmentListView
-                  assessments={assessments} onOpenAssessment={(e) => setSelectedExamId(e.id)}
-                  onOpenCreate={() => { setEditingAssessment(null); setIsEditorOpen(true); }}
-                  onEditAssessment={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }}
-                  onDuplicateAssessment={duplicateAssessment} onDeleteAssessment={deleteAssessment}
-                />
-              )}
-              {currentTab === 'students' && (
-                <StudentListView
-                  students={students} onOpenCreate={() => setIsStudentModalOpen(true)}
-                  onGenerateCode={generateCodeForStudent} onGenerateCodes={generateCodesForStudents}
-                  onDeleteStudent={deleteStudent}
-                />
-              )}
+              {currentTab === 'dashboard' && <DashboardView exams={assessments} submissions={submissions} onNavigate={handleTabChange} onOpenCreateExam={() => { setEditingAssessment(null); setIsEditorOpen(true); }} />}
+              {currentTab === 'exams' && <AssessmentListView assessments={assessments} onOpenAssessment={(e) => setSelectedExamId(e.id)} onOpenCreate={() => { setEditingAssessment(null); setIsEditorOpen(true); }} onEditAssessment={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }} onDuplicateAssessment={duplicateAssessment} onDeleteAssessment={async (id) => { const r = await deleteAssessment(id); notify(r.message); }} />}
+              {currentTab === 'students' && <StudentListView students={students} onOpenCreate={() => setIsStudentModalOpen(true)} onGenerateCode={generateCodeForStudent} onGenerateCodes={async (ids) => { const r = await generateCodesForStudents(ids); notify(r.message); }} onDeleteStudent={async (id) => { const r = await deleteStudent(id); notify(r.message); }} />}
               {currentTab === 'compiler' && <PackageCompilerView exams={assessments} />}
-              {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={updateSubmission} />}
+              {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={async (s) => { const r = await updateSubmission(s); notify(r.message); }} />}
               {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} />}
             </>
           )}
         </main>
       </div>
 
-      <AssessmentEditorModal
-        isOpen={isEditorOpen} initialExam={editingAssessment}
-        onClose={() => { setIsEditorOpen(false); setEditingAssessment(null); }}
-        onSave={async (e) => { await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); }}
-      />
-      <StudentEditorModal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)} onSave={async (s) => { await saveStudent(s); setIsStudentModalOpen(false); }} />
+      <AssessmentEditorModal isOpen={isEditorOpen} initialExam={editingAssessment} onClose={() => { setIsEditorOpen(false); setEditingAssessment(null); }} onSave={async (e) => { const r = await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); notify(r.message); }} />
+      <StudentEditorModal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)} onSave={async (s) => { const r = await saveStudent(s); setIsStudentModalOpen(false); notify(r.message); }} />
       <ServerSettingsModal isOpen={isServerModalOpen} onClose={() => setIsServerModalOpen(false)} />
     </div>
   );

@@ -7,6 +7,9 @@ import { StudentSelectionBar } from './StudentSelectionBar';
 import { SingleCodeModal } from './SingleCodeModal';
 import { printStudentCodesPdf } from './StudentPrintReport';
 
+import { StudentClassTabs } from './StudentClassTabs';
+import { useStudentSelection } from './useStudentSelection';
+
 interface Props {
   students: Student[];
   onOpenCreate: () => void;
@@ -19,31 +22,12 @@ export const StudentListView: React.FC<Props> = ({
   students, onOpenCreate, onGenerateCode, onGenerateCodes, onDeleteStudent,
 }) => {
   const [selectedClass, setSelectedClass] = useState<string>('all');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [modalStudent, setModalStudent] = useState<{ student: Student; code: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
-  const classes = Array.from(new Set(students.map((s) => s.classGroup))).sort();
   const filtered = selectedClass === 'all' ? students : students.filter((s) => s.classGroup === selectedClass);
   const filteredIds = filtered.map((s) => s.id);
-  const selectedInFilter = filteredIds.filter((id) => selectedIds.has(id));
-  const isAllSelected = filtered.length > 0 && selectedInFilter.length === filtered.length;
-
-  const handleToggleSelectAll = () => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      filteredIds.forEach((id) => (isAllSelected ? next.delete(id) : next.add(id)));
-      return next;
-    });
-  };
-
-  const handleToggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
+  const { selectedIds, isAllSelected, handleToggleSelectAll, handleToggleSelect } = useStudentSelection(filteredIds);
 
   const handleGenerate = async () => {
     if (selectedIds.size === 0) return;
@@ -61,16 +45,7 @@ export const StudentListView: React.FC<Props> = ({
         onGenerate={handleGenerate} onOpenCreate={onOpenCreate}
       />
 
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-        <Button size="sm" variant={selectedClass === 'all' ? 'primary' : 'secondary'} onClick={() => setSelectedClass('all')}>
-          All Classes ({students.length})
-        </Button>
-        {classes.map((cls) => (
-          <Button key={cls} size="sm" variant={selectedClass === cls ? 'primary' : 'secondary'} onClick={() => setSelectedClass(cls)}>
-            {cls} ({students.filter((s) => s.classGroup === cls).length})
-          </Button>
-        ))}
-      </div>
+      <StudentClassTabs students={students} selectedClass={selectedClass} onSelectClass={setSelectedClass} />
 
       <StudentSelectionBar isAllSelected={isAllSelected} filteredCount={filtered.length} selectedCount={selectedIds.size} onToggleSelectAll={handleToggleSelectAll} />
 

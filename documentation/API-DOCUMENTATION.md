@@ -59,19 +59,42 @@ The server also implements the following additional endpoints for internal manag
 
 ---
 
-## 4. Detailed Endpoint Specifications
+## 4. Response Format & Detailed Endpoint Specifications
+
+Every API response follows a consistent structure with an HTTP status code, a status flag, and a clear message written in plain language.
+
+### Standard Success Response
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Assessments loaded.",
+  "data": [...]
+}
+```
+
+### Standard Error Response
+```json
+{
+  "success": false,
+  "statusCode": 404,
+  "message": "This student code was not recognized. Please check with your teacher."
+}
+```
+
+---
 
 ### Health & Connectivity
 
 #### `GET /health`
-- **Purpose**: Verifies that the CBT backend server is running and reachable over the local network.
-- **Client Method**: `apiClient.testConnection()`
-- **Success Response (200 OK)**:
+- Purpose: Checks that the CBT server is running and reachable on the local network.
+- Client Method: `apiClient.testConnection()`
+- Success Response (200 OK):
   ```json
   {
     "status": "ok",
     "service": "cbt-server",
-    "timestamp": "2026-09-13T20:00:00.000Z"
+    "timestamp": "2026-09-14T04:00:00.000Z"
   }
   ```
 
@@ -80,17 +103,19 @@ The server also implements the following additional endpoints for internal manag
 ### Assessments
 
 #### `GET /api/assessments`
-- **Purpose**: Lists all assessments.
-- **Client Method**: `apiClient.getAssessments(filters)`
-- **Query Parameters**:
+- Purpose: Lists all assessments matching optional filter parameters.
+- Client Method: `apiClient.getAssessments(filters)`
+- Query Parameters:
   - `level` (optional): Filter by education level (`primary`, `junior_secondary`, `senior_secondary`).
-  - `targetClass` (optional): Filter by class name (e.g. `SSS 2`).
-  - `department` (optional): Filter by department stream (e.g. `science`).
-  - `assessmentType` (optional): Filter by type (`test` or `exam`).
-- **Success Response (200 OK)**:
+  - `targetClass` (optional): Filter by class name (such as `SSS 2`).
+  - `department` (optional): Filter by department stream (`science`, `commercial`, `art`, `general`).
+  - `assessmentType` (optional): Filter by assessment type (`test` or `exam`).
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Assessments loaded.",
     "data": [
       {
         "id": "exam_17892348912",
@@ -111,39 +136,118 @@ The server also implements the following additional endpoints for internal manag
     ]
   }
   ```
-
-#### `POST /api/assessments`
-- **Purpose**: Creates an assessment record.
-- **Client Method**: `apiClient.createAssessment(data)`
-- **Request Body**: JSON object containing assessment fields and question array.
-- **Success Response (201 Created)**:
+- Empty Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "No assessments match criteria.",
+    "data": []
+  }
+  ```
+
+#### `GET /api/assessments/:id`
+- Purpose: Looks up a single assessment by its ID.
+- Success Response (200 OK):
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Assessment details loaded.",
     "data": { "id": "exam_17892348912", "title": "Mathematics - SSS 2" }
+  }
+  ```
+- Failure Response (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "This assessment was not found. It may have been deleted."
+  }
+  ```
+
+#### `POST /api/assessments`
+- Purpose: Creates a new assessment.
+- Client Method: `apiClient.createAssessment(data)`
+- Success Response (201 Created):
+  ```json
+  {
+    "success": true,
+    "statusCode": 201,
+    "message": "New assessment saved and ready for students.",
+    "data": { "id": "exam_17892348912", "title": "Mathematics - SSS 2" }
+  }
+  ```
+- Validation Error (400 Bad Request):
+  ```json
+  {
+    "success": false,
+    "statusCode": 400,
+    "message": "Please provide a subject title."
   }
   ```
 
 #### `PUT /api/assessments/:id`
-- **Purpose**: Updates an assessment. Operates as an idempotent upsert. If the assessment ID does not exist on the server, it creates it automatically.
-- **Client Method**: `apiClient.updateAssessment(id, updates)`
-- **Request Body**: Partial or complete Assessment object.
-- **Success Response (200 OK)**:
+- Purpose: Saves changes to an existing assessment. If the assessment does not exist on the server, it creates it automatically.
+- Client Method: `apiClient.updateAssessment(id, updates)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Assessment updates saved successfully.",
     "data": { "id": "exam_17892348912", "title": "Mathematics - SSS 2 Updated" }
   }
   ```
 
 #### `DELETE /api/assessments/:id`
-- **Purpose**: Removes an assessment by ID.
-- **Client Method**: `apiClient.deleteAssessment(id)`
-- **Success Response (200 OK)**:
+- Purpose: Deletes an assessment by ID.
+- Client Method: `apiClient.deleteAssessment(id)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
-    "message": "Assessment deleted successfully"
+    "statusCode": 200,
+    "message": "Assessment was removed successfully."
+  }
+  ```
+- Failure Response (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "Assessment was already removed or does not exist."
+  }
+  ```
+
+#### `POST /api/assessments/:id/verify-pin`
+- Purpose: Verifies whether an entered unlock PIN matches the assessment PIN.
+- Client Method: `apiClient.verifyPin(id, pin)`
+- Success Response (200 OK):
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Access PIN verified. You can start the assessment.",
+    "data": { "valid": true }
+  }
+  ```
+- Wrong PIN Response (403 Forbidden):
+  ```json
+  {
+    "success": false,
+    "statusCode": 403,
+    "message": "Incorrect PIN. Please check the code with your teacher.",
+    "data": { "valid": false }
+  }
+  ```
+- Missing Assessment (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "Assessment not found.",
+    "data": { "valid": false }
   }
   ```
 
@@ -152,12 +256,14 @@ The server also implements the following additional endpoints for internal manag
 ### Students
 
 #### `GET /api/students`
-- **Purpose**: Retrieves all registered student profiles.
-- **Client Method**: `apiClient.getStudents()`
-- **Success Response (200 OK)**:
+- Purpose: Retrieves all registered student profiles.
+- Client Method: `apiClient.getStudents()`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Student list loaded successfully.",
     "data": [
       {
         "id": "stu_1789290000_a1b2",
@@ -173,12 +279,14 @@ The server also implements the following additional endpoints for internal manag
   ```
 
 #### `GET /api/students/code/:code`
-- **Purpose**: Looks up a candidate by their 6-character alphanumeric OTP login code. Not case sensitive.
-- **Client Method**: `apiClient.getStudentByCode(code)`
-- **Success Response (200 OK)**:
+- Purpose: Verifies a candidate by their 6-character access code.
+- Client Method: `studentApi.lookupStudentByCode(code)` or `apiClient.getStudentByCode(code)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Student ID verified successfully.",
     "data": {
       "id": "stu_1789290000_a1b2",
       "code": "K8P2X4",
@@ -188,30 +296,24 @@ The server also implements the following additional endpoints for internal manag
     }
   }
   ```
-- **When Code Is Not Found (404 Not Found)**:
+- Invalid Code Response (404 Not Found):
   ```json
   {
     "success": false,
-    "message": "Student not found with this code."
+    "statusCode": 404,
+    "message": "This student code was not recognized. Please check with your teacher."
   }
   ```
 
 #### `POST /api/students`
-- **Purpose**: Registers a new student or updates an existing student profile.
-- **Client Method**: `apiClient.saveStudent(data)`
-- **Request Body**:
-  ```json
-  {
-    "name": "Ibrahim Chukwuemeka",
-    "educationLevel": "senior_secondary",
-    "classGroup": "SSS 2",
-    "department": "science"
-  }
-  ```
-- **Success Response (201 Created)**:
+- Purpose: Registers a new student or updates an existing student profile.
+- Client Method: `apiClient.saveStudent(data)`
+- Success Response (201 Created):
   ```json
   {
     "success": true,
+    "statusCode": 201,
+    "message": "Student registered successfully.",
     "data": {
       "id": "stu_1789290000_a1b2",
       "name": "Ibrahim Chukwuemeka",
@@ -219,14 +321,24 @@ The server also implements the following additional endpoints for internal manag
     }
   }
   ```
+- Validation Error (400 Bad Request):
+  ```json
+  {
+    "success": false,
+    "statusCode": 400,
+    "message": "Please enter the student full name, school level, and class group."
+  }
+  ```
 
 #### `POST /api/students/:id/generate-code`
-- **Purpose**: Generates a fresh unique 6-character OTP login code for a single student.
-- **Client Method**: `apiClient.generateStudentCode(id, fallbackStudent)`
-- **Success Response (200 OK)**:
+- Purpose: Generates a new 6-character access code for a student.
+- Client Method: `apiClient.generateStudentCode(id, fallbackStudent)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "New student access code generated.",
     "data": {
       "id": "stu_1789290000_a1b2",
       "code": "K8P2X4",
@@ -234,21 +346,24 @@ The server also implements the following additional endpoints for internal manag
     }
   }
   ```
-
-#### `POST /api/students/generate-all`
-- **Purpose**: Generates unique 6-character OTP login codes in bulk for a list of student IDs or for all students in a class.
-- **Client Method**: `apiClient.generateAllStudentCodes(classGroup, studentIds)`
-- **Request Body**:
+- Missing Profile (404 Not Found):
   ```json
   {
-    "classGroup": "SSS 2",
-    "studentIds": ["stu_1", "stu_2"]
+    "success": false,
+    "statusCode": 404,
+    "message": "Student profile was not found to generate code."
   }
   ```
-- **Success Response (200 OK)**:
+
+#### `POST /api/students/generate-all`
+- Purpose: Generates access codes for students in bulk.
+- Client Method: `apiClient.generateAllStudentCodes(classGroup, studentIds)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Access codes generated for all selected students.",
     "data": [
       { "id": "stu_1", "code": "H4N9P2" },
       { "id": "stu_2", "code": "R7K3M8" }
@@ -257,11 +372,23 @@ The server also implements the following additional endpoints for internal manag
   ```
 
 #### `DELETE /api/students/:id`
-- **Purpose**: Deletes a student registration record.
-- **Client Method**: `apiClient.deleteStudent(id)`
-- **Success Response (200 OK)**:
+- Purpose: Deletes a student registration record.
+- Client Method: `apiClient.deleteStudent(id)`
+- Success Response (200 OK):
   ```json
-  { "success": true }
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Student record removed."
+  }
+  ```
+- Failure Response (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "Student was already removed or does not exist."
+  }
   ```
 
 ---
@@ -269,25 +396,14 @@ The server also implements the following additional endpoints for internal manag
 ### Submissions & Grading
 
 #### `POST /api/submissions`
-- **Purpose**: Submits completed exam responses for automatic scoring.
-- **Client Method**: `apiClient.submitAnswers(payload)`
-- **Request Body**:
-  ```json
-  {
-    "studentName": "Ibrahim Chukwuemeka",
-    "examId": "exam_17892348912",
-    "classGroup": "SSS 2",
-    "department": "science",
-    "answers": { "q_1": "Option B" },
-    "infractionCount": 0,
-    "totalElapsedSeconds": 1200
-  }
-  ```
-- **Success Response (201 Created)**:
+- Purpose: Submits student responses for scoring and recording.
+- Client Method: `apiClient.submitAnswers(payload)`
+- Success Response (201 Created):
   ```json
   {
     "success": true,
-    "message": "Your exams have been sent for grading.",
+    "statusCode": 201,
+    "message": "Your assessment has been submitted and recorded.",
     "data": {
       "id": "sub_1789239999",
       "examId": "exam_17892348912",
@@ -299,26 +415,66 @@ The server also implements the following additional endpoints for internal manag
     }
   }
   ```
+- Missing Data Error (400 Bad Request):
+  ```json
+  {
+    "success": false,
+    "statusCode": 400,
+    "message": "Missing student name or assessment reference for submission."
+  }
+  ```
 
 #### `GET /api/submissions`
-- **Purpose**: Lists submissions. Supports optional `?examId=<ID>` query filter.
-- **Client Method**: `apiClient.getSubmissions(examId)`
-- **Success Response (200 OK)**:
+- Purpose: Lists submissions. Supports optional `?examId=<ID>` query filter.
+- Client Method: `apiClient.getSubmissions(examId)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Submissions loaded successfully.",
     "data": []
   }
   ```
 
-#### `PUT /api/submissions/:id/grade`
-- **Purpose**: Teacher manual grading review.
-- **Client Method**: `apiClient.gradeSubmission(id, answers)`
-- **Success Response (200 OK)**:
+#### `GET /api/submissions/:id`
+- Purpose: Loads details for a specific submission.
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Submission details loaded.",
+    "data": { "id": "sub_1789239999" }
+  }
+  ```
+- Not Found Response (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "Submission record not found."
+  }
+  ```
+
+#### `PUT /api/submissions/:id/grade`
+- Purpose: Updates grades or teacher review notes on a submission.
+- Client Method: `apiClient.gradeSubmission(id, answers)`
+- Success Response (200 OK):
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Grades and review updated successfully.",
     "data": { "id": "sub_1789239999", "status": "graded" }
+  }
+  ```
+- Failure Response (404 Not Found):
+  ```json
+  {
+    "success": false,
+    "statusCode": 404,
+    "message": "Could not find this submission to update grades."
   }
   ```
 
@@ -327,18 +483,63 @@ The server also implements the following additional endpoints for internal manag
 ### Encrypted Package Bundles
 
 #### `POST /api/packages/compile`
-- **Purpose**: Bundles assessment files and exam schedules into an encrypted zip file.
-- **Client Method**: `apiClient.compilePackage(payload)`
-- **Success Response (200 OK)**: Binary zip stream (`application/zip`).
+- Purpose: Bundles assessment files and exam schedules into an encrypted zip file.
+- Client Method: `apiClient.compilePackage(payload)`
+- Success Response (200 OK): Binary zip stream (`application/zip`) with header `X-Status-Message: Offline package created successfully.`.
+- Error Response (400 Bad Request):
+  ```json
+  {
+    "success": false,
+    "statusCode": 400,
+    "message": "Please select at least one assessment to package."
+  }
+  ```
 
 #### `POST /api/packages/unpack`
-- **Purpose**: Unpacks and imports assessments from base64 encoded package content.
-- **Client Method**: `apiClient.unpackPackage(zipBase64)`
-- **Success Response (200 OK)**:
+- Purpose: Unpacks and imports assessments from base64 encoded package content.
+- Client Method: `apiClient.unpackPackage(zipBase64)`
+- Success Response (200 OK):
   ```json
   {
     "success": true,
+    "statusCode": 200,
+    "message": "Unpacked 3 assessment(s) successfully.",
     "data": { "importedCount": 3, "packageId": "pkg_17892" }
+  }
+  ```
+- Error Response (400 Bad Request):
+  ```json
+  {
+    "success": false,
+    "statusCode": 400,
+    "message": "Please provide an offline package file to unpack."
+  }
+  ```
+
+---
+
+### System Analytics
+
+#### `GET /api/analytics/overview`
+- Purpose: Returns counts of assessments, students, and submissions.
+- Success Response (200 OK):
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "System summary metrics loaded.",
+    "data": { "totalAssessments": 12, "totalStudents": 45, "totalSubmissions": 30 }
+  }
+  ```
+
+#### `POST /api/analytics/reset`
+- Purpose: Resets the database to default seed data for test environments.
+- Success Response (200 OK):
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Database reset to initial sample data."
   }
   ```
 

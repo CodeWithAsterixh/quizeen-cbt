@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash, DownloadSimple, MagnifyingGlass } from '@phosphor-icons/react';
+import { Trash, DownloadSimple, MagnifyingGlass } from '@cbt/shared';
 import { LogEntry } from './types';
 
 interface Props {

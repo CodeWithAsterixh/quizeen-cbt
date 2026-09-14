@@ -8,6 +8,8 @@ import { AssessmentRunner } from './features/runner/AssessmentRunner';
 import { AssessmentCompletedScreen } from './features/completion/AssessmentCompletedScreen';
 import { useStudentAppStore } from './store/useStudentAppStore';
 
+import { useStudentSync } from './features/profile/useStudentSync';
+
 export const App: React.FC = () => {
   const { assessments, submissions, refresh, saveSubmission, importAssessments, clearAllAssessments } = useStudentAppStore();
   const [session, setSession] = useState<StudentSession | null>(null);
@@ -19,30 +21,8 @@ export const App: React.FC = () => {
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isPinOpen, setPinOpen] = useState(false);
 
-  const syncStudent = useCallback(async () => {
-    if (!session?.studentCode) return;
-    try {
-      if (await apiClient.isAvailable()) {
-        const s = await apiClient.getStudentByCode(session.studentCode);
-        if (s) setSession((p) => (p ? { ...p, studentName: s.name, classGroup: s.classGroup, department: s.department, educationLevel: s.educationLevel } : null));
-      }
-    } catch {}
-  }, [session?.studentCode]);
+  const { isRefreshing, handleRefresh } = useStudentSync(session, setSession, refresh);
 
-  useEffect(() => {
-    if (!session?.studentCode) return;
-    syncStudent();
-    const interval = setInterval(syncStudent, 4000);
-    return () => clearInterval(interval);
-  }, [session?.studentCode, syncStudent]);
-
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try { await Promise.all([refresh(), syncStudent()]); }
-    finally { setTimeout(() => setIsRefreshing(false), 400); }
-  };
   const handleExit = () => { setSession(null); setLatestSub(null); setView('start'); };
   const handleSelect = (a: Assessment) => {
     if (a.unlockPin?.trim()) { setPendingPinAssessment(a); setPinOpen(true); }

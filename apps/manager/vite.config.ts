@@ -34,5 +34,8 @@ export default defineConfig(() => {
     server: {
       port: 5175,
     },
+    optimizeDeps: {
+      include: ['@phosphor-icons/react'],
+    },
   };
 });

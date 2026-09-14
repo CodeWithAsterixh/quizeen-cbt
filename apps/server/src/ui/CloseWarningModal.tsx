@@ -1,6 +1,5 @@
 import React from 'react';
-import { WarningCircle } from '@phosphor-icons/react';
-import { Modal, Button } from '@cbt/shared';
+import { Modal, Button, WarningCircle } from '@cbt/shared';
 
 interface Props {
   isOpen: boolean;

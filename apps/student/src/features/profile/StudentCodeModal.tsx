@@ -3,6 +3,7 @@ import { WarningCircle, ArrowRight } from '@phosphor-icons/react';
 import { Student, StudentSession, LocalStore, apiClient, Modal, Button } from '@cbt/shared';
 import { OtpCodeInput } from './OtpCodeInput';
 import { StudentVerifiedCard } from './StudentVerifiedCard';
+import { useStudentLookup } from './useStudentLookup';
 
 interface Props {
   isOpen: boolean;
@@ -10,47 +11,19 @@ interface Props {
   onProfileSubmit: (session: StudentSession) => void;
 }
 
-const localStudentStore = new LocalStore<Student>('students');
-
 export const StudentCodeModal: React.FC<Props> = ({ isOpen, onClose, onProfileSubmit }) => {
-  const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [foundStudent, setFoundStudent] = useState<Student | null>(null);
+  const { code, setCode, loading, error, foundStudent, setFoundStudent, reset, lookup: handleLookup } = useStudentLookup();
 
   useEffect(() => {
-    if (isOpen) { setCode(''); setError(''); setFoundStudent(null); setLoading(false); }
+    if (isOpen) reset();
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleLookup = async (inputCode: string) => {
-    const clean = inputCode.trim().toUpperCase();
-    if (clean.length !== 6) return;
-    setLoading(true);
-    setError('');
-    setFoundStudent(null);
-
-    try {
-      let student = (await apiClient.isAvailable()) ? await apiClient.getStudentByCode(clean) : null;
-      if (!student) {
-        const local = await localStudentStore.getAll();
-        student = local.find((s) => s.code?.toUpperCase() === clean) || null;
-      }
-      if (student) setFoundStudent(student);
-      else setError(`Student ID "${clean}" was not found. Please check with your teacher.`);
-    } catch {
-      setError('Unable to verify student ID. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleProceed = () => {
     if (!foundStudent) return;
     const s = foundStudent;
-    setCode('');
-    setFoundStudent(null);
+    reset();
     onProfileSubmit({
       studentId: s.id, studentCode: s.code, studentName: s.name,
       educationLevel: s.educationLevel, classGroup: s.classGroup,

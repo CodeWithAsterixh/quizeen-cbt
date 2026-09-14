@@ -2,46 +2,52 @@ import { Assessment, Submission, ExamScheduleConfig, EducationLevel, Department 
 import { serverConfig } from './server-config.js';
 import { studentApi } from './student-api.js';
 
+import { submissionApi } from './submission-api.js';
+import { packageApi } from './package-api.js';
+
 export const apiClient = {
-  getServerUrl: (): string => serverConfig.getUrl(),
-  setServerUrl: (url: string): void => serverConfig.setUrl(url),
+  getServerUrl: () => serverConfig.getUrl(), setServerUrl: (url: string) => serverConfig.setUrl(url),
   testConnection: (url?: string) => serverConfig.testConnection(url),
+  async isAvailable(): Promise<boolean> { return (await serverConfig.testConnection()).ok; },
 
-  async isAvailable(): Promise<boolean> {
-    const res = await serverConfig.testConnection();
-    return res.ok;
-  },
-
-  async getExams(filters?: { level?: EducationLevel; targetClass?: string; department?: Department; assessmentType?: string }): Promise<Assessment[]> {
-    const params = new URLSearchParams();
-    if (filters?.level) params.append('level', filters.level);
-    if (filters?.targetClass) params.append('targetClass', filters.targetClass);
-    if (filters?.department) params.append('department', filters.department);
-    if (filters?.assessmentType) params.append('assessmentType', filters.assessmentType);
-    params.append('_t', Date.now().toString());
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments?${params.toString()}`, {
-      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
-    });
+  async getExams(f?: { level?: EducationLevel; targetClass?: string; department?: Department; assessmentType?: string }): Promise<Assessment[]> {
+    const p = new URLSearchParams();
+    if (f?.level) p.append('level', f.level); if (f?.targetClass) p.append('targetClass', f.targetClass);
+    if (f?.department) p.append('department', f.department); if (f?.assessmentType) p.append('assessmentType', f.assessmentType);
+    p.append('_t', Date.now().toString());
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments?${p.toString()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
     if (!res.ok) return [];
     return ((await res.json()) as any).data || [];
   },
 
-  async createExam(exam: Omit<Assessment, 'id' | 'createdAt'>): Promise<Assessment> {
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(exam),
-    });
-    return ((await res.json()) as any).data;
+  async createExam(exam: Omit<Assessment, 'id' | 'createdAt'>): Promise<{ data: Assessment; message?: string; statusCode?: number }> {
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(exam) });
+    const json = await res.json();
+    return { data: json.data, message: json.message, statusCode: json.statusCode ?? res.status };
   },
 
-  async updateExam(id: string, updates: Partial<Assessment>): Promise<Assessment> {
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates),
-    });
-    return ((await res.json()) as any).data;
+  async updateExam(id: string, updates: Partial<Assessment>): Promise<{ data: Assessment; message?: string; statusCode?: number }> {
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });
+    const json = await res.json();
+    return { data: json.data, message: json.message, statusCode: json.statusCode ?? res.status };
   },
 
-  async deleteExam(id: string): Promise<void> {
-    await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, { method: 'DELETE' });
+  async deleteExam(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments/${id}`, { method: 'DELETE' });
+    const json = await res.json();
+    return { success: json.success ?? res.ok, message: json.message };
+  },
+
+  async verifyPin(id: string, pin: string): Promise<{ valid: boolean; statusCode: number; message: string }> {
+    try {
+      const res = await fetch(`${serverConfig.getApiBase()}/assessments/${encodeURIComponent(id)}/verify-pin`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }),
+      });
+      const json = await res.json();
+      return { valid: json.data?.valid ?? res.ok, statusCode: json.statusCode ?? res.status, message: json.message || '' };
+    } catch {
+      return { valid: false, statusCode: 0, message: 'Could not reach server to verify PIN.' };
+    }
   },
 
   getAssessments(f?: any) { return this.getExams(f); },
@@ -49,48 +55,16 @@ export const apiClient = {
   updateAssessment(id: string, u: any) { return this.updateExam(id, u); },
   deleteAssessment(id: string) { return this.deleteExam(id); },
 
-  async submitAnswers(payload: {
-    studentName: string; examId: string; classGroup: string; department?: Department;
-    answers: Record<string, string>; infractionCount?: number; totalElapsedSeconds: number;
-  }): Promise<Submission> {
-    const res = await fetch(`${serverConfig.getApiBase()}/submissions`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-    });
-    return ((await res.json()) as any).data;
-  },
+  submitAnswers: (p: any) => submissionApi.submitAnswers(p),
+  getSubmissions: (examId?: string) => submissionApi.getSubmissions(examId),
+  gradeSubmission: (id: string, a: any) => submissionApi.gradeSubmission(id, a),
 
-  async getSubmissions(examId?: string): Promise<Submission[]> {
-    const sep = examId ? `?examId=${encodeURIComponent(examId)}&` : '?';
-    const res = await fetch(`${serverConfig.getApiBase()}/submissions${sep}_t=${Date.now()}`, {
-      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
-    });
-    if (!res.ok) return [];
-    return ((await res.json()) as any).data || [];
-  },
-
-  async gradeSubmission(id: string, answers: Record<string, { awardedPoints: number }>): Promise<Submission> {
-    const res = await fetch(`${serverConfig.getApiBase()}/submissions/${id}/grade`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answers }),
-    });
-    return ((await res.json()) as any).data;
-  },
-
-  async compilePackage(payload: { packageName: string; examIds: string[]; schedules: ExamScheduleConfig[] }): Promise<Blob> {
-    const res = await fetch(`${serverConfig.getApiBase()}/packages/compile`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-    });
-    return res.blob();
-  },
-
-  async unpackPackage(zipBase64: string): Promise<{ importedCount: number; packageId: string }> {
-    const res = await fetch(`${serverConfig.getApiBase()}/packages/unpack`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ zipBase64 }),
-    });
-    return ((await res.json()) as any).data;
-  },
+  compilePackage: (p: any) => packageApi.compilePackage(p),
+  unpackPackage: (z: string) => packageApi.unpackPackage(z),
 
   getStudents: () => studentApi.getStudents(),
   getStudentByCode: (code: string) => studentApi.getStudentByCode(code),
+  lookupStudentByCode: (code: string) => studentApi.lookupStudentByCode(code),
   saveStudent: (student: any) => studentApi.saveStudent(student),
   generateStudentCode: (id: string, fallback?: any) => studentApi.generateCode(id, fallback),
   generateAllStudentCodes: (classGroup?: string, studentIds?: string[]) => studentApi.generateAllCodes(classGroup, studentIds),

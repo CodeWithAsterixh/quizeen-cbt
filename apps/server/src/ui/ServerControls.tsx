@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Stop, Copy, Check } from '@phosphor-icons/react';
+import { Play, Stop, Copy, Check } from '@cbt/shared';
 import { ServerStatus } from './types';
 
 interface Props {
@@ -50,7 +50,7 @@ export const ServerControls: React.FC<Props> = ({ status, onToggle }) => {
         </button>
       </div>
       <div className="ip-list">
-        {status.ips.map((ip) => (
+        {(status.ips || []).map((ip) => (
           <div key={ip} className="ip-pill">
             <span>http://{ip}:{status.port}</span>
             <button className="btn-copy" onClick={() => handleCopy(ip)}>

@@ -12,4 +12,5 @@ export * from './NumberInput.js';
 export * from './LevelSelector.js';
 export * from './ClassSelector.js';
 export * from './DepartmentSelector.js';
+export * from './icons.js';
 

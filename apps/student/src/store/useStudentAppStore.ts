@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
 
+import { fetchAndSyncStudentData } from './studentStoreSync';
+
 const assessmentStore = new LocalStore<Assessment>('exams');
 const submissionStore = new LocalStore<Submission>('submissions');
 
@@ -9,28 +11,9 @@ export function useStudentAppStore() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
 
   const refresh = async () => {
-    try {
-      if (await apiClient.isAvailable()) {
-        const [remote, remoteSubs] = await Promise.all([
-          apiClient.getAssessments(),
-          apiClient.getSubmissions(),
-        ]);
-        if (remote) {
-          setAssessments(remote);
-          await assessmentStore.clear();
-          if (remote.length > 0) await assessmentStore.saveBatch(remote);
-        }
-        if (remoteSubs) {
-          setSubmissions(remoteSubs);
-          await submissionStore.clear();
-          if (remoteSubs.length > 0) await submissionStore.saveBatch(remoteSubs);
-        }
-        return;
-      }
-    } catch {}
-    const stored = await assessmentStore.getAll();
-    setAssessments(stored);
-    setSubmissions(await submissionStore.getAll());
+    const data = await fetchAndSyncStudentData(assessmentStore, submissionStore);
+    setAssessments(data.assessments);
+    setSubmissions(data.submissions);
   };
 
   useEffect(() => {

@@ -2,29 +2,14 @@ import { Submission } from '@cbt/shared';
 import { db } from '../../core/db/database.js';
 import { SubmitExamPayload, ReviewGradesPayload } from '../../core/types/contracts.js';
 
+import { scoreAnswers } from './scoring-helper.js';
+
 export class GradingService {
   public submitAndGrade(payload: SubmitExamPayload): Submission {
     const exam = db.getExamById(payload.examId);
     if (!exam) throw new Error(`Exam not found: ${payload.examId}`);
 
-    const answersRecord: Submission['answers'] = {};
-    let totalScore = 0;
-    let hasPendingReview = false;
-
-    exam.questions.forEach((q) => {
-      const selected = (payload.answers[q.id] || '').trim();
-      let awarded = 0;
-
-      if (q.type === 'multiple_choice' || q.type === 'true_false') {
-        if (selected.toLowerCase() === q.correctAnswer.trim().toLowerCase()) awarded = q.points;
-      } else {
-        if (selected.toLowerCase() === q.correctAnswer.trim().toLowerCase()) awarded = q.points;
-        else if (selected.length > 0) hasPendingReview = true;
-      }
-
-      answersRecord[q.id] = { questionId: q.id, selectedAnswer: selected, awardedPoints: awarded };
-      totalScore += awarded;
-    });
+    const { answersRecord, totalScore, hasPendingReview } = scoreAnswers(exam.questions, payload.answers);
 
     const totalPoints = exam.totalPoints || 1;
     const percentage = Math.round((totalScore / totalPoints) * 100);

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const { promptVersion } = require('./bump-version.js');
 
 const root = path.resolve(__dirname, '..');
@@ -10,27 +10,30 @@ function run(cmd, cwd = root) {
   execSync(cmd, { cwd, stdio: 'inherit', env: process.env });
 }
 
+function runAsync(cmd, cwd = root) {
+  return new Promise((resolve, reject) => {
+    console.log(`\n> ${cmd} (started in parallel)`);
+    const [c, ...args] = cmd.split(' ');
+    const child = spawn(c, args, { cwd, shell: true, stdio: 'inherit', env: process.env });
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Command failed (${code}): ${cmd}`));
+    });
+  });
+}
+
 function findMakeNsis() {
   try {
     const out = execSync('where.exe makensis', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     if (out) return out.split(/\r?\n/)[0];
   } catch {}
-
-  const localAppData = process.env.LOCALAPPDATA;
-  if (localAppData) {
-    const cacheDir = path.join(localAppData, 'electron-builder', 'Cache');
-    if (fs.existsSync(cacheDir)) {
-      const entries = fs.readdirSync(cacheDir);
-      for (const entry of entries) {
-        if (entry.startsWith('nsis-')) {
-          const nsisDir = path.join(cacheDir, entry);
-          const sub = fs.readdirSync(nsisDir);
-          for (const s of sub) {
-            const candidate = path.join(nsisDir, s, 'Bin', 'makensis.exe');
-            if (fs.existsSync(candidate)) return candidate;
-            const candidate2 = path.join(nsisDir, s, 'makensis.exe');
-            if (fs.existsSync(candidate2)) return candidate2;
-          }
+  const cacheDir = path.join(process.env.LOCALAPPDATA || '', 'electron-builder', 'Cache');
+  if (fs.existsSync(cacheDir)) {
+    for (const entry of fs.readdirSync(cacheDir).filter(e => e.startsWith('nsis-'))) {
+      const nsisDir = path.join(cacheDir, entry);
+      for (const s of fs.readdirSync(nsisDir)) {
+        for (const p of [path.join(nsisDir, s, 'Bin', 'makensis.exe'), path.join(nsisDir, s, 'makensis.exe')]) {
+          if (fs.existsSync(p)) return p;
         }
       }
     }
@@ -44,57 +47,37 @@ async function main() {
   const releaseDir = path.join(root, '.qzn-releases', `v${version}`);
   fs.mkdirSync(releaseDir, { recursive: true });
 
-  console.log('\n--- Step 1: Generating Application Icons ---');
-  run('node scripts/generate-icons.js', root);
+  console.log('\n--- Step 1: Generating Icons ---');
+  run('node scripts/generate-icons.js');
 
-  console.log('\n--- Step 2: Packaging Server App (Unpacked) ---');
-  run('npm --workspace=apps/server run electron:pack', root);
+  console.log('\n--- Step 2: Packaging Server, Manager, and Student in Parallel ---');
+  await Promise.all([
+    runAsync('npm --workspace=apps/server run electron:pack'),
+    runAsync('npm --workspace=apps/manager run electron:pack'),
+    runAsync('npm --workspace=apps/student run electron:pack'),
+  ]);
 
-  console.log('\n--- Step 3: Packaging Manager App (Unpacked) ---');
-  run('npm --workspace=apps/manager run electron:pack', root);
-
-  console.log('\n--- Step 4: Packaging Student App (Unpacked) ---');
-  run('npm --workspace=apps/student run electron:pack', root);
-
-  console.log('\n--- Step 5: Compiling Unified Suite Installer ---');
+  console.log('\n--- Step 3: Compiling Unified Suite Installer ---');
   const makensis = findMakeNsis();
   const outInstaller = path.join(releaseDir, `Queez-CBT-Suite-Setup-v${version}.exe`);
-  const serverDir = path.join(root, 'apps', 'server', 'release', 'win-unpacked');
-  const managerDir = path.join(root, 'apps', 'manager', 'release', 'win-unpacked');
-  const studentDir = path.join(root, 'apps', 'student', 'release', 'win-unpacked');
-  const iconPath = path.join(root, 'apps', 'manager', 'resources', 'icon.ico');
-  const licensePath = path.join(root, 'installer', 'LICENSE.txt');
-  const nsiScript = path.join(root, 'installer', 'suite.nsi');
+  const nsisCmd = `"${makensis}" /DVERSION="${version}" /DOUT_FILE="${outInstaller}" ` +
+    `/DSERVER_DIR="${path.join(root, 'apps/server/release/win-unpacked')}" ` +
+    `/DMANAGER_DIR="${path.join(root, 'apps/manager/release/win-unpacked')}" ` +
+    `/DSTUDENT_DIR="${path.join(root, 'apps/student/release/win-unpacked')}" ` +
+    `/DICON_PATH="${path.join(root, 'apps/manager/resources/icon.ico')}" ` +
+    `/DLICENSE_PATH="${path.join(root, 'installer/LICENSE.txt')}" ` +
+    `"${path.join(root, 'installer/suite.nsi')}"`;
+  run(nsisCmd);
 
-  const nsisCmd = `"${makensis}" /DVERSION="${version}" /DOUT_FILE="${outInstaller}" /DSERVER_DIR="${serverDir}" /DMANAGER_DIR="${managerDir}" /DSTUDENT_DIR="${studentDir}" /DICON_PATH="${iconPath}" /DLICENSE_PATH="${licensePath}" "${nsiScript}"`;
-  run(nsisCmd, root);
+  ['apps/server/release', 'apps/manager/release', 'apps/student/release'].forEach(dir => {
+    fs.rmSync(path.join(root, dir), { recursive: true, force: true });
+  });
 
-  console.log('\n--- Step 6: Cleaning Staging Files ---');
-  fs.rmSync(path.join(root, 'apps', 'server', 'release'), { recursive: true, force: true });
-  fs.rmSync(path.join(root, 'apps', 'manager', 'release'), { recursive: true, force: true });
-  fs.rmSync(path.join(root, 'apps', 'student', 'release'), { recursive: true, force: true });
-
-  const manifest = {
-    productName: 'Queez CBT Suite',
-    version,
-    releaseDate: new Date().toISOString(),
-    installer: `Queez-CBT-Suite-Setup-v${version}.exe`,
-    sizeMb: (fs.statSync(outInstaller).size / 1024 / 1024).toFixed(1),
-    components: [
-      'Queez Local Server',
-      'Queez Assessment Manager',
-      'Queez Student Portal',
-    ],
-  };
+  const sizeMb = (fs.statSync(outInstaller).size / 1024 / 1024).toFixed(1);
+  const manifest = { productName: 'Queez CBT Suite', version, releaseDate: new Date().toISOString(), installer: path.basename(outInstaller), sizeMb, components: ['Queez Local Server', 'Queez Assessment Manager', 'Queez Student Portal'] };
   fs.writeFileSync(path.join(releaseDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
 
-  console.log(`\n======================================================`);
-  console.log(`Queez CBT Suite v${version} built successfully!`);
-  console.log(`Installer: ${outInstaller} (${manifest.sizeMb} MB)`);
-  console.log(`======================================================\n`);
+  console.log(`\nQueez CBT Suite v${version} built successfully!\nInstaller: ${outInstaller} (${sizeMb} MB)\n`);
 }
 
-main().catch((err) => {
-  console.error('\nRelease build failed:', err.message);
-  process.exit(1);
-});
+main().catch((err) => { console.error('\nRelease build failed:', err.message); process.exit(1); });

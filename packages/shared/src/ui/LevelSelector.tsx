@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings } from '@phosphor-icons/react';
+import { Buildings } from './icons.js';
 import { EDUCATION_LEVELS, EducationLevel } from '../types/index.js';
 import { Button } from './Button.js';
 
