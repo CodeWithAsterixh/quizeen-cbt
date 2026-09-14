@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FloppyDisk, ListNumbers, Gear } from '@phosphor-icons/react';
+import { FloppyDisk, ListNumbers, Gear } from '@cbt/shared';
 import { Assessment, Question, EducationLevel, Department, AssessmentType, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
 import { QuestionsListTab } from './QuestionsListTab';
 import { AssessmentSettingsTab } from './AssessmentSettingsTab';

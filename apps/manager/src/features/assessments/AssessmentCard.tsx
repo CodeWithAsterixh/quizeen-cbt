@@ -1,5 +1,5 @@
 import { Assessment, Button, getAssessmentAvailabilityInfo } from '@cbt/shared';
-import { ArrowRight, CopyIcon, PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { ArrowRight, CopyIcon, PencilSimpleIcon, TrashIcon } from '@cbt/shared';
 import React from 'react';
 
 interface AssessmentCardProps {

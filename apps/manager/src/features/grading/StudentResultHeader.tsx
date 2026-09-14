@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, MagicWand, FloppyDisk } from '@phosphor-icons/react';
+import { ArrowLeft, MagicWand, FloppyDisk } from '@cbt/shared';
 import { Button } from '@cbt/shared';
 
 interface StudentResultHeaderProps {

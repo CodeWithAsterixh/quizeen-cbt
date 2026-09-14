@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Users, Trophy } from '@phosphor-icons/react';
+import { ArrowRight, Users, Trophy } from '@cbt/shared';
 import { Card, Badge, Button } from '@cbt/shared';
 import { ClassSubjectSummary } from './analytics-types';
 

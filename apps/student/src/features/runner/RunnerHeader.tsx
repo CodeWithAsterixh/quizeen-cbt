@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, DoorOpen } from '@phosphor-icons/react';
+import { Clock, DoorOpen } from '@cbt/shared';
 import { Exam, StudentSession, Card, Badge, Button } from '@cbt/shared';
 import { CalcToggle } from '../calculator';
 

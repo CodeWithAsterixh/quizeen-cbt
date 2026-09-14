@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, DownloadSimple } from '@phosphor-icons/react';
+import { Plus, DownloadSimple } from '@cbt/shared';
 import { Assessment, Submission, Button, isAssessmentAvailable } from '@cbt/shared';
 import { ManagerTab } from '../../components/layout/Sidebar';
 import { DashboardMetrics } from './DashboardMetrics';

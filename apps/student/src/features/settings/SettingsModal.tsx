@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock } from '@phosphor-icons/react';
+import { Lock } from '@cbt/shared';
 import { unpackExamZip, Exam, Modal, Badge } from '@cbt/shared';
 import { SettingsAuthForm } from './SettingsAuthForm';
 import { SettingsActions } from './SettingsActions';

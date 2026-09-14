@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { WarningCircle } from '@phosphor-icons/react';
+import { WarningCircle } from '@cbt/shared';
 import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge } from '@cbt/shared';
 import { FloatingCalculator } from '../calculator';
 import { RunnerHeader } from './RunnerHeader';

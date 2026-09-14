@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ArrowLeft } from '@phosphor-icons/react';
+import { ArrowRight, ArrowLeft } from '@cbt/shared';
 import { EDUCATION_LEVELS, EducationLevel, Department, StudentSession, Modal, Button, TextInput } from '@cbt/shared';
 import { LevelSelector } from './LevelSelector';
 import { DepartmentSelector } from './DepartmentSelector';

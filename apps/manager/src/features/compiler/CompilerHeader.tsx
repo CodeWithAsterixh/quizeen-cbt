@@ -1,5 +1,5 @@
 import React from 'react';
-import { DownloadSimple, CheckSquare, Square } from '@phosphor-icons/react';
+import { DownloadSimple, CheckSquare, Square } from '@cbt/shared';
 import { Button } from '@cbt/shared';
 
 interface CompilerHeaderProps {

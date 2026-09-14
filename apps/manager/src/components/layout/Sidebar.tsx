@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear,
-} from '@phosphor-icons/react';
+} from '@cbt/shared';
 import { Badge, Button } from '@cbt/shared';
 
 export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics';

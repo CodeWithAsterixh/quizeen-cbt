@@ -1,4 +1,4 @@
-import { Pi as PiIcon } from '@phosphor-icons/react';
+import { Pi as PiIcon } from '@cbt/shared';
 import { AngleMode } from './types';
 
 interface Props {

@@ -8,7 +8,7 @@ import {
   Equals as EqualsIcon,
   PlusMinus as PlusMinusIcon,
   Percent as PercentIcon,
-} from '@phosphor-icons/react';
+} from '@cbt/shared';
 import { AngleMode } from './types';
 import { CalcSciGrid } from './calc-sci-grid';
 

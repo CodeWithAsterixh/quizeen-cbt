@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Assessment, Submission, Button } from '@cbt/shared';
-import { ListNumbers, Table } from '@phosphor-icons/react';
+import { ListNumbers, Table } from '@cbt/shared';
 import { AssessmentDetailHeader } from './AssessmentDetailHeader';
 import { AssessmentDetailStats } from './AssessmentDetailStats';
 import { AssessmentDetailResultsTable } from './AssessmentDetailResultsTable';

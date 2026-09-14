@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaretRight } from '@phosphor-icons/react';
+import { CaretRight } from '@cbt/shared';
 import { Submission, Assessment, Card, Button } from '@cbt/shared';
 
 interface AssessmentDetailResultsTableProps {

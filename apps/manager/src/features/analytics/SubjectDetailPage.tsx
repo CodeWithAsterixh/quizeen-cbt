@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft } from '@cbt/shared';
 import { Assessment, Submission, Card, Badge } from '@cbt/shared';
 import { getGradeAndRemark } from './grade-utils';
 

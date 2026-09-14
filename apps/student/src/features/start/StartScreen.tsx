@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Gear, GraduationCap } from '@phosphor-icons/react';
+import { Play, Gear, GraduationCap } from '@cbt/shared';
 import { Button, Card } from '@cbt/shared';
 
 interface StartScreenProps {

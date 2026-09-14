@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Broadcast, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Broadcast, CheckCircle, XCircle } from '@cbt/shared';
 import { Modal, Button, Badge, apiClient } from '@cbt/shared';
 
 interface Props {

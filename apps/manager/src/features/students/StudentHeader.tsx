@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserPlus, Printer, Key } from '@phosphor-icons/react';
+import { UserPlus, Printer, Key } from '@cbt/shared';
 import { Button } from '@cbt/shared';
 
 interface Props {

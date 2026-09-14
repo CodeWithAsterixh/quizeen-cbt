@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaretLeft, CaretRight, CheckCircle } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight, CheckCircle } from '@cbt/shared';
 import { Question, Card, Badge, Button, RichContent } from '@cbt/shared';
 import { QuestionOptionsView } from './QuestionOptionsView';
 

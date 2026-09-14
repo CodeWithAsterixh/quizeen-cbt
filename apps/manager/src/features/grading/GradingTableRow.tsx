@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, WarningCircle } from '@phosphor-icons/react';
+import { Eye, WarningCircle } from '@cbt/shared';
 import { Submission, Badge, Button } from '@cbt/shared';
 
 interface GradingTableRowProps {

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { FileArchive, Trash } from '@phosphor-icons/react';
+import { FileArchive, Trash } from '@cbt/shared';
 import { Button, Badge } from '@cbt/shared';
 import { ServerConnectionConfig } from './ServerConnectionConfig';
 

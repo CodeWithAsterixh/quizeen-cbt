@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash, Check } from '@phosphor-icons/react';
+import { Trash, Check } from '@cbt/shared';
 import { Question, Card, Button, TextInput, SelectDropdown, TextEditor } from '@cbt/shared';
 import { QuestionOptionsEditor } from './QuestionOptionsEditor';
 

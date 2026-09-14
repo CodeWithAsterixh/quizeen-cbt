@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { Plus } from '@cbt/shared';
 import { Assessment, Button } from '@cbt/shared';
 import { AssessmentFiltersBar } from './AssessmentFiltersBar';
 import { AssessmentCard } from './AssessmentCard';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calculator as CalcIcon, X as CloseIcon, ArrowsOutSimple as ResizeIcon, DotsSixVertical as DragIcon } from '@phosphor-icons/react';
+import { Calculator as CalcIcon, X as CloseIcon, ArrowsOutSimple as ResizeIcon, DotsSixVertical as DragIcon } from '@cbt/shared';
 import { AngleMode } from './types';
 import { evaluateExpression, applyUnaryFunction } from './calc-engine';
 import { CalcKeypad } from './calc-keypad';

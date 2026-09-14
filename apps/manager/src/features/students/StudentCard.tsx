@@ -1,5 +1,5 @@
 import React from 'react';
-import { Key, Trash } from '@phosphor-icons/react';
+import { Key, Trash } from '@cbt/shared';
 import { Student, Button, Badge, Card } from '@cbt/shared';
 
 interface Props {

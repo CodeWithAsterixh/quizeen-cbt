@@ -1,5 +1,5 @@
 import { Button, Card, Assessment, Exam, StudentSession, Submission, isAssessmentAvailable } from '@cbt/shared';
-import { Tray } from '@phosphor-icons/react';
+import { Tray } from '@cbt/shared';
 import React, { useState } from 'react';
 import { AssessmentCard } from './AssessmentCard';
 import { AssessmentCatalogHeader } from './AssessmentCatalogHeader';

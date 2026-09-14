@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Broadcast, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Broadcast, CheckCircle, XCircle } from '@cbt/shared';
 import { Button, Badge, apiClient } from '@cbt/shared';
 
 export const ServerConnectionConfig: React.FC = () => {

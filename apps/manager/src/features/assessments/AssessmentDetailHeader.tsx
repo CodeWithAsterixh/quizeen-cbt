@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, PencilSimple, Copy, Trash } from '@phosphor-icons/react';
+import { ArrowLeft, PencilSimple, Copy, Trash } from '@cbt/shared';
 import { Assessment, Button } from '@cbt/shared';
 
 interface AssessmentDetailHeaderProps {

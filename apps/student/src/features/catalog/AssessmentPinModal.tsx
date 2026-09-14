@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LockKey, Play } from '@phosphor-icons/react';
+import { LockKey, Play } from '@cbt/shared';
 import { Assessment, Exam, Modal, Button, TextInput, apiClient } from '@cbt/shared';
 
 interface AssessmentPinModalProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle } from '@phosphor-icons/react';
+import { CheckCircle } from '@cbt/shared';
 import { Student, Badge } from '@cbt/shared';
 
 interface Props {

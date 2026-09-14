@@ -1,5 +1,5 @@
 import React from 'react';
-import { PencilSimple, Copy, Trash, Clock } from '@phosphor-icons/react';
+import { PencilSimple, Copy, Trash, Clock } from '@cbt/shared';
 import { Assessment, Badge, Button, getAssessmentAvailabilityInfo } from '@cbt/shared';
 
 interface AssessmentTableRowProps {

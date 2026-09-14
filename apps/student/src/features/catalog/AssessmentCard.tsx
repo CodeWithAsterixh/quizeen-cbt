@@ -1,5 +1,5 @@
 import { Assessment, Badge, Button, Card } from '@cbt/shared';
-import { CheckCircle, CheckSquareIcon, ClockIcon, LockKey, Play } from '@phosphor-icons/react';
+import { CheckCircle, CheckSquareIcon, ClockIcon, LockKey, Play } from '@cbt/shared';
 import React from 'react';
 
 interface AssessmentCardProps {

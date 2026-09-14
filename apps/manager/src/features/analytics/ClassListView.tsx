@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { MagnifyingGlass } from '@cbt/shared';
 import { Card, TextInput, Button, EDUCATION_LEVELS } from '@cbt/shared';
 import { ClassSummary } from './analytics-types';
 import { ClassCard } from './ClassCard';

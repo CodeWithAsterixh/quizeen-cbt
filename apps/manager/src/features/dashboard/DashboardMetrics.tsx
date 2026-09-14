@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Archive, Users, ClipboardText } from '@phosphor-icons/react';
+import { BookOpen, Archive, Users, ClipboardText } from '@cbt/shared';
 import { Card } from '@cbt/shared';
 
 interface DashboardMetricsProps {

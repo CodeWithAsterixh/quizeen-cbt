@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check } from '@phosphor-icons/react';
+import { Check } from '@cbt/shared';
 import { Question, Button, TextInput } from '@cbt/shared';
 
 interface QuestionOptionsEditorProps {

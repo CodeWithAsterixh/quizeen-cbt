@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WarningCircle, ArrowRight } from '@phosphor-icons/react';
+import { WarningCircle, ArrowRight } from '@cbt/shared';
 import { Student, StudentSession, LocalStore, apiClient, Modal, Button } from '@cbt/shared';
 import { OtpCodeInput } from './OtpCodeInput';
 import { StudentVerifiedCard } from './StudentVerifiedCard';

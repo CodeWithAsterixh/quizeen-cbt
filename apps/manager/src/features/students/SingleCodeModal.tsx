@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, IdentificationBadge } from '@phosphor-icons/react';
+import { Copy, Check, IdentificationBadge } from '@cbt/shared';
 import { Student, Modal, Button, Badge } from '@cbt/shared';
 
 interface Props {

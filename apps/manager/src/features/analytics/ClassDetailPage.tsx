@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, Users } from '@phosphor-icons/react';
+import { ArrowLeft, BookOpen, Users } from '@cbt/shared';
 import { Card, Button } from '@cbt/shared';
 import { ClassSummary, ClassSubjectSummary, StudentClassSummary } from './analytics-types';
 import { ClassSubjectsTab } from './ClassSubjectsTab';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Card, StudentSession } from '@cbt/shared';
-import { Tray } from '@phosphor-icons/react';
+import { Tray } from '@cbt/shared';
 
 interface Props {
   student: StudentSession;

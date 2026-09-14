@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MagicWand, FloppyDisk } from '@phosphor-icons/react';
+import { MagicWand, FloppyDisk } from '@cbt/shared';
 import { Submission, Exam, Modal, Button } from '@cbt/shared';
 import { GradeQuestionItem } from './GradeQuestionItem';
 import { useSubmissionGrading } from './useSubmissionGrading';

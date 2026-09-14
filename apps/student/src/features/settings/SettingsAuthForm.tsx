@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Key } from '@phosphor-icons/react';
+import { Key } from '@cbt/shared';
 import { Button, TextInput } from '@cbt/shared';
 
 interface SettingsAuthFormProps {

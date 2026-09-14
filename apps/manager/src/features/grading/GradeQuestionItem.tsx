@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Question, RichContent, NumberInput, TextEditor } from '@cbt/shared';
-import { Check, X, CaretDown } from '@phosphor-icons/react';
+import { Check, X, CaretDown } from '@cbt/shared';
 
 interface GradeQuestionItemProps {
   question: Question;

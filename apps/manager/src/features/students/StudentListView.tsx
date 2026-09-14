@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Users } from '@phosphor-icons/react';
+import { UserPlus, Users } from '@cbt/shared';
 import { Student, Button, Card } from '@cbt/shared';
 import { StudentHeader } from './StudentHeader';
 import { StudentCard } from './StudentCard';

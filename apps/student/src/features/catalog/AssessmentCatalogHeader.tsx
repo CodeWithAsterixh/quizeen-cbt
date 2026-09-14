@@ -1,5 +1,5 @@
 import React from 'react';
-import { SignOut, UserCircle, ArrowsClockwise } from '@phosphor-icons/react';
+import { SignOut, UserCircle, ArrowsClockwise } from '@cbt/shared';
 import { StudentSession, DEPARTMENTS, Button } from '@cbt/shared';
 
 interface AssessmentCatalogHeaderProps {
