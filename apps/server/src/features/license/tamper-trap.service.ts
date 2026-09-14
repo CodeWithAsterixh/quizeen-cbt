@@ -28,12 +28,12 @@ class TamperTrapService {
     } catch {}
   }
 
-  public verifyAndRecordTimestamp(): { valid: boolean; reason?: string } {
+  public verifyAndRecordTimestamp(overrideTime?: number): { valid: boolean; reason?: string } {
     if (this.isTampered) {
       return { valid: false, reason: 'Clock rollback previously detected' };
     }
 
-    const currentNow = Date.now();
+    const currentNow = overrideTime ?? Date.now();
     const trap = this.loadTrap();
 
     if (trap.highWaterTimestamp > 0 && currentNow < trap.highWaterTimestamp - 60000) {

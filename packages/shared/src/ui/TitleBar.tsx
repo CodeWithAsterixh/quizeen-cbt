@@ -17,12 +17,14 @@ const CloseIcon = () => (
 export interface TitleBarProps {
   title?: string;
   badge?: string;
+  iconUrl?: string;
   onClose?: () => void;
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'Queez',
   badge = 'CBT Platform',
+  iconUrl,
   onClose,
 }) => {
   const { isElectron, isMax, handleMinimize, handleMaximize, handleClose } = useTitleBar();
@@ -31,7 +33,8 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 
   return (
     <header className="title-bar" onDoubleClick={handleMaximize}>
-      <div className="title-bar-drag">
+      <div className="title-bar-drag" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {iconUrl && <img src={iconUrl} alt="Logo" style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain' }} />}
         <span className="title-bar-title">{title}</span>
         {badge && <span className="title-bar-badge">{badge}</span>}
       </div>

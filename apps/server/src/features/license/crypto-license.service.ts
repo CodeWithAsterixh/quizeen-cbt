@@ -11,7 +11,10 @@ class CryptoLicenseService {
   private licenseFile = path.join(resolveDataDir(), 'license.json');
 
   private canonicalize(obj: any): string {
-    return JSON.stringify(obj, Object.keys(obj).sort());
+    if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+    if (Array.isArray(obj)) return `[${obj.map((item) => this.canonicalize(item)).join(',')}]`;
+    const keys = Object.keys(obj).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${this.canonicalize(obj[k])}`).join(',')}}`;
   }
 
   public verifySignature(token: SignedLicenseToken): boolean {
@@ -19,7 +22,8 @@ class CryptoLicenseService {
       const pubKey = getLicensePublicKey();
       if (!pubKey) return false;
       const data = Buffer.from(this.canonicalize(token.payload), 'utf8');
-      const sig = Buffer.from(token.signature, 'hex');
+      const isHex = /^[0-9a-fA-F]+$/.test(token.signature);
+      const sig = Buffer.from(token.signature, isHex ? 'hex' : 'base64');
       return crypto.verify(null, data, pubKey, sig);
     } catch {
       return false;

@@ -19,9 +19,7 @@ export const App: React.FC = () => {
   const [pendingPinAssessment, setPendingPinAssessment] = useState<Assessment | null>(null);
   const [latestSub, setLatestSub] = useState<Submission | null>(null);
   const [view, setView] = useState<'start' | 'catalog' | 'running' | 'completed'>('start');
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
-  const [isProfileOpen, setProfileOpen] = useState(false);
-  const [isPinOpen, setPinOpen] = useState(false);
+  const [modalState, setModalState] = useState({ settings: false, profile: false, pin: false });
 
   const { licenseState, isLocked, refreshLicense } = useAppLicense();
   const { isRefreshing, handleRefresh } = useStudentSync(session, setSession, refresh);
@@ -30,18 +28,14 @@ export const App: React.FC = () => {
 
   useDeviceHeartbeat({
     status: isExamActive ? 'in_exam' : updater.phase === 'downloading' || updater.phase === 'installing' ? 'updating' : 'online',
-    currentExam: activeAssessment ? {
-      examId: activeAssessment.id, examTitle: activeAssessment.title,
-      studentName: session ? session.studentName : 'Candidate',
-    } : null,
+    currentExam: activeAssessment ? { examId: activeAssessment.id, examTitle: activeAssessment.title, studentName: session?.studentName || 'Candidate' } : null,
     updateStatus: updater.phase, updateProgress: updater.progress,
     onPushUpdateTriggered: () => { if (!isExamActive) updater.startDownload(); },
   });
 
   const handleExit = () => { setSession(null); setLatestSub(null); setView('start'); };
   const handleSelect = (a: Assessment) => {
-    if (a.unlockPin?.trim()) { setPendingPinAssessment(a); setPinOpen(true); }
-    else { setActiveAssessment(a); setView('running'); }
+    if (a.unlockPin?.trim()) { setPendingPinAssessment(a); setModalState(s => ({ ...s, pin: true })); } else { setActiveAssessment(a); setView('running'); }
   };
   const handleSubmit = async (sub: Submission) => {
     await saveSubmission(sub); setLatestSub(sub); setActiveAssessment(null); setView('completed');
@@ -51,17 +45,22 @@ export const App: React.FC = () => {
     return <LicenseLockoutScreen licenseState={licenseState} onRetry={refreshLicense} />;
   }
 
+  const branding = licenseState?.license?.branding;
   return (
     <div className="app-shell">
-      <TitleBar title="Queez" badge="Student Portal" />
+      <TitleBar
+        title={branding?.appName || branding?.schoolName || 'Queez'}
+        badge={branding?.shortName ? `${branding.shortName} Portal` : 'Student Portal'}
+        iconUrl={branding?.appIconUrl || branding?.logoUrl}
+      />
       <main className="app-content">
         {view === 'start' && (
-          <StartScreen onStartExamClick={() => { setSession(null); setProfileOpen(true); }} onOpenSettings={() => setSettingsOpen(true)} examCount={assessments.length} />
+          <StartScreen onStartExamClick={() => { setSession(null); setModalState(s => ({ ...s, profile: true })); }} onOpenSettings={() => setModalState(s => ({ ...s, settings: true }))} examCount={assessments.length} />
         )}
         {view === 'catalog' && session && (
           <AssessmentCatalog
             student={session} assessments={assessments} submissions={submissions}
-            onSelectAssessment={handleSelect} onChangeProfile={() => setProfileOpen(true)}
+            onSelectAssessment={handleSelect} onChangeProfile={() => setModalState(s => ({ ...s, profile: true }))}
             onExit={handleExit} onRefresh={handleRefresh} isRefreshing={isRefreshing}
           />
         )}
@@ -74,15 +73,15 @@ export const App: React.FC = () => {
       </main>
 
       <AppModals
-        isSettingsOpen={isSettingsOpen} onCloseSettings={() => setSettingsOpen(false)}
+        isSettingsOpen={modalState.settings} onCloseSettings={() => setModalState(s => ({ ...s, settings: false }))}
         onExamsUpdated={importAssessments} examCount={assessments.length} onClearAll={clearAllAssessments}
-        isProfileOpen={isProfileOpen} onCloseProfile={() => setProfileOpen(false)}
-        onProfileSubmit={(s) => { setSession(s); setProfileOpen(false); setView('catalog'); }}
-        session={session} pendingPinExam={pendingPinAssessment} isPinOpen={isPinOpen}
-        onClosePin={() => { setPinOpen(false); setPendingPinAssessment(null); }}
+        isProfileOpen={modalState.profile} onCloseProfile={() => setModalState(s => ({ ...s, profile: false }))}
+        onProfileSubmit={(s) => { setSession(s); setModalState(m => ({ ...m, profile: false })); setView('catalog'); }}
+        session={session} pendingPinExam={pendingPinAssessment} isPinOpen={modalState.pin}
+        onClosePin={() => { setModalState(s => ({ ...s, pin: false })); setPendingPinAssessment(null); }}
         onConfirmPin={() => {
           if (pendingPinAssessment) {
-            setActiveAssessment(pendingPinAssessment); setPendingPinAssessment(null); setPinOpen(false); setView('running');
+            setActiveAssessment(pendingPinAssessment); setPendingPinAssessment(null); setModalState(s => ({ ...s, pin: false })); setView('running');
           }
         }}
       />

@@ -4,11 +4,13 @@ import { TitleBar as SharedTitleBar } from '@cbt/shared';
 interface TitleBarProps {
   title?: string;
   badge?: string;
+  iconUrl?: string;
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'Queez',
-  badge = 'Management ',
+  badge = 'Management',
+  iconUrl,
 }) => {
-  return <SharedTitleBar title={title} badge={badge} />;
+  return <SharedTitleBar title={title} badge={badge} iconUrl={iconUrl} />;
 };

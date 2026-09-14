@@ -1,9 +1,11 @@
 export interface SchoolBrandingConfig {
   schoolName: string;
+  appName?: string;
   shortName: string;
   schoolCode: string;
   motto?: string;
   logoUrl?: string;
+  appIconUrl?: string;
   watermarkText?: string;
   headerText?: string;
 }
