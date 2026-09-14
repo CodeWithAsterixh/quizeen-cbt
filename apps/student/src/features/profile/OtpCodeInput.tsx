@@ -54,6 +54,12 @@ export const OtpCodeInput: React.FC<Props> = ({ value, onChange, onComplete, dis
           maxLength={1}
           value={chars[i] || ''}
           disabled={disabled}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          data-form-type="other"
+          data-lpignore="true"
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}

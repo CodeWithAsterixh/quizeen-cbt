@@ -48,14 +48,13 @@ export const StudentCodeModal: React.FC<Props> = ({ isOpen, onClose, onProfileSu
 
   const handleProceed = () => {
     if (!foundStudent) return;
+    const s = foundStudent;
+    setCode('');
+    setFoundStudent(null);
     onProfileSubmit({
-      studentId: foundStudent.id,
-      studentCode: foundStudent.code,
-      studentName: foundStudent.name,
-      educationLevel: foundStudent.educationLevel,
-      classGroup: foundStudent.classGroup,
-      department: foundStudent.department,
-      loggedInAt: new Date().toISOString(),
+      studentId: s.id, studentCode: s.code, studentName: s.name,
+      educationLevel: s.educationLevel, classGroup: s.classGroup,
+      department: s.department, loggedInAt: new Date().toISOString(),
     });
   };
 

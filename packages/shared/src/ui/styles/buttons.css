@@ -85,3 +85,5 @@
 .cbt-btn-sm, .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; min-height: 32px; }
 .cbt-btn-lg, .btn-lg { padding: 0.55rem 1.15rem; font-size: 0.9rem; font-weight: 600; min-height: 42px; }
 .cbt-btn-pill { border-radius: var(--radius-full); }
+@keyframes cbt-spin { to { transform: rotate(360deg); } }
+.cbt-spin { animation: cbt-spin 0.8s linear infinite; }

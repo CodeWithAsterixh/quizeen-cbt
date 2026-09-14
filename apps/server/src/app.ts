@@ -18,10 +18,16 @@ export interface RequestLogEntry {
 
 export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express.Application => {
   const app = express();
-
+  app.set('etag', false);
   app.use(cors());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+  app.use((_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+  });
 
   if (onRequest) {
     app.use((req, res, next) => {

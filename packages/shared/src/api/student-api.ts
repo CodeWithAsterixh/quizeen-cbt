@@ -3,7 +3,9 @@ import { serverConfig } from './server-config.js';
 
 export const studentApi = {
   async getStudents(): Promise<Student[]> {
-    const res = await fetch(`${serverConfig.getApiBase()}/students`);
+    const res = await fetch(`${serverConfig.getApiBase()}/students?_t=${Date.now()}`, {
+      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     if (!res.ok) return [];
     const json = (await res.json()) as { success: boolean; data: Student[] };
     return json.data || [];
@@ -11,7 +13,9 @@ export const studentApi = {
 
   async getStudentByCode(code: string): Promise<Student | null> {
     const clean = encodeURIComponent(code.trim().toUpperCase());
-    const res = await fetch(`${serverConfig.getApiBase()}/students/code/${clean}`);
+    const res = await fetch(`${serverConfig.getApiBase()}/students/code/${clean}?_t=${Date.now()}`, {
+      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     if (!res.ok) return null;
     const json = (await res.json()) as { success: boolean; data: Student };
     return json.data || null;

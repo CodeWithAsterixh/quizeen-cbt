@@ -18,7 +18,11 @@ export const apiClient = {
     if (filters?.targetClass) params.append('targetClass', filters.targetClass);
     if (filters?.department) params.append('department', filters.department);
     if (filters?.assessmentType) params.append('assessmentType', filters.assessmentType);
-    const res = await fetch(`${serverConfig.getApiBase()}/assessments?${params.toString()}`);
+    params.append('_t', Date.now().toString());
+    const res = await fetch(`${serverConfig.getApiBase()}/assessments?${params.toString()}`, {
+      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
+    if (!res.ok) return [];
     return ((await res.json()) as any).data || [];
   },
 
@@ -56,8 +60,12 @@ export const apiClient = {
   },
 
   async getSubmissions(examId?: string): Promise<Submission[]> {
-    const url = examId ? `${serverConfig.getApiBase()}/submissions?examId=${examId}` : `${serverConfig.getApiBase()}/submissions`;
-    return ((await (await fetch(url)).json()) as any).data || [];
+    const sep = examId ? `?examId=${encodeURIComponent(examId)}&` : '?';
+    const res = await fetch(`${serverConfig.getApiBase()}/submissions${sep}_t=${Date.now()}`, {
+      cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
+    if (!res.ok) return [];
+    return ((await res.json()) as any).data || [];
   },
 
   async gradeSubmission(id: string, answers: Record<string, { awardedPoints: number }>): Promise<Submission> {

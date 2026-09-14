@@ -8,32 +8,40 @@ export function useStudentAppStore() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        if (await apiClient.isAvailable()) {
-          const remote = await apiClient.getAssessments();
-          setAssessments(remote || []);
+  const refresh = async () => {
+    try {
+      if (await apiClient.isAvailable()) {
+        const [remote, remoteSubs] = await Promise.all([
+          apiClient.getAssessments(),
+          apiClient.getSubmissions(),
+        ]);
+        if (remote) {
+          setAssessments(remote);
           await assessmentStore.clear();
-          if (remote && remote.length > 0) {
-            await assessmentStore.saveBatch(remote);
-          }
-          const remoteSubs = await apiClient.getSubmissions();
-          setSubmissions(remoteSubs || []);
-          await submissionStore.clear();
-          if (remoteSubs && remoteSubs.length > 0) {
-            await submissionStore.saveBatch(remoteSubs);
-          }
-          return;
+          if (remote.length > 0) await assessmentStore.saveBatch(remote);
         }
-      } catch {
-        // fallback to local storage
+        if (remoteSubs) {
+          setSubmissions(remoteSubs);
+          await submissionStore.clear();
+          if (remoteSubs.length > 0) await submissionStore.saveBatch(remoteSubs);
+        }
+        return;
       }
-      const stored = await assessmentStore.getAll();
-      setAssessments(stored);
-      setSubmissions(await submissionStore.getAll());
+    } catch {}
+    const stored = await assessmentStore.getAll();
+    setAssessments(stored);
+    setSubmissions(await submissionStore.getAll());
+  };
+
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(refresh, 4000);
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
     };
-    init();
   }, []);
 
   const saveSubmission = async (sub: Submission) => {
@@ -76,12 +84,9 @@ export function useStudentAppStore() {
   };
 
   return {
-    assessments, exams: assessments,
-    submissions,
-    saveSubmission,
-    importAssessments, importExams: importAssessments,
-    resetToDefaults,
-    clearAllAssessments, clearAllExams: clearAllAssessments,
+    assessments, exams: assessments, submissions, refresh,
+    saveSubmission, importAssessments, importExams: importAssessments,
+    resetToDefaults, clearAllAssessments, clearAllExams: clearAllAssessments,
   };
 }
 

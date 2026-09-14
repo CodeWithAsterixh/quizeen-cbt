@@ -33,6 +33,18 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
     if (isOpen) {
       setActiveTab(initialExam ? initialTab : 'settings');
       setEditingQIndex(null);
+      setSubject(initialExam?.subject ?? 'Mathematics');
+      setSession(initialExam?.session ?? '2024/2025');
+      setAssessmentType(initialExam?.assessmentType ?? 'test');
+      setIsAvailable(initialExam?.isAvailable ?? true);
+      setAvailableFrom(initialExam?.availableFrom ?? '');
+      setAvailableTo(initialExam?.availableTo ?? '');
+      setDurationMinutes(initialExam?.durationMinutes ?? 30);
+      setPassingScore(initialExam?.passingScore ?? 50);
+      setEducationLevel(initialExam?.educationLevel ?? 'senior_secondary');
+      setSelectedClasses(initialExam?.targetClasses ?? ['SSS 2']);
+      setDepartment(initialExam?.department);
+      setQuestions(initialExam?.questions ?? [{ id: `q_${Date.now()}`, prompt: 'Sample Question 1', type: 'multiple_choice', options: ['Option A', 'Option B', 'Option C', 'Option D'], correctAnswer: 'Option A', points: 10 }]);
     }
   }, [isOpen, initialExam, initialTab]);
 
@@ -62,12 +74,8 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={initialExam ? `Edit: ${initialExam.subject}` : 'Create New Assessment'} subtitle="Manage assessment settings and questions" maxWidth={880}>
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--color-border)', paddingBottom: 10 }}>
-          <Button type="button" variant={activeTab === 'questions' ? 'primary' : 'outline'} size="sm" icon={<ListNumbers size={18} />} onClick={() => setActiveTab('questions')}>
-            Questions ({questions.length})
-          </Button>
-          <Button type="button" variant={activeTab === 'settings' ? 'primary' : 'outline'} size="sm" icon={<Gear size={18} />} onClick={() => setActiveTab('settings')}>
-            Settings & Availability
-          </Button>
+          <Button type="button" variant={activeTab === 'questions' ? 'primary' : 'outline'} size="sm" icon={<ListNumbers size={18} />} onClick={() => setActiveTab('questions')}>Questions ({questions.length})</Button>
+          <Button type="button" variant={activeTab === 'settings' ? 'primary' : 'outline'} size="sm" icon={<Gear size={18} />} onClick={() => setActiveTab('settings')}>Settings & Availability</Button>
         </div>
         {activeTab === 'questions' ? (
           <QuestionsListTab questions={questions} editingIndex={editingQIndex} setEditingIndex={setEditingQIndex} onAddQuestion={handleAddQ} onUpdateQuestion={(i, upd) => { const copy = [...questions]; copy[i] = { ...copy[i], ...upd }; setQuestions(copy); }} onDeleteQuestion={(i) => { setQuestions(questions.filter((_, idx) => idx !== i)); setEditingQIndex(null); }} />

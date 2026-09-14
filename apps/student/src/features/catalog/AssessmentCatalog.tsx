@@ -11,13 +11,13 @@ interface AssessmentCatalogProps {
   onSelectAssessment: (assessment: Assessment) => void;
   onChangeProfile?: () => void;
   onExit: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
-  student, assessments, submissions, onSelectAssessment, onChangeProfile, onExit,
+  student, assessments, submissions, onSelectAssessment, onChangeProfile, onExit, onRefresh, isRefreshing,
 }) => {
-  const exams = assessments;
-  const onSelectExam = onSelectAssessment;
   const [typeFilter, setTypeFilter] = useState<'all' | 'test' | 'exam'>('all');
   const submittedExamIds = new Set(
     submissions
@@ -25,8 +25,8 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
       .map((s) => s.examId)
   );
 
-  const filteredExams = exams.filter((exam) => {
-    if (!isAssessmentAvailable(exam)) return false;
+  const filteredExams = assessments.filter((exam) => {
+    if (exam.isAvailable === false || exam.isPublished === false || !isAssessmentAvailable(exam)) return false;
     if (exam.educationLevel && exam.educationLevel !== student.educationLevel) return false;
     if (exam.targetClasses && exam.targetClasses.length > 0) {
       const match = exam.targetClasses.some(
@@ -43,7 +43,7 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
 
   return (
     <main style={{ padding: '32px 40px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-      <AssessmentCatalogHeader student={student} onExit={onExit} onChangeProfile={onChangeProfile} />
+      <AssessmentCatalogHeader student={student} onExit={onExit} onRefresh={onRefresh} isRefreshing={isRefreshing} onChangeProfile={onChangeProfile} />
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {(['all', 'test', 'exam'] as const).map((t) => (
@@ -67,14 +67,21 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: 20 }}>
             There are no active {typeFilter === 'all' ? 'assessments' : typeFilter === 'test' ? 'tests' : 'exams'} scheduled right now for <strong>{student.classGroup}</strong>.
           </p>
-          <Button variant="secondary" onClick={onExit}>
-            Leave Exam Room
-          </Button>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            {onRefresh && (
+              <Button variant="primary" onClick={onRefresh} disabled={isRefreshing}>
+                {isRefreshing ? 'Refreshing...' : 'Check Again'}
+              </Button>
+            )}
+            <Button variant="secondary" onClick={onExit}>
+              Leave Exam Room
+            </Button>
+          </div>
         </Card>
       ) : (
         <section aria-label="Available assessments list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
           {filteredExams.map((exam) => (
-            <AssessmentCard key={exam.id} assessment={exam} isSubmitted={submittedExamIds.has(exam.id)} onSelectAssessment={onSelectExam} />
+            <AssessmentCard key={exam.id} assessment={exam} isSubmitted={submittedExamIds.has(exam.id)} onSelectAssessment={onSelectAssessment} />
           ))}
         </section>
       )}
