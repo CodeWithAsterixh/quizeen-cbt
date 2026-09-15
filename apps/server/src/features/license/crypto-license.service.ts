@@ -81,6 +81,12 @@ class CryptoLicenseService {
       return { success: false, state: this.getLicenseState(), error: err?.message || 'Activation failed' };
     }
   }
+
+  public removeLicense(): void {
+    if (fs.existsSync(this.licenseFile)) {
+      try { fs.unlinkSync(this.licenseFile); } catch {}
+    }
+  }
 }
 
 export const cryptoLicenseService = new CryptoLicenseService();

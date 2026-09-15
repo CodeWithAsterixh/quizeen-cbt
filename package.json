@@ -1,6 +1,6 @@
 {
   "name": "cbt-system-prototype",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -18,6 +18,7 @@
     "server:build": "npm --workspace=apps/server run build",
     "release": "node scripts/build-release.js",
     "release:suite": "node scripts/build-release.js",
+    "package:setup": "node scripts/package-setup.js",
     "release:bump": "node scripts/bump-version.js",
     "release:icons": "node scripts/generate-icons.js",
     "api:audit": "node scripts/audit-api-routes.js",

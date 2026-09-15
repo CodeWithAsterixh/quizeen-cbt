@@ -6,40 +6,41 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
   const [tokenInput, setTokenInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
-  const getUrl = useCallback((path: string) => `http://127.0.0.1:${port}/api/${path}`, [port]);
+  const getUrl = useCallback((p: string) => `http://127.0.0.1:${port}/api/${p}`, [port]);
 
   const fetchStatus = useCallback(async () => {
-    try {
-      const res = await fetch(getUrl('license'));
-      if (res.ok) setState((await res.json()).data);
-    } catch {}
+    try { const res = await fetch(getUrl('license')); if (res.ok) setState((await res.json()).data); } catch {}
   }, [getUrl]);
-
   useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
   const handleCopyHw = () => {
-    if (!state?.hardwareId) return;
-    navigator.clipboard.writeText(state.hardwareId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (state?.hardwareId) { navigator.clipboard.writeText(state.hardwareId); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+  };
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = (ev) => { const t = ev.target?.result as string; if (t) setTokenInput(t.trim()); };
+    r.readAsText(f);
   };
 
   const handleActivate = async () => {
     setMsg(null);
     try {
-      const res = await fetch(getUrl('license/activate'), {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tokenInput.trim() }),
-      });
+      const res = await fetch(getUrl('license/activate'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: tokenInput.trim(), token: tokenInput.trim() }) });
       const data = await res.json();
-      if (data.success) {
-        setMsg({ type: 'ok', text: 'License activated successfully.' });
-        setState(data.state);
-        setTokenInput('');
-      } else setMsg({ type: 'err', text: data.error || 'Activation failed.' });
-    } catch (err: any) {
-      setMsg({ type: 'err', text: err?.message || 'Server connection failed.' });
-    }
+      if (data.success) { setMsg({ type: 'ok', text: 'License activated.' }); setState(data.state); setTokenInput(''); }
+      else setMsg({ type: 'err', text: data.error || 'Activation failed.' });
+    } catch (err: any) { setMsg({ type: 'err', text: err?.message || 'Server connection failed.' }); }
+  };
+
+  const handleSync = async () => {
+    setMsg(null);
+    try {
+      const res = await fetch(getUrl('license/sync'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const data = await res.json();
+      setMsg({ type: data.success ? 'ok' : 'err', text: data.message || 'Sync complete.' });
+      if (data.state) setState(data.state);
+    } catch (err: any) { setMsg({ type: 'err', text: err?.message || 'Sync failed.' }); }
   };
 
   return (
@@ -50,9 +51,10 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Server License & Customization</h3>
             <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>Hardware binding and term activation</p>
           </div>
-          <Badge color={state?.status === 'active' ? 'emerald' : state?.status === 'expired' ? 'amber' : 'rose'}>
-            {state?.status?.toUpperCase() || 'UNLICENSED'}
-          </Badge>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {state?.status === 'active' && <Button size="sm" variant="secondary" onClick={handleSync}>Sync Status</Button>}
+            <Badge color={state?.status === 'active' ? 'emerald' : state?.status === 'expired' ? 'amber' : 'rose'}>{state?.status?.toUpperCase() || 'UNLICENSED'}</Badge>
+          </div>
         </div>
 
         <div style={{ background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 4, marginBottom: 14, border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -60,18 +62,12 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-subtle)' }}>SERVER HARDWARE ID</div>
             <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.95rem' }}>{state?.hardwareId || 'Computing...'}</span>
           </div>
-          <Button size="sm" variant="secondary" onClick={handleCopyHw} icon={copied ? <Check size={14} /> : <Copy size={14} />}>
-            {copied ? 'Copied' : 'Copy'}
-          </Button>
+          <Button size="sm" variant="secondary" onClick={handleCopyHw} icon={copied ? <Check size={14} /> : <Copy size={14} />}>{copied ? 'Copied' : 'Copy'}</Button>
         </div>
 
         {state?.license && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 14 }}>
-            {[
-              ['School Name', state.license.branding.schoolName],
-              ['Term & Validity', `${state.license.term} (${state.daysRemaining} days left)`],
-              ['Station Quota', `${state.license.stationLimit} Student Stations`],
-            ].map(([lbl, val]) => (
+            {[['School Name', state.license.branding.schoolName], ['Term & Validity', `${state.license.term} (${state.daysRemaining} days left)`], ['Station Quota', `${state.license.stationLimit} Student Stations`]].map(([lbl, val]) => (
               <div key={lbl} style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>{lbl}</span>
                 <strong style={{ fontSize: '0.9rem' }}>{val}</strong>
@@ -80,12 +76,18 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
           </div>
         )}
 
-        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>Activate New License Token</div>
+        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Activate Server (16-Digit Key or File)</span>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}>
+              Load .qznlic File
+              <input type="file" accept=".qznlic,.json" style={{ display: 'none' }} onChange={handleFile} />
+            </label>
+          </div>
           {msg && <div style={{ padding: '6px 10px', borderRadius: 4, marginBottom: 8, fontSize: '0.8rem', background: msg.type === 'ok' ? '#ecfdf5' : '#fef2f2', color: msg.type === 'ok' ? '#047857' : '#b91c1c' }}>{msg.text}</div>}
-          <textarea value={tokenInput} onChange={(e) => setTokenInput(e.target.value)} placeholder="Paste signed license JSON token here..." style={{ width: '100%', height: 60, padding: '8px', fontSize: '0.75rem', fontFamily: 'monospace', borderRadius: 4, border: '1px solid var(--color-border)', marginBottom: 8 }} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button size="sm" variant="primary" onClick={handleActivate} disabled={!tokenInput.trim()} icon={<LockKey size={14} />}>Activate License</Button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input value={tokenInput} onChange={(e) => setTokenInput(e.target.value)} placeholder="XXXX-XXXX-XXXX-XXXX or token" style={{ flex: 1, padding: '8px 10px', fontSize: '0.85rem', fontFamily: 'monospace', borderRadius: 4, border: '1px solid var(--color-border)' }} />
+            <Button size="sm" variant="primary" onClick={handleActivate} disabled={!tokenInput.trim()} icon={<LockKey size={14} />}>Activate</Button>
           </div>
         </div>
       </div>
