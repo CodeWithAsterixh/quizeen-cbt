@@ -1,6 +1,6 @@
 {
   "name": "cbt-system-prototype",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "workspaces": [
     "packages/*",
