@@ -3,11 +3,16 @@ import { LicenseState } from '../types/license.js';
 import { serverConfig } from './server-config.js';
 import { applyThemeCustomization } from '../ui/theme-engine.js';
 
+// Grace period before showing lockout on initial failure.
+// Gives UDP discovery time to detect and switch to the real server IP.
+const DISCOVERY_GRACE_MS = 6000;
+
 export function useAppLicense() {
   const [licenseState, setLicenseState] = useState<LicenseState | null>(null);
   const [hasResolved, setHasResolved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isFetchingRef = useRef(false);
+  const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchLicense = useCallback(async (isInitial = false) => {
     if (isFetchingRef.current) return;
@@ -22,6 +27,9 @@ export function useAppLicense() {
       if (state.license?.theme || state.license?.branding) {
         applyThemeCustomization(state.license.theme, state.license.branding);
       }
+      // Cancel any pending grace timer - we have a real result
+      if (graceTimerRef.current) { clearTimeout(graceTimerRef.current); graceTimerRef.current = null; }
+      setHasResolved(true);
     } catch (err: any) {
       setError(err?.message || 'Server unreachable');
       setLicenseState((prev) => {
@@ -32,11 +40,21 @@ export function useAppLicense() {
           message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
         };
       });
+      if (isInitial && !hasResolved) {
+        // Don't immediately lock - wait for UDP discovery to auto-switch URL first
+        if (!graceTimerRef.current) {
+          graceTimerRef.current = setTimeout(() => {
+            graceTimerRef.current = null;
+            setHasResolved(true);
+          }, DISCOVERY_GRACE_MS);
+        }
+      } else {
+        setHasResolved(true);
+      }
     } finally {
       isFetchingRef.current = false;
-      setHasResolved(true);
     }
-  }, []);
+  }, [hasResolved]);
 
   useEffect(() => {
     fetchLicense(true);
@@ -46,6 +64,7 @@ export function useAppLicense() {
     return () => {
       window.removeEventListener('cbt:server-changed', handleServerChange);
       clearInterval(interval);
+      if (graceTimerRef.current) clearTimeout(graceTimerRef.current);
     };
   }, [fetchLicense]);
 

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DiscoveredServer } from '../types/server-discovery.js';
 import { serverConfig } from './server-config.js';
 
+const DEFAULT_URL = 'http://localhost:4000';
+
 interface BeaconPayload {
   ip: string;
   port: number;
@@ -46,30 +48,29 @@ export function useDiscoveredServers() {
         let changed = false;
         const next = new Map(prev);
         for (const [key, val] of next.entries()) {
-          if (val.lastSeen < cutoff) {
-            next.delete(key);
-            changed = true;
-          }
+          if (val.lastSeen < cutoff) { next.delete(key); changed = true; }
         }
         return changed ? next : prev;
       });
     }, 2500);
 
-    return () => {
-      cleanup?.();
-      clearInterval(pruner);
-    };
+    return () => { cleanup?.(); clearInterval(pruner); };
   }, []);
 
   const servers = useMemo(() => Array.from(serverMap.values()), [serverMap]);
+
+  // Auto-connect: if exactly 1 server is discovered and we haven't been manually configured,
+  // switch to it silently. If multiple servers are found, present the picker - don't guess.
+  useEffect(() => {
+    if (servers.length !== 1) return;
+    const current = serverConfig.getUrl();
+    if (current !== DEFAULT_URL) return;
+    serverConfig.setUrl(servers[0].url);
+  }, [servers]);
 
   const connectTo = useCallback((url: string) => {
     serverConfig.setUrl(url);
   }, []);
 
-  return {
-    servers,
-    activeUrl,
-    connectTo,
-  };
+  return { servers, activeUrl, connectTo };
 }
