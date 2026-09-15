@@ -10,6 +10,7 @@ import { studentsRouter } from './features/students/students.routes.js';
 import { deviceRouter } from './features/devices/device.routes.js';
 import { updateRouter } from './features/updates/update.routes.js';
 import { licenseRouter } from './features/license/license.routes.js';
+import { licenseGuardMiddleware } from './core/middleware/license-guard.js';
 
 export interface RequestLogEntry {
   id: string;
@@ -59,12 +60,12 @@ export const createApp = (onRequest?: (entry: RequestLogEntry) => void): express
     res.json({ status: 'ok', service: 'cbt-server', timestamp: getLocalIsoTimestamp() });
   });
 
-  app.use('/api/assessments', assessmentRouter);
-  app.use('/api/exams', assessmentRouter);
-  app.use('/api/submissions', submissionRouter);
-  app.use('/api/packages', packageRouter);
-  app.use('/api/analytics', analyticsRouter);
-  app.use('/api/students', studentsRouter);
+  app.use('/api/assessments', licenseGuardMiddleware, assessmentRouter);
+  app.use('/api/exams', licenseGuardMiddleware, assessmentRouter);
+  app.use('/api/submissions', licenseGuardMiddleware, submissionRouter);
+  app.use('/api/packages', licenseGuardMiddleware, packageRouter);
+  app.use('/api/analytics', licenseGuardMiddleware, analyticsRouter);
+  app.use('/api/students', licenseGuardMiddleware, studentsRouter);
   app.use('/api/devices', deviceRouter);
   app.use('/api/updates', updateRouter);
   app.use('/api/license', licenseRouter);

@@ -13,14 +13,20 @@ export function useAppLicense() {
       setIsLoading(true);
       const res = await fetch(`${serverConfig.getUrl()}/api/license`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: LicenseState = await res.json();
-      setLicenseState(data);
+      const body = await res.json();
+      const state: LicenseState = body?.data || body;
+      setLicenseState(state);
       setError(null);
-      if (data.license?.theme || data.license?.branding) {
-        applyThemeCustomization(data.license.theme, data.license.branding);
+      if (state.license?.theme || state.license?.branding) {
+        applyThemeCustomization(state.license.theme, state.license.branding);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to check license');
+      setLicenseState({
+        status: 'unlicensed',
+        hardwareId: 'Server Offline',
+        message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
+      });
+      setError(err?.message || 'Server unreachable');
     } finally {
       setIsLoading(false);
     }
@@ -30,18 +36,20 @@ export function useAppLicense() {
     fetchLicense();
     const handleServerChange = () => fetchLicense();
     window.addEventListener('cbt:server-changed', handleServerChange);
-    const interval = setInterval(fetchLicense, 60000);
+    const interval = setInterval(fetchLicense, 15000);
     return () => {
       window.removeEventListener('cbt:server-changed', handleServerChange);
       clearInterval(interval);
     };
   }, [fetchLicense]);
 
+  const isLocked = isLoading ? true : licenseState?.status !== 'active';
+
   return {
     licenseState,
     isLoading,
     error,
     refreshLicense: fetchLicense,
-    isLocked: licenseState ? licenseState.status !== 'active' : false,
+    isLocked,
   };
 }
