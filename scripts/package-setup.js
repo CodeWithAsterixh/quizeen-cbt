@@ -24,22 +24,39 @@ function runAsync(cmd, cwd = root) {
 }
 
 function findMakeNsis() {
+  // Prefer system-installed 64-bit NSIS (avoids 32-bit mmap hang on >1 GB payloads)
+  const systemPaths = [
+    'C:\\Program Files (x86)\\NSIS\\makensis.exe',
+    'C:\\Program Files\\NSIS\\makensis.exe',
+  ];
+  for (const p of systemPaths) {
+    if (fs.existsSync(p)) {
+      console.log(`Using system NSIS: ${p}`);
+      return p;
+    }
+  }
+  // Try PATH
   try {
     const out = execSync('where.exe makensis', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     if (out) return out.split(/\r?\n/)[0];
   } catch {}
+  // Fall back to 32-bit electron-builder cache - will hang on payloads >600 MB
   const cacheDir = path.join(process.env.LOCALAPPDATA || '', 'electron-builder', 'Cache');
   if (fs.existsSync(cacheDir)) {
     for (const entry of fs.readdirSync(cacheDir).filter((e) => e.startsWith('nsis-'))) {
       const nsisDir = path.join(cacheDir, entry);
       for (const s of fs.readdirSync(nsisDir)) {
         for (const p of [path.join(nsisDir, s, 'Bin', 'makensis.exe'), path.join(nsisDir, s, 'makensis.exe')]) {
-          if (fs.existsSync(p)) return p;
+          if (fs.existsSync(p)) {
+            console.warn(`WARNING: Falling back to 32-bit NSIS. This WILL hang on a 1.2 GB payload.`);
+            console.warn(`Install 64-bit NSIS from: https://nsis.sourceforge.io/Download`);
+            return p;
+          }
         }
       }
     }
   }
-  throw new Error('makensis.exe not found in electron-builder Cache or PATH.');
+  throw new Error('makensis.exe not found. Install NSIS from https://nsis.sourceforge.io/Download');
 }
 
 async function main() {
@@ -57,7 +74,7 @@ async function main() {
   console.log('\n--- Compiling Unified Suite Setup ---');
   const makensis = findMakeNsis();
   const outInstaller = path.join(releaseDir, `Queez-CBT-Suite-Setup-v${version}.exe`);
-  const nsisCmd = `"${makensis}" /DVERSION="${version}" /DOUT_FILE="${outInstaller}" ` +
+  const nsisCmd = `"${makensis}" /V3 /DVERSION="${version}" /DOUT_FILE="${outInstaller}" ` +
     `/DSERVER_DIR="${path.join(root, 'apps/server/release/win-unpacked')}" ` +
     `/DMANAGER_DIR="${path.join(root, 'apps/manager/release/win-unpacked')}" ` +
     `/DSTUDENT_DIR="${path.join(root, 'apps/student/release/win-unpacked')}" ` +
