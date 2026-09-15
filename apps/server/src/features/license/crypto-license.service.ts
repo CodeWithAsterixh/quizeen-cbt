@@ -5,7 +5,7 @@ import { LicenseState, SignedLicenseToken } from '@cbt/shared';
 import { resolveDataDir } from '../../core/db/database.js';
 import { getHardwareId } from './hardware.service.js';
 import { tamperTrapService } from './tamper-trap.service.js';
-import { getLicensePublicKey } from './license-key.service.js';
+import { getLicensePublicKey, clearCachedLicenseKey } from './license-key.service.js';
 
 class CryptoLicenseService {
   private licenseFile = path.join(resolveDataDir(), 'license.json');
@@ -68,6 +68,7 @@ class CryptoLicenseService {
 
   public activateLicense(tokenString: string): { success: boolean; state: LicenseState; error?: string } {
     try {
+      clearCachedLicenseKey();
       const parsed: SignedLicenseToken = JSON.parse(tokenString.trim());
       if (!parsed.payload || !parsed.signature) {
         return { success: false, state: this.getLicenseState(), error: 'Invalid token format' };

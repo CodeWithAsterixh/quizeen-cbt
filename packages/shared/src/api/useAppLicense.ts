@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { LicenseState } from '../types/license.js';
 import { serverConfig } from './server-config.js';
 import { applyThemeCustomization } from '../ui/theme-engine.js';
 
 export function useAppLicense() {
   const [licenseState, setLicenseState] = useState<LicenseState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasResolved, setHasResolved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isFetchingRef = useRef(false);
 
-  const fetchLicense = useCallback(async () => {
+  const fetchLicense = useCallback(async (isInitial = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
-      setIsLoading(true);
       const res = await fetch(`${serverConfig.getUrl()}/api/license`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
@@ -21,35 +23,39 @@ export function useAppLicense() {
         applyThemeCustomization(state.license.theme, state.license.branding);
       }
     } catch (err: any) {
-      setLicenseState({
-        status: 'unlicensed',
-        hardwareId: 'Server Offline',
-        message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
-      });
       setError(err?.message || 'Server unreachable');
+      setLicenseState((prev) => {
+        if (prev?.status === 'active' && !isInitial) return prev;
+        return {
+          status: 'unlicensed',
+          hardwareId: 'Server Offline',
+          message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
+        };
+      });
     } finally {
-      setIsLoading(false);
+      isFetchingRef.current = false;
+      setHasResolved(true);
     }
   }, []);
 
   useEffect(() => {
-    fetchLicense();
-    const handleServerChange = () => fetchLicense();
+    fetchLicense(true);
+    const handleServerChange = () => fetchLicense(false);
     window.addEventListener('cbt:server-changed', handleServerChange);
-    const interval = setInterval(fetchLicense, 15000);
+    const interval = setInterval(() => fetchLicense(false), 15000);
     return () => {
       window.removeEventListener('cbt:server-changed', handleServerChange);
       clearInterval(interval);
     };
   }, [fetchLicense]);
 
-  const isLocked = isLoading ? true : licenseState?.status !== 'active';
+  const isLocked = Boolean(hasResolved && licenseState && licenseState.status !== 'active');
 
   return {
     licenseState,
-    isLoading,
+    isLoading: !hasResolved,
     error,
-    refreshLicense: fetchLicense,
+    refreshLicense: () => fetchLicense(false),
     isLocked,
   };
 }
