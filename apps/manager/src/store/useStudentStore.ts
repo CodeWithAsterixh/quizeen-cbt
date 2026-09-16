@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Student, LocalStore, apiClient, generateStudentCode } from '@cbt/shared';
-
+import { Student, LocalStore, apiClient } from '@cbt/shared';
 import { generateSingleCode, generateBatchCodes } from './studentCodeGen';
 
 const studentStore = new LocalStore<Student>('students');
@@ -12,9 +11,22 @@ export function useStudentStore() {
     try {
       if (await apiClient.isAvailable()) {
         const remote = await apiClient.getStudents();
-        setStudents(remote);
-        await studentStore.clear();
-        if (remote.length > 0) await studentStore.saveBatch(remote);
+        const local = await studentStore.getAll();
+        const remoteMap = new Map((remote || []).map((s) => [s.id, s]));
+
+        for (const s of local) {
+          const rem = remoteMap.get(s.id);
+          if (!rem || (s.code && s.code !== rem.code)) {
+            try { await apiClient.saveStudent(s); } catch {}
+          }
+        }
+
+        const map = new Map<string, Student>();
+        local.forEach((s) => map.set(s.id, s));
+        (remote || []).forEach((s) => map.set(s.id, s));
+        const merged = Array.from(map.values());
+        if (merged.length > 0) await studentStore.saveBatch(merged);
+        setStudents(merged);
         return;
       }
     } catch {}
@@ -48,12 +60,22 @@ export function useStudentStore() {
   const generateCodeForStudent = async (studentId: string): Promise<string> => {
     const res = await generateSingleCode(studentId, students, studentStore);
     setStudents(res.updatedStudents);
+    try {
+      const s = res.updatedStudents.find((st) => st.id === studentId);
+      if (s && (await apiClient.isAvailable())) await apiClient.saveStudent(s);
+    } catch {}
     return res.code;
   };
 
   const generateCodesForStudents = async (studentIds: string[]): Promise<{ success: boolean; message: string }> => {
     const res = await generateBatchCodes(studentIds, students, studentStore);
     setStudents(res.updatedStudents);
+    try {
+      if (await apiClient.isAvailable()) {
+        const targets = res.updatedStudents.filter((s) => studentIds.includes(s.id));
+        for (const t of targets) await apiClient.saveStudent(t);
+      }
+    } catch {}
     return { success: res.success, message: res.message };
   };
 

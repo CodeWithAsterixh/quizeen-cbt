@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTitleBar } from './useTitleBar.js';
+import { serverConfig } from '../api/server-config.js';
 
 const MinusIcon = () => (
   <svg width="10" height="2" viewBox="0 0 10 2" fill="currentColor"><rect width="10" height="2" /></svg>
@@ -28,6 +29,23 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   onClose,
 }) => {
   const { isElectron, isMax, handleMinimize, handleMaximize, handleClose } = useTitleBar();
+  const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let unmounted = false;
+    const check = async () => {
+      const res = await serverConfig.testConnection(undefined, true);
+      if (!unmounted) setIsServerOnline(res.ok);
+    };
+    check();
+    const interval = setInterval(check, 4000);
+    window.addEventListener('cbt:server-changed', check);
+    return () => {
+      unmounted = true;
+      clearInterval(interval);
+      window.removeEventListener('cbt:server-changed', check);
+    };
+  }, []);
 
   if (!isElectron) return null;
 
@@ -37,6 +55,19 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         {iconUrl && <img src={iconUrl} alt="Logo" style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain' }} />}
         <span className="title-bar-title">{title}</span>
         {badge && <span className="title-bar-badge">{badge}</span>}
+        {isServerOnline !== null && (
+          <span
+            style={{
+              fontSize: 10, padding: '2px 6px', borderRadius: 8, fontWeight: 600,
+              background: isServerOnline ? '#ecfdf5' : '#fef3c7',
+              color: isServerOnline ? '#059669' : '#d97706',
+              border: `1px solid ${isServerOnline ? '#a7f3d0' : '#fde68a'}`,
+            }}
+            title={isServerOnline ? 'Connected to Central Server' : 'Central Server Disconnected: Working Offline'}
+          >
+            {isServerOnline ? 'Server Online' : 'Offline Mode'}
+          </span>
+        )}
       </div>
 
       <div className="title-bar-controls">
