@@ -1,3 +1,5 @@
+process.env.WS_NO_BUFFER_UTIL = 'true';
+process.env.WS_NO_UTF_8_VALIDATE = 'true';
 import http from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 

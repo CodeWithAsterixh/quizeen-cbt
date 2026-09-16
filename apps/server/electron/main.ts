@@ -1,10 +1,13 @@
+process.env.WS_NO_BUFFER_UTIL = 'true';
+process.env.WS_NO_UTF_8_VALIDATE = 'true';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ServerManager } from './server-manager.js';
 import { onServerThemeChange } from '../src/features/theme/theme.routes.js';
 import { themeService } from '../src/features/theme/theme.service.js';
-import { applyRuntimeBranding } from './branding-service.js';
+import { applyRuntimeBranding, applyCachedBranding } from './branding-service.js';
+import { cryptoLicenseService } from '../src/features/license/crypto-license.service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let mainWindow: BrowserWindow | null = null;
@@ -36,19 +39,12 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => mainWindow?.show());
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F12' && input.type === 'keyDown') {
-      mainWindow?.webContents.toggleDevTools();
-      event.preventDefault();
-    }
+  mainWindow.webContents.on('before-input-event', (e, input) => {
+    if (input.key === 'F12' && input.type === 'keyDown') { mainWindow?.webContents.toggleDevTools(); e.preventDefault(); }
   });
-
   const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5176';
-  if (!app.isPackaged) {
-    mainWindow.loadURL(devUrl);
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-  }
+  if (!app.isPackaged) mainWindow.loadURL(devUrl);
+  else mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
 }
 
 app.whenReady().then(() => {
@@ -59,8 +55,21 @@ app.whenReady().then(() => {
       : path.join(app.getPath('userData'), 'data');
   }
   createWindow();
+  try {
+    const lic = cryptoLicenseService.getLicenseState();
+    if (lic.status === 'active' && lic.license?.branding) {
+      applyRuntimeBranding(lic.license.branding, mainWindow);
+    } else { applyCachedBranding(mainWindow); }
+  } catch { applyCachedBranding(mainWindow); }
 
-  ipcMain.handle('server:start', async (_e, port) => serverManager.start(port));
+  ipcMain.handle('server:start', async (_e, port) => {
+    const res = await serverManager.start(port);
+    try {
+      const lic = cryptoLicenseService.getLicenseState();
+      if (lic.status === 'active' && lic.license?.branding) applyRuntimeBranding(lic.license.branding, mainWindow);
+    } catch {}
+    return res;
+  });
   ipcMain.handle('server:stop', async () => { serverManager.stop(); return true; });
   ipcMain.handle('server:get-status', async () => serverManager.getStatus());
   ipcMain.handle('server:detect', async (_e, port) => serverManager.detectExisting(port));
@@ -69,12 +78,8 @@ app.whenReady().then(() => {
 
   ipcMain.on('window:minimize', () => mainWindow?.minimize());
   ipcMain.handle('window:maximize', () => {
-    if (mainWindow?.isMaximized()) {
-      mainWindow.unmaximize();
-      return false;
-    }
-    mainWindow?.maximize();
-    return true;
+    if (mainWindow?.isMaximized()) { mainWindow.unmaximize(); return false; }
+    mainWindow?.maximize(); return true;
   });
   ipcMain.on('window:close', () => mainWindow?.close());
   ipcMain.handle('window:isMaximized', () => mainWindow?.isMaximized() ?? false);

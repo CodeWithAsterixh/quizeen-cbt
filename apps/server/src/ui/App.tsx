@@ -19,17 +19,22 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
+  const [branding, setBranding] = useState<any>(null);
+
   useEffect(() => {
     const api = (window as any).serverApi;
     if (!api) return;
     if (localStorage.getItem('cbt_server_autostart') === 'true') api.startServer(4000);
-
-    api.detectExisting?.(4000).then((res: any) => {
-      if (res?.active) setInfoMessage(`Active Queez Server detected at ${res.url}.`);
-    }).catch(() => {});
-
+    api.detectExisting?.(4000).then((r: any) => { if (r?.active) setInfoMessage(`Active Queez Server detected at ${r.url}.`); }).catch(() => {});
     api.getTheme?.().then((t: any) => { if (t) applyThemeCustomization(t); }).catch(() => {});
     const unsubTheme = api.onThemeChanged?.((t: any) => { if (t) applyThemeCustomization(t); });
+
+    fetch('http://127.0.0.1:4000/api/license').then(r => r.json()).then(d => {
+      if (d?.data?.license?.branding) {
+        setBranding(d.data.license.branding);
+        (window as any).electronApi?.applyBranding?.(d.data.license.branding);
+      }
+    }).catch(() => {});
 
     const poll = async () => {
       try {
@@ -46,9 +51,7 @@ export const App: React.FC = () => {
     };
     poll();
     const interval = setInterval(poll, 1000);
-    const cleanup = api.onRequestLogged?.((entry: LogEntry) => {
-      setLogs((prev) => [...prev.slice(-499), entry]);
-    });
+    const cleanup = api.onRequestLogged?.((entry: LogEntry) => { setLogs((prev) => [...prev.slice(-499), entry]); });
     return () => { clearInterval(interval); cleanup?.(); unsubTheme?.(); };
   }, []);
 
@@ -73,15 +76,9 @@ export const App: React.FC = () => {
 
   return (
     <div className="server-window">
-      <TitleBar title="Queez" badge="CBT Server" onClose={handleClose} />
+      <TitleBar title={branding?.appName || branding?.schoolName || 'Queez'} badge="CBT Server" iconUrl={branding?.appIconUrl || branding?.logoUrl} onClose={handleClose} />
       <div className="server-body">
-        <ServerSidebar
-          currentTab={currentTab}
-          onSelectTab={setCurrentTab}
-          requestCount={logs.length}
-          isRunning={Boolean(status?.running)}
-          port={status?.port || 4000}
-        />
+        <ServerSidebar currentTab={currentTab} onSelectTab={setCurrentTab} requestCount={logs.length} isRunning={Boolean(status?.running)} port={status?.port || 4000} />
         <main className="server-content">
           {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
           {currentTab === 'devices' && <ServerDevicesTab />}

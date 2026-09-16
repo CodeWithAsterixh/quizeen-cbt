@@ -48,10 +48,12 @@ function createWindow() {
 
 import { startDiscoveryListener } from './discovery-listener.js';
 import { setupIpc } from './ipc.js';
+import { applyCachedBranding } from './branding-service.js';
 
 app.whenReady().then(() => {
   setupIpc(() => mainWindow);
   createWindow();
+  applyCachedBranding(mainWindow);
   startDiscoveryListener((d) => mainWindow?.webContents.send('server:discovered', d));
 
   app.on('activate', () => {

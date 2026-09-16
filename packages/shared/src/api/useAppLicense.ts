@@ -31,10 +31,14 @@ export function useAppLicense() {
       setLicenseState({ ...state, serverOnline: true });
       setError(null);
       if (state.license?.theme || state.license?.branding) {
-        applyThemeCustomization(state.license.theme, state.license.branding);
-        if (state.license?.branding && typeof window !== 'undefined') {
-          (window as any).electronApi?.applyBranding?.(state.license.branding);
+        const b = state.license.branding ? { ...state.license.branding } : undefined;
+        if (b) {
+          const s = serverConfig.getUrl();
+          if (b.appIconUrl?.startsWith('/')) b.appIconUrl = `${s}${b.appIconUrl}`;
+          if (b.logoUrl?.startsWith('/')) b.logoUrl = `${s}${b.logoUrl}`;
         }
+        applyThemeCustomization(state.license.theme, b);
+        if (b && typeof window !== 'undefined') (window as any).electronApi?.applyBranding?.(b);
       }
       if (graceTimerRef.current) { clearTimeout(graceTimerRef.current); graceTimerRef.current = null; }
       hasResolvedRef.current = true;

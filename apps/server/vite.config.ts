@@ -13,7 +13,15 @@ export default defineConfig(() => {
       ...(!isWeb
         ? [
             electron([
-              { entry: 'electron/main.ts' },
+              {
+                entry: 'electron/main.ts',
+                vite: {
+                  define: {
+                    'process.env.WS_NO_BUFFER_UTIL': '"true"',
+                    'process.env.WS_NO_UTF_8_VALIDATE': '"true"',
+                  },
+                },
+              },
               {
                 entry: 'electron/preload.ts',
                 onstart(options) {
@@ -34,6 +42,10 @@ export default defineConfig(() => {
     },
     server: {
       port: 5176,
+    },
+    define: {
+      'process.env.WS_NO_BUFFER_UTIL': '"true"',
+      'process.env.WS_NO_UTF_8_VALIDATE': '"true"',
     },
     optimizeDeps: {
       include: ['@phosphor-icons/react'],
