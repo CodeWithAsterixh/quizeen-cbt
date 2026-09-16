@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, app } from 'electron';
 
 export interface ElectronApi {
   readStorage: (key: string) => Promise<string | null>;
@@ -8,6 +8,9 @@ export interface ElectronApi {
   closeWindow: () => Promise<void>;
   isMaximized: () => Promise<boolean>;
   onServerDiscovered: (callback: (data: { ip: string; port: number; serverName?: string }) => void) => () => void;
+  enterExamMode: () => Promise<void>;
+  exitExamMode: () => Promise<void>;
+  appVersion: string;
 }
 
 const api: ElectronApi = {
@@ -22,6 +25,9 @@ const api: ElectronApi = {
     ipcRenderer.on('server:discovered', handler);
     return () => { ipcRenderer.removeListener('server:discovered', handler); };
   },
+  enterExamMode: () => ipcRenderer.invoke('exam:enter'),
+  exitExamMode: () => ipcRenderer.invoke('exam:exit'),
+  appVersion: app.getVersion(),
 };
 
 contextBridge.exposeInMainWorld('electronApi', api);

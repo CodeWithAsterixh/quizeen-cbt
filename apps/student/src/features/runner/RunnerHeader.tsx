@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, DoorOpen } from '@cbt/shared';
+import { Clock, CheckSquare } from '@cbt/shared';
 import { Exam, StudentSession, Card, Badge, Button } from '@cbt/shared';
 import { CalcToggle } from '../calculator';
 
@@ -43,8 +43,8 @@ export const RunnerHeader: React.FC<RunnerHeaderProps> = ({
             {timeFormatted}
           </Badge>
           <CalcToggle isOpen={isCalcOpen} onToggle={onToggleCalc} />
-          <Button variant="danger" size="sm" onClick={onQuit} icon={<DoorOpen size={18} />}>
-            Leave
+          <Button variant="success" size="sm" onClick={onQuit} icon={<CheckSquare size={18} />}>
+            Submit
           </Button>
         </nav>
       </Card>

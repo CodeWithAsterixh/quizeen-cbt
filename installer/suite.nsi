@@ -22,7 +22,7 @@ Var Relaunched
 
 ; Define defaults if not passed via command line
 !ifndef VERSION
-  !define VERSION "2.1.0"
+  !define VERSION "2.0.6"
 !endif
 !ifndef ICON_PATH
   !define ICON_PATH "..\apps\manager\resources\icon.ico"
@@ -197,9 +197,9 @@ Section -Post
   ; Open Windows Firewall for LAN access - without this, student machines on the
   ; same router cannot reach the server even though it binds to 0.0.0.0
   ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Server"'
-  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Server" dir=in action=allow protocol=TCP localport=4000 profile=private,domain enable=yes'
+  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Server" dir=in action=allow protocol=TCP localport=4000 profile=any enable=yes'
   ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Discovery"'
-  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Discovery" dir=in action=allow protocol=UDP localport=4001 profile=private,domain enable=yes'
+  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Discovery" dir=in action=allow protocol=UDP localport=4001 profile=any enable=yes'
 SectionEnd
 
 ; Component Descriptions
@@ -285,6 +285,9 @@ Function .onInit
     ${Else}
       StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
     ${EndIf}
+    ; Bring the elevated installer window to the foreground immediately.
+    ; Without this it appears behind the user's current app after UAC approval.
+    BringToFront
     Return
   ${EndIf}
 

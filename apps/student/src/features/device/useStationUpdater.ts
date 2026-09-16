@@ -1,10 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { deviceApi, UpdatePhase } from '@cbt/shared';
 
+// Read the real app version from Electron's preload (sourced from package.json).
+// Fall back to a clearly-wrong sentinel so the server will always report
+// an update available, which is better than silently skipping the check.
+function getAppVersion(): string {
+  const v = (window as any).electronApi?.appVersion;
+  return typeof v === 'string' && v ? v : '0.0.0';
+}
+
 export const useStationUpdater = (isExamActive: boolean) => {
   const [phase, setPhase] = useState<UpdatePhase>('idle');
   const [progress, setProgress] = useState(0);
-  const [latestVersion, setLatestVersion] = useState('1.2.0');
+  const [latestVersion, setLatestVersion] = useState('');
   const [pendingUpdate, setPendingUpdate] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,13 +20,12 @@ export const useStationUpdater = (isExamActive: boolean) => {
   const checkForUpdate = useCallback(async () => {
     try {
       setPhase('checking');
-      const res = await deviceApi.checkUpdate('student', '1.2.0');
+      const currentVersion = getAppVersion();
+      const res = await deviceApi.checkUpdate('student', currentVersion);
       if (res.updateAvailable) {
         setLatestVersion(res.latestVersion);
         setPendingUpdate(true);
-        if (!isExamActive) {
-          setShowModal(true);
-        }
+        if (!isExamActive) setShowModal(true);
       }
       setPhase('idle');
     } catch {
@@ -27,9 +34,7 @@ export const useStationUpdater = (isExamActive: boolean) => {
   }, [isExamActive]);
 
   useEffect(() => {
-    if (!isExamActive && pendingUpdate && phase === 'idle') {
-      setShowModal(true);
-    }
+    if (!isExamActive && pendingUpdate && phase === 'idle') setShowModal(true);
   }, [isExamActive, pendingUpdate, phase]);
 
   const startDownload = useCallback(async () => {
@@ -61,10 +66,6 @@ export const useStationUpdater = (isExamActive: boolean) => {
     }
   }, [isExamActive]);
 
-  const dismissModal = () => {
-    setShowModal(false);
-  };
-
   return {
     phase,
     progress,
@@ -73,6 +74,6 @@ export const useStationUpdater = (isExamActive: boolean) => {
     error,
     checkForUpdate,
     startDownload,
-    dismissModal,
+    dismissModal: () => setShowModal(false),
   };
 };

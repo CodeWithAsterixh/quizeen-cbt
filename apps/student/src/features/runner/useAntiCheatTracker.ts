@@ -1,36 +1,35 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
-export function useAntiCheatTracker(onInfraction?: (count: number) => void) {
-  const [infractionCount, setInfractionCount] = useState(0);
-  const [warningBanner, setWarningBanner] = useState('');
-  const cbRef = useRef(onInfraction);
-  cbRef.current = onInfraction;
+// On focus loss: auto-submit the exam immediately rather than warning.
+// The kiosk lock (setAlwaysOnTop + fullscreen) already prevents most exits,
+// but if focus somehow escapes, we treat that as the student leaving and
+// force-submit so there is no ambiguity about whether the attempt counts.
+export function useAntiCheatTracker(onAutoSubmit?: () => void) {
+  const cbRef = useRef(onAutoSubmit);
+  cbRef.current = onAutoSubmit;
+
+  const triggerSubmit = useCallback(() => {
+    cbRef.current?.();
+  }, []);
 
   useEffect(() => {
-    const recordInfraction = (msg: string) => {
-      setInfractionCount((c) => {
-        const next = c + 1;
-        cbRef.current?.(next);
-        return next;
-      });
-      setWarningBanner(msg);
-      setTimeout(() => setWarningBanner(''), 4500);
-    };
+    const electron = (window as any).electronApi;
+    electron?.enterExamMode?.();
 
     const handleVisibility = () => {
-      if (document.hidden) recordInfraction('Security Warning: Tab switching and leaving test window is prohibited.');
+      if (document.hidden) triggerSubmit();
     };
     const handleBlur = () => {
-      recordInfraction('Notice: Window focus lost. Focus on your exam.');
+      triggerSubmit();
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('blur', handleBlur);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('blur', handleBlur);
+      electron?.exitExamMode?.();
     };
-  }, []);
-
-  return { infractionCount, warningBanner };
+  }, [triggerSubmit]);
 }

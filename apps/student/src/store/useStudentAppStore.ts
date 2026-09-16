@@ -42,8 +42,7 @@ export function useStudentAppStore() {
           classGroup: sub.classGroup,
           department: sub.department,
           answers: answersRecord,
-          infractionCount: sub.infractionCount,
-          totalElapsedSeconds: 0,
+          totalElapsedSeconds: sub.timeSpentSeconds ?? 0,
         });
       }
     } catch {

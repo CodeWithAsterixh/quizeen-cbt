@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { WarningCircle } from '@cbt/shared';
 import { Assessment, Exam, StudentSession, Submission, AnswerItem, Badge, apiClient } from '@cbt/shared';
 import { FloatingCalculator } from '../calculator';
 import { RunnerHeader } from './RunnerHeader';
@@ -14,11 +13,10 @@ interface AssessmentRunnerProps {
   assessment: Assessment;
   student: StudentSession;
   onSubmitAssessment: (submission: Submission) => Promise<void>;
-  onQuit: () => void;
 }
 
 export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
-  assessment, student, onSubmitAssessment, onQuit,
+  assessment, student, onSubmitAssessment,
 }) => {
   const exam = assessment;
   const onSubmitExam = onSubmitAssessment;
@@ -27,7 +25,6 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
   const [secondsLeft, setSecondsLeft] = useState(exam.durationMinutes * 60);
   const [isCalcOpen, setIsCalcOpen] = useState(false);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
-  const [isQuitOpen, setIsQuitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const sessionSeed = `${exam.id}_${student.studentCode || student.studentId || student.studentName || 'candidate'}`;
@@ -36,29 +33,23 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
     [exam.questions, exam.shuffleQuestions, exam.shuffleOptions, sessionSeed]
   );
 
-  const handleInfraction = useCallback((count: number) => {
-    apiClient.reportLiveSession({
-      examId: exam.id, studentName: student.studentName,
-      classGroup: student.classGroup, department: student.department,
-      infractionCount: count, timeSpentSeconds: Math.max(0, exam.durationMinutes * 60 - secondsLeft),
-    });
-  }, [exam.id, exam.durationMinutes, secondsLeft, student.classGroup, student.department, student.studentName]);
-
-  const { infractionCount, warningBanner } = useAntiCheatTracker(handleInfraction);
-
   useEffect(() => {
     apiClient.reportLiveSession({
       examId: exam.id, studentName: student.studentName,
       classGroup: student.classGroup, department: student.department, infractionCount: 0,
     });
+    return () => { (window as any).electronApi?.exitExamMode?.(); };
   }, [exam.id, student.classGroup, student.department, student.studentName]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    const submission = buildExamSubmission(exam, student, answers, secondsLeft, infractionCount);
+    const submission = buildExamSubmission(exam, student, answers, secondsLeft);
     await onSubmitExam(submission);
-  }, [answers, exam, infractionCount, isSubmitting, onSubmitExam, secondsLeft, student]);
+  }, [answers, exam, isSubmitting, onSubmitExam, secondsLeft, student]);
+
+  // Auto-submit immediately if student leaves the exam window
+  useAntiCheatTracker(handleSubmit);
 
   useEffect(() => {
     if (secondsLeft <= 0) return void handleSubmit();
@@ -71,18 +62,13 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
 
   return (
     <main aria-label="Exam workspace" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: 1100, margin: '0 auto', width: '100%', padding: '20px 24px', gap: 16 }}>
-      <RunnerHeader exam={exam} student={student} secondsLeft={secondsLeft} isCalcOpen={isCalcOpen} onToggleCalc={() => setIsCalcOpen((o) => !o)} onQuit={() => setIsQuitOpen(true)} />
-      {warningBanner && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <Badge color="amber" icon={<WarningCircle size={20} />}>{warningBanner}</Badge>
-        </div>
-      )}
+      <RunnerHeader exam={exam} student={student} secondsLeft={secondsLeft} isCalcOpen={isCalcOpen} onToggleCalc={() => setIsCalcOpen((o) => !o)} onQuit={() => setIsSubmitOpen(true)} />
       {currentQ && (
         <RunnerQuestionCard question={currentQ} questionNumber={currentIndex + 1} totalQuestions={questions.length} currentAnswer={answers[currentQ.id] ?? ''} onSelectAnswer={(val) => setAnswers((prev) => ({ ...prev, [currentQ.id]: val }))} onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))} onNext={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))} onSubmit={() => setIsSubmitOpen(true)} isFirst={currentIndex === 0} isLast={currentIndex === questions.length - 1} />
       )}
       <RunnerPalette questions={questions} currentIndex={currentIndex} answers={answers} onSelectIndex={setCurrentIndex} />
       <FloatingCalculator isOpen={isCalcOpen} onClose={() => setIsCalcOpen(false)} />
-      <RunnerModals isSubmitOpen={isSubmitOpen} isQuitOpen={isQuitOpen} unansweredCount={unansweredCount} isSubmitting={isSubmitting} onCloseSubmit={() => setIsSubmitOpen(false)} onConfirmSubmit={() => { setIsSubmitOpen(false); handleSubmit(); }} onCloseQuit={() => setIsQuitOpen(false)} onConfirmQuit={onQuit} />
+      <RunnerModals isSubmitOpen={isSubmitOpen} unansweredCount={unansweredCount} isSubmitting={isSubmitting} onCloseSubmit={() => setIsSubmitOpen(false)} onConfirmSubmit={() => { setIsSubmitOpen(false); handleSubmit(); }} />
     </main>
   );
 };

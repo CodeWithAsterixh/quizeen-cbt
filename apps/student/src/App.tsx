@@ -65,7 +65,7 @@ export const App: React.FC = () => {
           />
         )}
         {view === 'running' && activeAssessment && session && (
-          <AssessmentRunner assessment={activeAssessment} student={session} onSubmitAssessment={handleSubmit} onQuit={() => { setActiveAssessment(null); setView('catalog'); }} />
+          <AssessmentRunner assessment={activeAssessment} student={session} onSubmitAssessment={handleSubmit} />
         )}
         {view === 'completed' && latestSub && (
           <AssessmentCompletedScreen submission={latestSub} onReturnToHome={handleExit} />
@@ -88,6 +88,7 @@ export const App: React.FC = () => {
 
       <UpdateProgressModal
         isOpen={updater.showModal} phase={updater.phase} progress={updater.progress}
+        currentVersion={(window as any).electronApi?.appVersion || ''}
         latestVersion={updater.latestVersion} error={updater.error}
         onStart={updater.startDownload} onDismiss={updater.dismissModal}
       />

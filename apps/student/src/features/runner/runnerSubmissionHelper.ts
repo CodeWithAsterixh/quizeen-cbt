@@ -4,8 +4,7 @@ export function buildExamSubmission(
   exam: Exam,
   student: StudentSession,
   answers: Record<string, string>,
-  secondsLeft: number,
-  infractionCount: number
+  secondsLeft: number
 ): Submission {
   let autoScore = 0;
   const formattedAnswers: Record<string, AnswerItem> = {};
@@ -37,6 +36,5 @@ export function buildExamSubmission(
     percentage: pct,
     status: hasShort ? 'awaiting_result' : 'graded',
     submittedAt: getLocalIsoTimestamp(),
-    infractionCount,
   };
 }

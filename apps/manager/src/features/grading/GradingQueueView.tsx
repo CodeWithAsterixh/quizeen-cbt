@@ -44,14 +44,13 @@ export const GradingQueueView: React.FC<GradingQueueViewProps> = ({
               <th>Class</th>
               <th>Score</th>
               <th>Status</th>
-              <th>Warnings</th>
               <th style={{ textAlign: 'right' }}>Action</th>
             </tr>
           </thead>
           <tbody>
             {submissions.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--cbt-text-muted)' }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: 'var(--cbt-text-muted)' }}>
                   No student submissions have arrived yet.
                 </td>
               </tr>

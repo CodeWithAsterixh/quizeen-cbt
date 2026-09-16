@@ -23,7 +23,7 @@ function ensureFirewallRule(port: number): void {
     `name=${ruleName}`,
     'dir=in', 'action=allow', 'protocol=TCP',
     `localport=${port}`,
-    'profile=private,domain',
+    'profile=any',
     'enable=yes',
   ], { windowsHide: true }, () => {});
   // Also allow UDP on discovery port 4001
@@ -32,7 +32,7 @@ function ensureFirewallRule(port: number): void {
     'name=Queez CBT Discovery',
     'dir=in', 'action=allow', 'protocol=UDP',
     'localport=4001',
-    'profile=private,domain',
+    'profile=any',
     'enable=yes',
   ], { windowsHide: true }, () => {});
 }

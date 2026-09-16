@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, WarningCircle } from '@cbt/shared';
+import { Eye } from '@cbt/shared';
 import { Submission, Badge, Button } from '@cbt/shared';
 
 interface GradingTableRowProps {
@@ -37,15 +37,6 @@ export const GradingTableRow: React.FC<GradingTableRowProps> = ({ sub, onReview 
         <Badge color={sub.status === 'graded' ? 'emerald' : isInProgress ? 'blue' : 'amber'}>
           {sub.status === 'graded' ? 'Marked' : isInProgress ? 'In Progress' : 'Needs Marking'}
         </Badge>
-      </td>
-      <td>
-        {sub.infractionCount && sub.infractionCount > 0 ? (
-          <Badge color="rose">
-            <WarningCircle size={14} /> {sub.infractionCount} App Switch{sub.infractionCount > 1 ? 'es' : ''}
-          </Badge>
-        ) : (
-          <span style={{ fontSize: '0.82rem', color: 'var(--color-success)', fontWeight: 600 }}>Normal</span>
-        )}
       </td>
       <td style={{ textAlign: 'right' }}>
         <Button variant="secondary" size="sm" icon={<Eye size={16} />} onClick={() => onReview(sub)} disabled={isInProgress}>

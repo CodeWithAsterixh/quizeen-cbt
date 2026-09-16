@@ -20,7 +20,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
   const avg = total > 0 ? Math.round(completed.reduce((a, s) => a + s.percentage, 0) / total) : 0;
   const passed = completed.filter((s) => s.percentage >= 50).length;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-  const infractions = submissions.reduce((a, s) => a + (s.infractionCount || 0), 0);
 
   const classSummaries = buildClassSummaries(exams, completed);
   const currentClassSummary = classSummaries.find((c) => c.className === selectedClassName);
@@ -65,7 +64,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
         averageScore={avg}
         passRate={passRate}
         totalSubmissions={total}
-        totalInfractions={infractions}
       />
 
       <ClassListView

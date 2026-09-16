@@ -51,7 +51,7 @@ export const submissionApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'idempotency-key': createIdempotencyKey(`live_${payload.studentName}_${payload.examId}_${payload.infractionCount}`),
+          'idempotency-key': createIdempotencyKey(`live_${payload.studentName}_${payload.examId}_${Date.now()}`),
         },
         body: JSON.stringify(payload),
       });

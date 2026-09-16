@@ -13,13 +13,13 @@ export const SubjectScoresTable: React.FC<Props> = ({ subject, submissions }) =>
       <thead>
         <tr>
           <th>Student Name</th><th>Raw Score</th><th>Percentage</th>
-          <th>Grade</th><th>Remark</th><th>Integrity</th>
+          <th>Grade</th><th>Remark</th>
         </tr>
       </thead>
       <tbody>
         {submissions.length === 0 ? (
           <tr>
-            <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
+            <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
               No submissions for this subject yet.
             </td>
           </tr>
@@ -33,7 +33,6 @@ export const SubjectScoresTable: React.FC<Props> = ({ subject, submissions }) =>
                 <td><strong style={{ color: sub.percentage >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>{sub.percentage}%</strong></td>
                 <td><Badge color={badgeColor} style={{ fontWeight: 800 }}>Grade {grade}</Badge></td>
                 <td><span style={{ fontWeight: 600 }}>{remark}</span></td>
-                <td>{sub.infractionCount ? <Badge color="rose">{sub.infractionCount} switch(es)</Badge> : <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>Clean</span>}</td>
               </tr>
             );
           })

@@ -6,6 +6,7 @@ interface Props {
   isOpen: boolean;
   phase: UpdatePhase;
   progress: number;
+  currentVersion: string;
   latestVersion: string;
   error?: string | null;
   onStart: () => void;
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export const UpdateProgressModal: React.FC<Props> = ({
-  isOpen, phase, progress, latestVersion, error, onStart, onDismiss, onRestart,
+  isOpen, phase, progress, currentVersion, latestVersion, error, onStart, onDismiss, onRestart,
 }) => {
   if (!isOpen) return null;
 
@@ -22,9 +23,15 @@ export const UpdateProgressModal: React.FC<Props> = ({
     <Modal isOpen={isOpen} onClose={phase === 'downloading' ? () => {} : onDismiss} title="Station System Update">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)' }}>Available Version</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>v{latestVersion}</div>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>Installed</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>v{currentVersion}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>Available</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-primary)' }}>v{latestVersion}</div>
+            </div>
           </div>
           <Badge color={phase === 'ready' ? 'emerald' : phase === 'failed' ? 'rose' : 'blue'}>
             {phase.toUpperCase()}
