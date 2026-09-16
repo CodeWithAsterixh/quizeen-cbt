@@ -1,6 +1,6 @@
 {
   "name": "cbt-system-prototype",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -22,6 +22,7 @@
     "package:server-updater": "node scripts/stage-server-updates.js",
     "release:bump": "node scripts/bump-version.js",
     "release:icons": "node scripts/generate-icons.js",
+    "clean": "node scripts/clean.js",
     "api:audit": "node scripts/audit-api-routes.js",
     "license:hwid": "node scripts/get-hwid.js"
   }

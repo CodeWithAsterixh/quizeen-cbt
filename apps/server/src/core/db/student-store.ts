@@ -12,7 +12,7 @@ export class StudentStore {
 
   private resolveCategory(level?: string): string {
     const l = (level || '').toLowerCase();
-    if (l.includes('primary')) return 'primary';
+    if (l.includes('external')) return 'external';
     if (l.includes('junior')) return 'junior';
     if (l.includes('senior')) return 'senior';
     return 'general';
@@ -67,7 +67,7 @@ export class StudentStore {
 
   public clear(): void {
     this.cache.clear();
-    ['primary', 'junior', 'senior', 'general'].forEach((cat) => {
+    ['external', 'junior', 'senior', 'general'].forEach((cat) => {
       const p = path.join(this.dir, `${cat}.json`);
       try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch {}
     });

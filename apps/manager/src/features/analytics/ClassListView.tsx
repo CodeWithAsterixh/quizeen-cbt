@@ -24,7 +24,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({ classSummaries, on
       <Card style={{ padding: '14px 18px', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 240, margin: 0 }}>
           <TextInput
-            placeholder="Search class (e.g. Primary 5, JSS 2, SSS 2)..."
+            placeholder="Search class (e.g. JSS 2, SSS 2, JAMB / UTME)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<MagnifyingGlass size={18} />}

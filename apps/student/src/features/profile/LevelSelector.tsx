@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings } from '@cbt/shared';
+import { Buildings, GraduationCap, IdentificationBadge } from '@cbt/shared';
 import { EDUCATION_LEVELS, EducationLevel, Button } from '@cbt/shared';
 
 interface LevelSelectorProps {
@@ -16,6 +16,14 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({ selectedLevel, onS
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
         {EDUCATION_LEVELS.map((lvl) => {
           const isSelected = selectedLevel === lvl.id;
+          const weight = isSelected ? 'fill' : 'regular';
+          const iconColor = isSelected ? 'var(--color-surface)' : 'var(--color-text-muted)';
+          const icon = lvl.id === 'junior_secondary'
+            ? <Buildings size={24} weight={weight} color={iconColor} />
+            : lvl.id === 'senior_secondary'
+            ? <GraduationCap size={24} weight={weight} color={iconColor} />
+            : <IdentificationBadge size={24} weight={weight} color={iconColor} />;
+
           return (
             <Button
               key={lvl.id}
@@ -31,7 +39,7 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({ selectedLevel, onS
                 gap: 6,
               }}
             >
-              <Buildings size={24} weight={isSelected ? 'fill' : 'regular'} color={isSelected ? 'var(--color-surface)' : 'var(--color-text-muted)'} />
+              {icon}
               <span>{lvl.shortLabel}</span>
             </Button>
           );

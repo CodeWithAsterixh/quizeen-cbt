@@ -7,12 +7,6 @@ export interface ClassProgressionInfo {
 }
 
 export const CLASS_SEQUENCE: Array<{ name: string; level: EducationLevel }> = [
-  { name: 'Primary 1', level: 'primary' },
-  { name: 'Primary 2', level: 'primary' },
-  { name: 'Primary 3', level: 'primary' },
-  { name: 'Primary 4', level: 'primary' },
-  { name: 'Primary 5', level: 'primary' },
-  { name: 'Primary 6', level: 'primary' },
   { name: 'JSS 1', level: 'junior_secondary' },
   { name: 'JSS 2', level: 'junior_secondary' },
   { name: 'JSS 3', level: 'junior_secondary' },
@@ -21,8 +15,11 @@ export const CLASS_SEQUENCE: Array<{ name: string; level: EducationLevel }> = [
   { name: 'SSS 3', level: 'senior_secondary' },
 ];
 
+export const EXTERNAL_CLASSES = ['External Candidate', 'JAMB / UTME', 'WAEC / SSCE', 'NECO / GCE'];
+
 export const ALL_CLASSES = [
   ...CLASS_SEQUENCE.map((c) => c.name),
+  ...EXTERNAL_CLASSES,
   'Graduated',
 ];
 
@@ -49,5 +46,5 @@ export function getPreviousClassInfo(currentClass: string): ClassProgressionInfo
     const prev = CLASS_SEQUENCE[idx - 1];
     return { nextClass: prev.name, educationLevel: prev.level, isGraduated: false };
   }
-  return { nextClass: currentClass, educationLevel: 'primary', isGraduated: false };
+  return { nextClass: currentClass, educationLevel: 'junior_secondary', isGraduated: false };
 }

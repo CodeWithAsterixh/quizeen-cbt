@@ -1,4 +1,4 @@
-export type EducationLevel = 'primary' | 'junior_secondary' | 'senior_secondary';
+export type EducationLevel = 'junior_secondary' | 'senior_secondary' | 'external';
 
 export interface EducationLevelConfig {
   id: EducationLevel;
@@ -19,14 +19,6 @@ export interface DepartmentConfig {
 
 export const EDUCATION_LEVELS: EducationLevelConfig[] = [
   {
-    id: 'primary',
-    name: 'Primary School',
-    shortLabel: 'Primary',
-    description: 'Foundational elementary classes (Primary 1 to 6)',
-    classes: ['Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6'],
-    hasDepartments: false,
-  },
-  {
     id: 'junior_secondary',
     name: 'Junior Secondary School',
     shortLabel: 'JSS',
@@ -40,6 +32,14 @@ export const EDUCATION_LEVELS: EducationLevelConfig[] = [
     shortLabel: 'SSS',
     description: 'Specialized secondary education with departments (SSS 1 to 3)',
     classes: ['SSS 1', 'SSS 2', 'SSS 3'],
+    hasDepartments: true,
+  },
+  {
+    id: 'external',
+    name: 'External / Professional',
+    shortLabel: 'External',
+    description: 'External candidates, JAMB UTME, WAEC SSCE, NECO, and Professional prep',
+    classes: ['External Candidate', 'JAMB / UTME', 'WAEC / SSCE', 'NECO / GCE'],
     hasDepartments: true,
   },
 ];

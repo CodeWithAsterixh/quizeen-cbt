@@ -1,4 +1,4 @@
-export * from './seed-primary.js';
+export * from './seed-external.js';
 export * from './seed-junior.js';
 export * from './seed-senior-science.js';
 export * from './seed-senior-arts.js';

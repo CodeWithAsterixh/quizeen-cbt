@@ -1,5 +1,5 @@
 import React from 'react';
-import { Buildings } from './icons.js';
+import { Buildings, GraduationCap, IdentificationBadge } from './icons.js';
 import { EDUCATION_LEVELS, EducationLevel } from '../types/index.js';
 import { Button } from './Button.js';
 
@@ -22,6 +22,13 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
         {EDUCATION_LEVELS.map((lvl) => {
           const isSelected = selectedLevel === lvl.id;
+          const weight = isSelected ? 'fill' : 'regular';
+          const icon = lvl.id === 'junior_secondary'
+            ? <Buildings size={22} weight={weight} />
+            : lvl.id === 'senior_secondary'
+            ? <GraduationCap size={22} weight={weight} />
+            : <IdentificationBadge size={22} weight={weight} />;
+
           return (
             <Button
               key={lvl.id}
@@ -37,7 +44,7 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
                 gap: 6,
               }}
             >
-              <Buildings size={22} weight={isSelected ? 'fill' : 'regular'} />
+              {icon}
               <span>{lvl.shortLabel}</span>
             </Button>
           );
