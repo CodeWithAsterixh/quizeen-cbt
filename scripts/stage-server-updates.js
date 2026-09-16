@@ -9,7 +9,9 @@ const version = pkg.version || '2.3.0';
 const targetDirs = [
   path.join(root, 'apps', 'server', 'data', 'updates'),
   path.join(root, 'data', 'updates'),
-];
+  path.join(root, 'apps', 'server', 'release', 'win-unpacked', 'data', 'updates'),
+  process.env.PROGRAMDATA ? path.join(process.env.PROGRAMDATA, 'Queez CBT Suite', 'data', 'updates') : '',
+].filter(Boolean);
 
 function getSha256(filePath) {
   if (!fs.existsSync(filePath)) return undefined;

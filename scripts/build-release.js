@@ -42,6 +42,9 @@ async function main() {
     runAsync('npm --workspace=apps/student run electron:pack'),
   ]);
 
+  console.log('\n--- Step 2.5: Staging Updates for Central Server ---');
+  run('node scripts/stage-server-updates.js');
+
   console.log('\n--- Step 3: Compiling Unified Suite Installer ---');
   const makensis = findMakeNsis();
   const rawBaseName = whitelabel.isWhitelabel

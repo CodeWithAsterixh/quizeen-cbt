@@ -143,6 +143,11 @@ Section "Queez Local Server" SecServer
   SectionIn 1 2
   SetOutPath "$INSTDIR\Server"
   File /r "${SERVER_DIR}\*.*"
+  CreateDirectory "$INSTDIR\data\updates"
+  ${If} ${FileExists} "..\data\updates\*.*"
+    SetOutPath "$INSTDIR\data\updates"
+    File /r "..\data\updates\*.*"
+  ${EndIf}
 SectionEnd
 
 Section "Queez Assessment Manager" SecManager
@@ -188,6 +193,12 @@ Section -Post
     ExecWait 'icacls "$APPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     CreateDirectory "$INSTDIR\data"
     ExecWait 'icacls "$INSTDIR\data" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    CreateDirectory "$APPDATA\Queez CBT Suite\data\updates"
+    ExecWait 'icacls "$APPDATA\Queez CBT Suite\data\updates" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    ${If} ${FileExists} "..\data\updates\*.*"
+      SetOutPath "$APPDATA\Queez CBT Suite\data\updates"
+      File /r "..\data\updates\*.*"
+    ${EndIf}
     ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
       SetOutPath "$APPDATA\Queez CBT Suite\data"
       File "..\config\license-public.pem"
