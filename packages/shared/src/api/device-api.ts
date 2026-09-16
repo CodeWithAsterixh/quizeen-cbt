@@ -31,15 +31,16 @@ export const deviceApi = {
     }
   },
 
-  async pushUpdate(deviceId: string): Promise<boolean> {
+  async pushUpdate(deviceId: string): Promise<{ success: boolean; message?: string }> {
     try {
       const res = await fetch(`${serverConfig.getApiBase()}/devices/${deviceId}/push-update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      return res.ok;
+      const json = await res.json().catch(() => ({}));
+      return { success: res.ok, message: json?.message };
     } catch {
-      return false;
+      return { success: false, message: 'Server communication error' };
     }
   },
 

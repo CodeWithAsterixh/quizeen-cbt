@@ -85,7 +85,7 @@ export const App: React.FC = () => {
       />
 
       <UpdateProgressModal
-        isOpen={updater.showModal} phase={updater.phase} progress={updater.progress}
+        isOpen={updater.showModal || updater.phase !== 'idle'} phase={updater.phase} progress={updater.progress}
         currentVersion={(window as any).electronApi?.appVersion || ''}
         latestVersion={updater.latestVersion} error={updater.error}
         onStart={updater.startDownload} onDismiss={updater.dismissModal}

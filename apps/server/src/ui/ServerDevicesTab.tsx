@@ -7,6 +7,8 @@ export const ServerDevicesTab: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'student' | 'manager'>('all');
   const [pushingId, setPushingId] = useState<string | null>(null);
 
+  const [pushNotice, setPushNotice] = useState<string | null>(null);
+
   const fetchDevices = useCallback(async () => {
     const list = await deviceApi.getConnectedDevices();
     setDevices(list);
@@ -14,18 +16,21 @@ export const ServerDevicesTab: React.FC = () => {
 
   useEffect(() => {
     fetchDevices();
+    const interval = setInterval(fetchDevices, 5000);
     const unsub1 = socketClient.on('device:status', fetchDevices);
     const unsub2 = socketClient.on('device:push-update', fetchDevices);
-    return () => { unsub1(); unsub2(); };
+    return () => { clearInterval(interval); unsub1(); unsub2(); };
   }, [fetchDevices]);
 
   const handlePush = async (deviceId: string) => {
     setPushingId(deviceId);
-    await deviceApi.pushUpdate(deviceId);
-    setTimeout(() => {
-      setPushingId(null);
-      fetchDevices();
-    }, 1000);
+    setPushNotice(null);
+    const res = await deviceApi.pushUpdate(deviceId);
+    if (!res.success && res.message) {
+      setPushNotice(res.message);
+      setTimeout(() => setPushNotice(null), 4000);
+    }
+    setTimeout(() => { setPushingId(null); fetchDevices(); }, 1000);
   };
 
   const handleClearOffline = async () => {
@@ -46,25 +51,23 @@ export const ServerDevicesTab: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button size="sm" variant="secondary" onClick={handleClearOffline} icon={<Trash size={14} />}>
-            Clear Offline
-          </Button>
-          <Button size="sm" variant="secondary" onClick={fetchDevices} icon={<ArrowsClockwise size={14} />}>
-            Refresh
-          </Button>
+          <Button size="sm" variant="secondary" onClick={handleClearOffline} icon={<Trash size={14} />}>Clear Offline</Button>
+          <Button size="sm" variant="secondary" onClick={fetchDevices} icon={<ArrowsClockwise size={14} />}>Refresh</Button>
         </div>
       </div>
+
+      {pushNotice && (
+        <div style={{ padding: '8px 12px', borderRadius: 4, background: '#fee2e2', color: '#b91c1c', fontSize: '0.8rem' }}>
+          {pushNotice}
+        </div>
+      )}
 
       <div className="server-card" style={{ padding: '1rem', overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>
-              <th style={{ padding: '8px 12px' }}>STATION</th>
-              <th style={{ padding: '8px 12px' }}>TYPE</th>
-              <th style={{ padding: '8px 12px' }}>STATUS</th>
-              <th style={{ padding: '8px 12px' }}>VERSION</th>
-              <th style={{ padding: '8px 12px' }}>LAST SEEN</th>
-              <th style={{ padding: '8px 12px', textAlign: 'right' }}>ACTIONS</th>
+              <th style={{ padding: '8px 12px' }}>STATION</th><th style={{ padding: '8px 12px' }}>TYPE</th><th style={{ padding: '8px 12px' }}>STATUS</th>
+              <th style={{ padding: '8px 12px' }}>VERSION</th><th style={{ padding: '8px 12px' }}>LAST SEEN</th><th style={{ padding: '8px 12px', textAlign: 'right' }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>

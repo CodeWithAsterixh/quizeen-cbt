@@ -31,8 +31,8 @@ deviceRouter.get('/', (_req, res) => {
 
 deviceRouter.post('/:id/push-update', (req, res) => {
   const { id } = req.params;
-  const ok = deviceService.pushUpdate(id);
-  res.json({ success: ok, message: `Update push queued for ${id}` });
+  const result = deviceService.pushUpdate(id);
+  res.status(result.success ? 200 : 400).json(result);
 });
 
 deviceRouter.delete('/offline', (_req, res) => {

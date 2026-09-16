@@ -38,6 +38,7 @@ export const useStationUpdater = (isExamActive: boolean) => {
   const startDownload = useCallback(async () => {
     if (isExamActive) return;
     setError(null);
+    setShowModal(true);
     setPhase('downloading');
     setProgress(0);
     try {

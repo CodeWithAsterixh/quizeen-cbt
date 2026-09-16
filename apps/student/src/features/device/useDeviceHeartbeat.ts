@@ -34,19 +34,23 @@ export const useDeviceHeartbeat = ({
   useEffect(() => {
     let isCancelled = false;
 
+    const buildPayload = () => ({
+      deviceId: getStationDeviceId(),
+      deviceName: getStationName(),
+      appType: 'student' as const,
+      appVersion: getAppVersion(),
+      platform: navigator.platform || 'Windows',
+      status,
+      currentExam: currentExam || null,
+      updateStatus,
+      updateProgress,
+    });
+
     const sendHeartbeat = async () => {
+      const payload = buildPayload();
+      socketClient.send('device:heartbeat', payload);
       try {
-        const res = await deviceApi.reportHeartbeat({
-          deviceId: getStationDeviceId(),
-          deviceName: getStationName(),
-          appType: 'student',
-          appVersion: getAppVersion(),
-          platform: navigator.platform || 'Windows',
-          status,
-          currentExam: currentExam || null,
-          updateStatus,
-          updateProgress,
-        });
+        const res = await deviceApi.reportHeartbeat(payload);
         if (!isCancelled && res.pushUpdate && pushCallbackRef.current) {
           pushCallbackRef.current();
         }
@@ -55,9 +59,14 @@ export const useDeviceHeartbeat = ({
 
     sendHeartbeat();
     const interval = setInterval(sendHeartbeat, 10000);
+    const unsubConn = socketClient.onConnectionChange((connected) => {
+      if (connected) sendHeartbeat();
+    });
+
     return () => {
       isCancelled = true;
       clearInterval(interval);
+      unsubConn();
     };
   }, [status, currentExam, updateStatus, updateProgress]);
 };

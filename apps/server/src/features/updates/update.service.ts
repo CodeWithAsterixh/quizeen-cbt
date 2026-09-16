@@ -12,12 +12,16 @@ export interface AppManifestItem {
 
 class UpdateService {
   private getUpdatesDir(): string {
-    const dataDir = (db as any).dataDir || path.resolve(process.cwd(), 'data');
-    const updatesDir = path.join(dataDir, 'updates');
-    if (!fs.existsSync(updatesDir)) {
-      try { fs.mkdirSync(updatesDir, { recursive: true }); } catch {}
-    }
-    return updatesDir;
+    const list = [
+      typeof (db as any).getDataDir === 'function' ? path.join((db as any).getDataDir(), 'updates') : '',
+      path.resolve(process.cwd(), 'apps', 'server', 'data', 'updates'),
+      path.resolve(process.cwd(), 'data', 'updates'),
+    ].filter(Boolean);
+    for (const p of list) { if (fs.existsSync(path.join(p, 'manifest.json'))) return p; }
+    for (const p of list) { if (fs.existsSync(p)) return p; }
+    const fallback = list[0] || path.resolve(process.cwd(), 'data', 'updates');
+    try { fs.mkdirSync(fallback, { recursive: true }); } catch {}
+    return fallback;
   }
 
   private getManifest(): Record<string, AppManifestItem> {
@@ -84,10 +88,7 @@ class UpdateService {
   private compareSemver(a: string, b: string): number {
     const pa = a.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
     const pb = b.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
-    for (let i = 0; i < 3; i++) {
-      const diff = (pa[i] || 0) - (pb[i] || 0);
-      if (diff !== 0) return diff;
-    }
+    for (let i = 0; i < 3; i++) { const diff = (pa[i] || 0) - (pb[i] || 0); if (diff !== 0) return diff; }
     return 0;
   }
 }

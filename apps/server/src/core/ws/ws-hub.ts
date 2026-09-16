@@ -1,23 +1,51 @@
 import http from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 
+type WsMessageHandler = (event: string, data: any, ws: WebSocket) => void;
+type WsDisconnectHandler = (ws: WebSocket) => void;
+
 let wss: WebSocketServer | null = null;
 let pingInterval: NodeJS.Timeout | null = null;
+const messageHandlers = new Set<WsMessageHandler>();
+const disconnectHandlers = new Set<WsDisconnectHandler>();
+
+export function onWsMessage(handler: WsMessageHandler): () => void {
+  messageHandlers.add(handler);
+  return () => { messageHandlers.delete(handler); };
+}
+
+export function onWsDisconnect(handler: WsDisconnectHandler): () => void {
+  disconnectHandlers.add(handler);
+  return () => { disconnectHandlers.delete(handler); };
+}
+
+export function isDeviceConnected(deviceId: string): boolean {
+  if (!wss) return false;
+  for (const client of wss.clients) {
+    if (client.readyState === WebSocket.OPEN && (client as any).deviceId === deviceId) return true;
+  }
+  return false;
+}
 
 export function initWebSocketServer(server: http.Server): WebSocketServer {
   closeWebSocketServer();
-
   wss = new WebSocketServer({ server });
 
   wss.on('connection', (ws) => {
     (ws as any).isAlive = true;
     ws.on('pong', () => { (ws as any).isAlive = true; });
     ws.on('error', () => { try { ws.close(); } catch {} });
+    ws.on('message', (raw) => {
+      try {
+        const parsed = JSON.parse(raw.toString());
+        if (parsed?.event) messageHandlers.forEach((fn) => { try { fn(parsed.event, parsed.data, ws); } catch {} });
+      } catch {}
+    });
+    ws.on('close', () => {
+      disconnectHandlers.forEach((fn) => { try { fn(ws); } catch {} });
+    });
 
-    // Send initial connected ack
-    try {
-      ws.send(JSON.stringify({ event: 'connection:ack', timestamp: Date.now() }));
-    } catch {}
+    try { ws.send(JSON.stringify({ event: 'connection:ack', timestamp: Date.now() })); } catch {}
   });
 
   pingInterval = setInterval(() => {

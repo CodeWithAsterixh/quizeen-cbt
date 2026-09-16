@@ -16,11 +16,9 @@ class SocketClient {
       this.connect();
     }
   }
-
   private toWsUrl(httpUrl: string): string {
     return httpUrl.trim().replace(/\/+$/, '').replace(/^http:\/\//i, 'ws://').replace(/^https:\/\//i, 'wss://');
   }
-
   public connect(force = false): void {
     if (typeof window === 'undefined' || typeof WebSocket === 'undefined') return;
     if (this.ws && !force && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
@@ -83,6 +81,13 @@ class SocketClient {
     this.connListeners.add(callback);
     callback(this.connected);
     return () => { this.connListeners.delete(callback); };
+  }
+
+  public send(event: string, data?: any): boolean {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      try { this.ws.send(JSON.stringify({ event, data })); return true; } catch { return false; }
+    }
+    return false;
   }
 
   public isConnected(): boolean { return this.connected; }

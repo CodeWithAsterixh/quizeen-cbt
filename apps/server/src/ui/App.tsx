@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TitleBar, applyThemeCustomization } from '@cbt/shared';
+import { TitleBar, applyThemeCustomization, serverConfig } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
@@ -9,9 +9,7 @@ import { ServerLiveRequestsTab } from './ServerLiveRequestsTab';
 import { CloseWarningModal } from './CloseWarningModal';
 import { LogEntry, ServerStatus } from './types';
 
-const defaultStatus: ServerStatus = {
-  running: false, port: 4000, uptimeSeconds: 0, ips: ['127.0.0.1'], totalRequests: 0,
-};
+const defaultStatus: ServerStatus = { running: false, port: 4000, uptimeSeconds: 0, ips: ['127.0.0.1'], totalRequests: 0 };
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<ServerTab>('overview');
@@ -36,7 +34,14 @@ export const App: React.FC = () => {
     const poll = async () => {
       try {
         const s = await api.getStatus();
-        if (s) { setStatus(s); if (s.running) setErrorMessage(null); }
+        if (s) {
+          setStatus(s);
+          if (s.running) {
+            setErrorMessage(null);
+            const target = `http://127.0.0.1:${s.port}`;
+            if (serverConfig.getUrl() !== target) serverConfig.setUrl(target);
+          }
+        }
       } catch {}
     };
     poll();
@@ -50,8 +55,7 @@ export const App: React.FC = () => {
   const handleToggle = async (port: number) => {
     const api = (window as any).serverApi;
     if (!api) return;
-    setErrorMessage(null);
-    setInfoMessage(null);
+    setErrorMessage(null); setInfoMessage(null);
     try {
       if (status.running) await api.stopServer();
       else {
@@ -61,16 +65,11 @@ export const App: React.FC = () => {
       }
       const s = await api.getStatus();
       if (s) setStatus(s);
-    } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to communicate with server');
-    }
+    } catch (err: any) { setErrorMessage(err?.message || 'Failed to communicate with server'); }
   };
 
   const handleClose = () => status.running ? setIsWarningOpen(true) : (window as any).electronApi?.closeWindow();
-  const handleExit = async () => {
-    await (window as any).serverApi?.stopServer();
-    (window as any).electronApi?.closeWindow();
-  };
+  const handleExit = async () => { await (window as any).serverApi?.stopServer(); (window as any).electronApi?.closeWindow(); };
 
   return (
     <div className="server-window">
