@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { ServerManager } from './server-manager.js';
 import { onServerThemeChange } from '../src/features/theme/theme.routes.js';
 import { themeService } from '../src/features/theme/theme.service.js';
+import { applyRuntimeBranding } from './branding-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let mainWindow: BrowserWindow | null = null;
@@ -64,6 +65,7 @@ app.whenReady().then(() => {
   ipcMain.handle('server:get-status', async () => serverManager.getStatus());
   ipcMain.handle('server:detect', async (_e, port) => serverManager.detectExisting(port));
   ipcMain.handle('server:get-theme', async () => themeService.getTheme());
+  ipcMain.handle('app:apply-branding', async (_e, b) => applyRuntimeBranding(b, mainWindow));
 
   ipcMain.on('window:minimize', () => mainWindow?.minimize());
   ipcMain.handle('window:maximize', () => {

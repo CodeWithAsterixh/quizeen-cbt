@@ -23,6 +23,7 @@ const electronApi = {
   maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
   closeWindow: () => ipcRenderer.send('window:close'),
   isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+  applyBranding: (branding: any) => ipcRenderer.invoke('app:apply-branding', branding),
 };
 
 contextBridge.exposeInMainWorld('serverApi', serverApi);

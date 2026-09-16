@@ -10,6 +10,7 @@ export interface ElectronApi {
   onServerDiscovered: (callback: (data: { ip: string; port: number; serverName?: string }) => void) => () => void;
   enterExamMode: () => Promise<void>;
   exitExamMode: () => Promise<void>;
+  applyBranding: (branding: any) => Promise<boolean>;
 }
 
 const api: ElectronApi = {
@@ -26,7 +27,7 @@ const api: ElectronApi = {
   },
   enterExamMode: () => ipcRenderer.invoke('exam:enter'),
   exitExamMode: () => ipcRenderer.invoke('exam:exit'),
-  // appVersion: app.getVersion(),
+  applyBranding: (branding: any) => ipcRenderer.invoke('app:apply-branding', branding),
 };
 
 contextBridge.exposeInMainWorld('electronApi', api);

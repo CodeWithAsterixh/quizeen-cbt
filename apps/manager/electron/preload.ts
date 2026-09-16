@@ -8,6 +8,7 @@ export interface ElectronApi {
   closeWindow: () => Promise<void>;
   isMaximized: () => Promise<boolean>;
   onServerDiscovered: (callback: (data: { ip: string; port: number; serverName?: string }) => void) => () => void;
+  applyBranding: (branding: any) => Promise<boolean>;
 }
 
 const api: ElectronApi = {
@@ -22,6 +23,7 @@ const api: ElectronApi = {
     ipcRenderer.on('server:discovered', handler);
     return () => { ipcRenderer.removeListener('server:discovered', handler); };
   },
+  applyBranding: (branding: any) => ipcRenderer.invoke('app:apply-branding', branding),
 };
 
 contextBridge.exposeInMainWorld('electronApi', api);

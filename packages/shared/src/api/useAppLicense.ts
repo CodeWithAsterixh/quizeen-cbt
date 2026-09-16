@@ -32,6 +32,9 @@ export function useAppLicense() {
       setError(null);
       if (state.license?.theme || state.license?.branding) {
         applyThemeCustomization(state.license.theme, state.license.branding);
+        if (state.license?.branding && typeof window !== 'undefined') {
+          (window as any).electronApi?.applyBranding?.(state.license.branding);
+        }
       }
       if (graceTimerRef.current) { clearTimeout(graceTimerRef.current); graceTimerRef.current = null; }
       hasResolvedRef.current = true;

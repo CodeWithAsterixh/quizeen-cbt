@@ -42,13 +42,28 @@ Var Relaunched
 !ifndef STUDENT_DIR
   !define STUDENT_DIR "..\apps\student\release\win-unpacked"
 !endif
+!ifndef SUITE_NAME
+  !define SUITE_NAME "Queez CBT Suite"
+!endif
+!ifndef BRANDING_TEXT
+  !define BRANDING_TEXT "Quizeen CBT Systems"
+!endif
+!ifndef STUDENT_NAME
+  !define STUDENT_NAME "Queez Student Portal"
+!endif
+!ifndef MANAGER_NAME
+  !define MANAGER_NAME "Queez Assessment Manager"
+!endif
+!ifndef SERVER_NAME
+  !define SERVER_NAME "Queez Local Server"
+!endif
 
-Name "Queez CBT Suite ${VERSION}"
+Name "${SUITE_NAME} ${VERSION}"
 OutFile "${OUT_FILE}"
-InstallDir "$LOCALAPPDATA\Programs\Queez CBT Suite"
+InstallDir "$LOCALAPPDATA\Programs\${SUITE_NAME}"
 RequestExecutionLevel user
 
-BrandingText "Quizeen CBT Systems"
+BrandingText "${BRANDING_TEXT}"
 
 ; Installer visuals
 !define MUI_ICON "${ICON_PATH}"
@@ -154,18 +169,18 @@ Section -Post
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     ${If} ${SectionIsSelected} ${SecServer}
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
-      CreateShortcut "$DESKTOP\Queez Local Server.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
+      CreateShortcut "$DESKTOP\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecManager}
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
-      CreateShortcut "$DESKTOP\Queez Assessment Manager.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
+      CreateShortcut "$DESKTOP\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecStudent}
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
-      CreateShortcut "$DESKTOP\Queez Student Portal.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
+      CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
     ${EndIf}
-    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk" "$INSTDIR\uninstall.exe"
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk" "$INSTDIR\uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ${If} $InstallScope == "all"
@@ -370,24 +385,38 @@ Section "Uninstall"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
 
   ; Delete shortcuts in active context
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
   RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
 
+  Delete "$DESKTOP\${SERVER_NAME}.lnk"
+  Delete "$DESKTOP\${MANAGER_NAME}.lnk"
+  Delete "$DESKTOP\${STUDENT_NAME}.lnk"
   Delete "$DESKTOP\Queez Local Server.lnk"
   Delete "$DESKTOP\Queez Assessment Manager.lnk"
   Delete "$DESKTOP\Queez Student Portal.lnk"
 
   ; Clean current context as well to prevent stray shortcuts
   SetShellVarContext current
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk"
+  Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Local Server.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
   RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
 
+  Delete "$DESKTOP\${SERVER_NAME}.lnk"
+  Delete "$DESKTOP\${MANAGER_NAME}.lnk"
+  Delete "$DESKTOP\${STUDENT_NAME}.lnk"
   Delete "$DESKTOP\Queez Local Server.lnk"
   Delete "$DESKTOP\Queez Assessment Manager.lnk"
   Delete "$DESKTOP\Queez Student Portal.lnk"

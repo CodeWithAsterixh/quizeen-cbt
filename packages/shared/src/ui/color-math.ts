@@ -1,50 +1,27 @@
-export interface RgbColor {
-  r: number;
-  g: number;
-  b: number;
-}
+export interface RgbColor { r: number; g: number; b: number; }
 
 export function parseHex(hex: string): RgbColor {
   const clean = hex.replace('#', '').trim();
-  const full = clean.length === 3
-    ? clean.split('').map((c) => c + c).join('')
-    : clean;
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
   const num = parseInt(full || '000000', 16);
-  return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255,
-  };
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
 }
 
 export function toHex(r: number, g: number, b: number): string {
   const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
-  const hex = [clamp(r), clamp(g), clamp(b)]
-    .map((x) => x.toString(16).padStart(2, '0'))
-    .join('');
-  return `#${hex}`;
+  return `#${[clamp(r), clamp(g), clamp(b)].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
 }
 
 export function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
-  const nr = r / 255;
-  const ng = g / 255;
-  const nb = b / 255;
-  const max = Math.max(nr, ng, nb);
-  const min = Math.min(nr, ng, nb);
-  const delta = max - min;
-  let h = 0;
-  let s = 0;
+  const [nr, ng, nb] = [r / 255, g / 255, b / 255];
+  const max = Math.max(nr, ng, nb), min = Math.min(nr, ng, nb), delta = max - min;
+  let h = 0, s = 0;
   const l = (max + min) / 2;
-
   if (delta !== 0) {
     s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
-    if (max === nr) {
-      h = ((ng - nb) / delta + (ng < nb ? 6 : 0)) / 6;
-    } else if (max === ng) {
-      h = ((nb - nr) / delta + 2) / 6;
-    } else {
-      h = ((nr - ng) / delta + 4) / 6;
-    }
+    if (max === nr) h = ((ng - nb) / delta + (ng < nb ? 6 : 0)) / 6;
+    else if (max === ng) h = ((nb - nr) / delta + 2) / 6;
+    else h = ((nr - ng) / delta + 4) / 6;
   }
   return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
 }

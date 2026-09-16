@@ -20,21 +20,12 @@ export function renderGraphCanvas(
   const stepX = visibleLogs.length > 1 ? plotWidth / (visibleLogs.length - 1) : plotWidth;
 
   // Grid lines
-  ctx.strokeStyle = theme.gridLine;
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 3]);
+  ctx.strokeStyle = theme.gridLine; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
   const gridSteps = 4;
   for (let i = 0; i <= gridSteps; i++) {
-    const val = (maxVal / gridSteps) * i;
-    const y = getY(val);
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(plotWidth, y);
-    ctx.stroke();
-
-    ctx.fillStyle = theme.axisText;
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'left';
+    const val = (maxVal / gridSteps) * i, y = getY(val);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotWidth, y); ctx.stroke();
+    ctx.fillStyle = theme.axisText; ctx.font = '10px monospace'; ctx.textAlign = 'left';
     ctx.fillText(`${Math.round(val)}${metric === 'latency' ? 'ms' : ''}`, plotWidth + 6, y + 3);
   }
   ctx.setLineDash([]);

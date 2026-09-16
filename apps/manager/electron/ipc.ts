@@ -2,8 +2,12 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 
+import { applyRuntimeBranding } from './branding-service.js';
+
 export function setupIpc(getMainWindow: () => BrowserWindow | null) {
   const getFilePath = (key: string) => path.join(app.getPath('userData'), `${key}.json`);
+
+  ipcMain.handle('app:apply-branding', (_, b) => applyRuntimeBranding(b, getMainWindow()));
 
   ipcMain.handle('storage:read', (_, key: string) => {
     const p = getFilePath(key);

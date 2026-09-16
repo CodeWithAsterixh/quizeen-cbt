@@ -13,37 +13,23 @@ export const SettingsThemeCard: React.FC<Props> = ({ currentTheme, schoolName, o
   const [isSaving, setIsSaving] = useState(false);
 
   const handlePreview = () => {
-    applyThemeCustomization(
-      { primaryColor: primary, accentColor: accent, surfaceMode: 'light', fontPreset: 'inter' },
-      { schoolName }
-    );
+    applyThemeCustomization({ primaryColor: primary, accentColor: accent, surfaceMode: 'light', fontPreset: 'inter' }, { schoolName });
     onNotify('Applied live theme preview locally.');
   };
 
   const handleSaveToAll = async () => {
     setIsSaving(true);
     try {
-      applyThemeCustomization(
-        { primaryColor: primary, accentColor: accent, surfaceMode: 'light', fontPreset: 'inter' },
-        { schoolName }
-      );
+      applyThemeCustomization({ primaryColor: primary, accentColor: accent, surfaceMode: 'light', fontPreset: 'inter' }, { schoolName });
       const res = await apiClient.saveTheme({ primaryColor: primary, accentColor: accent });
-      if (res.success) {
-        onNotify('Theme saved and broadcast to Server, Student, and Manager stations.');
-      } else {
-        onNotify(res.error || 'Failed to save theme to server.');
-      }
+      onNotify(res.success ? 'Theme saved and broadcast to Server, Student, and Manager stations.' : (res.error || 'Failed to save theme to server.'));
     } catch {
       onNotify('Could not reach server to save theme.');
-    } finally {
-      setIsSaving(false);
-    }
+    } finally { setIsSaving(false); }
   };
 
   const handleReset = () => {
-    resetThemeToDefault();
-    setPrimary(DEFAULT_THEME.primaryColor);
-    setAccent(DEFAULT_THEME.accentColor);
+    resetThemeToDefault(); setPrimary(DEFAULT_THEME.primaryColor); setAccent(DEFAULT_THEME.accentColor);
     onNotify('Theme reset to default.');
   };
 
