@@ -47,7 +47,7 @@ export const App: React.FC = () => {
     <div className="app-shell">
       <TitleBar
         title={branding?.appName || branding?.schoolName || 'Queez'}
-        badge={branding?.shortName ? `${branding.shortName} Office` : 'Management'}
+        badge={branding?.shortName ? `${branding.shortName} Assessment office` : 'Management'}
         iconUrl={branding?.appIconUrl || branding?.logoUrl}
       />
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
