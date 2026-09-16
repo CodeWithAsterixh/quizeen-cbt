@@ -50,7 +50,7 @@ export const App: React.FC = () => {
     <div className="app-shell">
       <TitleBar
         title={branding?.appName || branding?.schoolName || 'Queez'}
-        badge={branding?.shortName ? `${branding.shortName} Portal` : 'Student Portal'}
+        badge={branding?.shortName ? `${branding.shortName} Student Portal` : 'Student Portal'}
         iconUrl={branding?.appIconUrl || branding?.logoUrl}
       />
       <main className="app-content">
