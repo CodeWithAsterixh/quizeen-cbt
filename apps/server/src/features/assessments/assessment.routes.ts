@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { assessmentService } from './assessment.service.js';
 import { EducationLevel, Department } from '@cbt/shared';
+import { broadcastWsEvent } from '../../core/ws/ws-hub.js';
 
 export const assessmentRouter = Router();
 
@@ -23,6 +24,7 @@ assessmentRouter.post('/', (req: Request, res: Response) => {
   try {
     if (!req.body.subject?.trim()) return res.status(400).json({ success: false, statusCode: 400, message: 'Please provide a subject title.' });
     const item = assessmentService.createAssessment(req.body);
+    broadcastWsEvent('assessments:changed', { action: 'created', id: item.id });
     res.status(201).json({ success: true, statusCode: 201, message: 'New assessment saved and ready for students.', data: item });
   } catch (err: unknown) {
     res.status(400).json({ success: false, statusCode: 400, message: (err as Error).message || 'Unable to save assessment.' });
@@ -32,6 +34,7 @@ assessmentRouter.post('/', (req: Request, res: Response) => {
 assessmentRouter.put('/:id', (req: Request, res: Response) => {
   const updated = assessmentService.updateAssessment(req.params.id as string, req.body);
   if (!updated) return res.status(404).json({ success: false, statusCode: 404, message: 'Could not update because assessment was not found.' });
+  broadcastWsEvent('assessments:changed', { action: 'updated', id: updated.id });
   res.status(200).json({ success: true, statusCode: 200, message: 'Assessment updates saved successfully.', data: updated });
 });
 
@@ -39,6 +42,7 @@ assessmentRouter.delete('/:id', (req: Request, res: Response) => {
   const existed = assessmentService.getAssessment(req.params.id as string);
   assessmentService.deleteAssessment(req.params.id as string);
   if (!existed) return res.status(404).json({ success: false, statusCode: 404, message: 'Assessment was already removed or does not exist.' });
+  broadcastWsEvent('assessments:changed', { action: 'deleted', id: req.params.id });
   res.status(200).json({ success: true, statusCode: 200, message: 'Assessment was removed successfully.' });
 });
 

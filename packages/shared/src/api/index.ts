@@ -4,3 +4,4 @@ export * from './student-api.js';
 export * from './device-api.js';
 export * from './useDiscoveredServers.js';
 export * from './useAppLicense.js';
+export * from './socket-client.js';

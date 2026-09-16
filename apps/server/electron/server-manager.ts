@@ -1,40 +1,13 @@
 import http from 'node:http';
-import { execFile } from 'node:child_process';
 import { createApp, RequestLogEntry } from '../src/app.js';
 import { getHardwareId } from '../src/features/license/hardware.service.js';
 import { ServerBeacon, getLocalIpAddresses } from './discovery.js';
 import { findFallbackPort, probeQueezServer } from './port-fallback.js';
+import { initWebSocketServer, closeWebSocketServer } from '../src/core/ws/ws-hub.js';
+import { ensureFirewallRule } from './firewall.js';
 
 export interface StartServerResult {
   success: boolean; port: number; error?: string; fallbackFrom?: number; message?: string;
-}
-
-// Ensure Windows Firewall allows inbound TCP on the given port.
-// Without this rule, other machines on the same LAN are blocked even though
-// the server binds to 0.0.0.0. Errors are silently swallowed - the server
-// still starts; the rule is just advisory.
-function ensureFirewallRule(port: number): void {
-  if (process.platform !== 'win32') return;
-  const ruleName = `Queez CBT Server Port ${port}`;
-  // Delete stale rule for this port, then re-add. Runs without elevation via
-  // the existing elevated installer context; silently fails if not elevated.
-  execFile('netsh', [
-    'advfirewall', 'firewall', 'add', 'rule',
-    `name=${ruleName}`,
-    'dir=in', 'action=allow', 'protocol=TCP',
-    `localport=${port}`,
-    'profile=any',
-    'enable=yes',
-  ], { windowsHide: true }, () => {});
-  // Also allow UDP on discovery port 4001
-  execFile('netsh', [
-    'advfirewall', 'firewall', 'add', 'rule',
-    'name=Queez CBT Discovery',
-    'dir=in', 'action=allow', 'protocol=UDP',
-    'localport=4001',
-    'profile=any',
-    'enable=yes',
-  ], { windowsHide: true }, () => {});
 }
 
 export class ServerManager {
@@ -69,6 +42,7 @@ export class ServerManager {
         srv.listen(port, '0.0.0.0', () => {
           this.startedAt = Date.now();
           ensureFirewallRule(port);
+          try { initWebSocketServer(srv); } catch {}
           try { this.beacon.start(port); } catch {}
           resolve({ success: true, port });
         });
@@ -102,6 +76,7 @@ export class ServerManager {
   }
 
   stop(): void {
+    try { closeWebSocketServer(); } catch {}
     this.beacon.stop();
     if (this.server) { try { this.server.close(); } catch {} this.server = null; }
     this.startedAt = 0;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Student, LocalStore, apiClient } from '@cbt/shared';
+import { Student, LocalStore, apiClient, socketClient } from '@cbt/shared';
 import { generateSingleCode, generateBatchCodes } from './studentCodeGen';
 
 const studentStore = new LocalStore<Student>('students');
@@ -35,12 +35,16 @@ export function useStudentStore() {
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 5000);
+    const unsubStudents = socketClient.on('students:changed', refresh);
+    const unsubConn = socketClient.onConnectionChange((connected) => { if (connected) refresh(); });
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     window.addEventListener('cbt:server-changed', refresh);
+    const slowBackup = setInterval(refresh, 60000);
     return () => {
-      clearInterval(interval);
+      unsubStudents();
+      unsubConn();
+      clearInterval(slowBackup);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('cbt:server-changed', refresh);
     };

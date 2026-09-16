@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Assessment, Submission, LocalStore, apiClient } from '@cbt/shared';
+import { Assessment, Submission, LocalStore, apiClient, socketClient } from '@cbt/shared';
 import { fetchAndSyncManagerData } from './managerStoreSync';
 
 const assessmentStore = new LocalStore<Assessment>('exams');
@@ -20,12 +20,18 @@ export function useManagerAppStore() {
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 3000);
+    const unsubAss = socketClient.on('assessments:changed', refresh);
+    const unsubSub = socketClient.on('submissions:changed', refresh);
+    const unsubConn = socketClient.onConnectionChange((connected) => { if (connected) refresh(); });
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     window.addEventListener('cbt:server-changed', refresh);
+    const slowBackup = setInterval(refresh, 60000);
     return () => {
-      clearInterval(interval);
+      unsubAss();
+      unsubSub();
+      unsubConn();
+      clearInterval(slowBackup);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('cbt:server-changed', refresh);
     };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTitleBar } from './useTitleBar.js';
-import { serverConfig } from '../api/server-config.js';
+import { socketClient } from '../api/socket-client.js';
 
 const MinusIcon = () => (
   <svg width="10" height="2" viewBox="0 0 10 2" fill="currentColor"><rect width="10" height="2" /></svg>
@@ -32,19 +32,9 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
 
   useEffect(() => {
-    let unmounted = false;
-    const check = async () => {
-      const res = await serverConfig.testConnection(undefined, true);
-      if (!unmounted) setIsServerOnline(res.ok);
-    };
-    check();
-    const interval = setInterval(check, 4000);
-    window.addEventListener('cbt:server-changed', check);
-    return () => {
-      unmounted = true;
-      clearInterval(interval);
-      window.removeEventListener('cbt:server-changed', check);
-    };
+    return socketClient.onConnectionChange((connected) => {
+      setIsServerOnline(connected);
+    });
   }, []);
 
   if (!isElectron) return null;

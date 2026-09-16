@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { gradingService } from './grading.service.js';
+import { broadcastWsEvent } from '../../core/ws/ws-hub.js';
 
 export const submissionRouter = Router();
 
@@ -20,6 +21,7 @@ submissionRouter.post('/', (req: Request, res: Response) => {
       return res.status(400).json({ success: false, statusCode: 400, message: 'Missing student name or assessment reference for submission.' });
     }
     const submission = gradingService.submitAndGrade(req.body);
+    broadcastWsEvent('submissions:changed', { action: 'submitted', id: submission.id });
     res.status(201).json({ success: true, statusCode: 201, message: 'Your assessment has been submitted and recorded.', data: submission });
   } catch (err: unknown) {
     res.status(400).json({ success: false, statusCode: 400, message: (err as Error).message || 'Unable to submit your answers.' });
@@ -42,6 +44,7 @@ submissionRouter.put('/:id/grade', (req: Request, res: Response) => {
   try {
     const updated = gradingService.reviewSubmission(req.params.id as string, req.body);
     if (!updated) return res.status(404).json({ success: false, statusCode: 404, message: 'Could not find this submission to update grades.' });
+    broadcastWsEvent('submissions:changed', { action: 'graded', id: updated.id });
     res.status(200).json({ success: true, statusCode: 200, message: 'Grades and review updated successfully.', data: updated });
   } catch (err: unknown) {
     res.status(400).json({ success: false, statusCode: 400, message: (err as Error).message || 'Unable to save grades.' });
