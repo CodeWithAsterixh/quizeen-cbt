@@ -49,7 +49,7 @@ export const App: React.FC = () => {
       <TitleBar title={branding?.appName || branding?.schoolName || 'Queez'} badge={branding?.shortName ? `${branding.shortName} Assessment office` : 'Management'} iconUrl={branding?.appIconUrl || branding?.logoUrl} />
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
       <div className="manager-body">
-        <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} onOpenServerSettings={() => setModals(m => ({ ...m, server: true }))} onOpenThemeSettings={() => setModals(m => ({ ...m, theme: true }))} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} onRefresh={handleRefresh} isSyncing={isSyncing} />
+        <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} />
         <main className="main-viewport">
           {notice && (
             <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 14, fontWeight: 600, fontSize: '0.88rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -69,6 +69,8 @@ export const App: React.FC = () => {
             onMoveStudents={async (ids, dir) => { const r = await moveStudentsClass(ids, dir); notify(r.message); }}
             onGenerateCode={generateCodeForStudent} onGenerateCodes={async (ids) => { const r = await generateCodesForStudents(ids); notify(r.message); }}
             onDeleteStudent={async (id) => { const r = await deleteStudent(id); notify(r.message); }} onUpdateSubmission={async (s) => { const r = await updateSubmission(s); notify(r.message); }}
+            onSync={handleRefresh} isSyncing={isSyncing} onOpenServerModal={() => setModals(m => ({ ...m, server: true }))}
+            currentTheme={licenseState?.license?.theme} schoolName={branding?.schoolName} onNotify={notify}
           />
         </main>
       </div>

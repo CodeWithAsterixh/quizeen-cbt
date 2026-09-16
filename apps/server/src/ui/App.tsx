@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TitleBar } from '@cbt/shared';
+import { TitleBar, applyThemeCustomization } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
@@ -30,13 +30,13 @@ export const App: React.FC = () => {
       if (res?.active) setInfoMessage(`Active Queez Server detected at ${res.url}.`);
     }).catch(() => {});
 
+    api.getTheme?.().then((t: any) => { if (t) applyThemeCustomization(t); }).catch(() => {});
+    const unsubTheme = api.onThemeChanged?.((t: any) => { if (t) applyThemeCustomization(t); });
+
     const poll = async () => {
       try {
         const s = await api.getStatus();
-        if (s) {
-          setStatus(s);
-          if (s.running) setErrorMessage(null);
-        }
+        if (s) { setStatus(s); if (s.running) setErrorMessage(null); }
       } catch {}
     };
     poll();
@@ -44,7 +44,7 @@ export const App: React.FC = () => {
     const cleanup = api.onRequestLogged?.((entry: LogEntry) => {
       setLogs((prev) => [...prev.slice(-499), entry]);
     });
-    return () => { clearInterval(interval); cleanup?.(); };
+    return () => { clearInterval(interval); cleanup?.(); unsubTheme?.(); };
   }, []);
 
   const handleToggle = async (port: number) => {

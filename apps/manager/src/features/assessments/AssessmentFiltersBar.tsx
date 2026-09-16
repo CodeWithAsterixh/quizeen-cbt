@@ -5,6 +5,9 @@ import { EDUCATION_LEVELS, DEPARTMENTS, Card, TextInput, SelectDropdown } from '
 interface AssessmentFiltersBarProps {
   searchTerm: string;
   onSearchChange: (val: string) => void;
+  sessionFilter: string;
+  onSessionChange: (val: string) => void;
+  availableSessions: string[];
   typeFilter: string;
   onTypeChange: (val: string) => void;
   levelFilter: string;
@@ -14,9 +17,13 @@ interface AssessmentFiltersBarProps {
 }
 
 export const AssessmentFiltersBar: React.FC<AssessmentFiltersBarProps> = ({
-  searchTerm, onSearchChange, typeFilter, onTypeChange,
-  levelFilter, onLevelChange, deptFilter, onDeptChange,
+  searchTerm, onSearchChange, sessionFilter, onSessionChange, availableSessions,
+  typeFilter, onTypeChange, levelFilter, onLevelChange, deptFilter, onDeptChange,
 }) => {
+  const sessionOptions = [
+    { value: 'all', label: 'All Sessions' },
+    ...availableSessions.map((s) => ({ value: s, label: s })),
+  ];
   const typeOptions = [
     { value: 'all', label: 'All Types (Tests & Exams)' },
     { value: 'test', label: 'Tests Only' },
@@ -40,6 +47,7 @@ export const AssessmentFiltersBar: React.FC<AssessmentFiltersBarProps> = ({
           onChange={(e) => onSearchChange(e.target.value)}
           icon={<MagnifyingGlass size={18} />}
         />
+        <SelectDropdown value={sessionFilter} onChange={(val) => onSessionChange(val)} options={sessionOptions} />
         <SelectDropdown value={typeFilter} onChange={(val) => onTypeChange(val)} options={typeOptions} />
         <SelectDropdown value={levelFilter} onChange={(val) => onLevelChange(val)} options={levelOptions} />
         <SelectDropdown value={deptFilter} onChange={(val) => onDeptChange(val)} options={deptOptions} />

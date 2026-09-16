@@ -2,12 +2,18 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ServerManager } from './server-manager.js';
+import { onServerThemeChange } from '../src/features/theme/theme.routes.js';
+import { themeService } from '../src/features/theme/theme.service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let mainWindow: BrowserWindow | null = null;
 
 const serverManager = new ServerManager((entry) => {
   mainWindow?.webContents.send('server:request-logged', entry);
+});
+
+onServerThemeChange((theme) => {
+  mainWindow?.webContents.send('server:theme-changed', theme);
 });
 
 function createWindow() {
@@ -57,6 +63,7 @@ app.whenReady().then(() => {
   ipcMain.handle('server:stop', async () => { serverManager.stop(); return true; });
   ipcMain.handle('server:get-status', async () => serverManager.getStatus());
   ipcMain.handle('server:detect', async (_e, port) => serverManager.detectExisting(port));
+  ipcMain.handle('server:get-theme', async () => themeService.getTheme());
 
   ipcMain.on('window:minimize', () => mainWindow?.minimize());
   ipcMain.handle('window:maximize', () => {

@@ -57,8 +57,13 @@ export function buildAssessmentResultPdf(assessment: Assessment, submissions: Su
   return doc;
 }
 
-export function downloadAssessmentResultPdf(assessment: Assessment, submissions: Submission[], schoolName?: string): void {
+export function downloadAssessmentResultPdf(
+  assessment: Assessment,
+  submissions: Submission[],
+  schoolName?: string,
+  customFilename?: string
+): void {
   const doc = buildAssessmentResultPdf(assessment, submissions, schoolName);
-  const cleanName = assessment.subject.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const cleanName = (customFilename || assessment.subject).replace(/[^a-zA-Z0-9_-]/g, '_');
   doc.save(`${cleanName}_Results.pdf`);
 }

@@ -1,19 +1,20 @@
 import React from 'react';
-import { ArrowLeft } from '@cbt/shared';
+import { ArrowLeft, Button, DownloadSimple } from '@cbt/shared';
 import { Assessment, Submission, Card, Badge } from '@cbt/shared';
+import { downloadAssessmentResultPdf } from '../grading/assessmentResultPdf';
 import { getGradeAndRemark } from './grade-utils';
-
 import { SubjectScoresTable } from './SubjectScoresTable';
 
 interface SubjectDetailPageProps {
   className: string;
   exam: Assessment;
   submissions: Submission[];
+  schoolName?: string;
   onBack: () => void;
 }
 
 export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
-  className, exam, submissions, onBack,
+  className, exam, submissions, schoolName, onBack,
 }) => {
   const classSubs = submissions.filter((s) => s.examId === exam.id && (s.classGroup === className || !s.classGroup));
   const total = classSubs.length;
@@ -36,18 +37,28 @@ export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
         <span>Back to {className}</span>
       </button>
 
-      <div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 4 }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>
-            {exam.subject}
-          </h1>
-          <Badge color={exam.assessmentType === 'exam' ? 'purple' : 'blue'} style={{ textTransform: 'capitalize' }}>
-            {exam.assessmentType ?? 'test'}
-          </Badge>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
+        <div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 4 }}>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>
+              {exam.subject}
+            </h1>
+            <Badge color={exam.assessmentType === 'exam' ? 'purple' : 'blue'} style={{ textTransform: 'capitalize' }}>
+              {exam.assessmentType ?? 'test'}
+            </Badge>
+          </div>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: 0 }}>
+            Detailed student scores and grading breakdown for {className} ({exam.session || '2024/2025'}).
+          </p>
         </div>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: 0 }}>
-          Detailed student scores and grading breakdown for {className} ({exam.session || '2024/2025'}).
-        </p>
+        <Button
+          variant="primary"
+          onClick={() => downloadAssessmentResultPdf(exam, classSubs, schoolName, `${className}_${exam.subject}`)}
+          disabled={classSubs.length === 0}
+          icon={<DownloadSimple size={16} />}
+        >
+          Export Result (PDF)
+        </Button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>

@@ -5,7 +5,8 @@ import { buildAssessmentResultPdf } from './assessmentResultPdf';
 export async function exportBatchResultsZip(
   assessments: Assessment[],
   allSubmissions: Submission[],
-  schoolName?: string
+  schoolName?: string,
+  zipPrefix?: string
 ): Promise<void> {
   const zip = new JSZip();
 
@@ -22,7 +23,8 @@ export async function exportBatchResultsZip(
   const link = document.createElement('a');
   link.href = url;
   const dateStr = new Date().toISOString().split('T')[0];
-  link.download = `Assessment_Results_${dateStr}.zip`;
+  const baseName = (zipPrefix || 'Assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
+  link.download = `${baseName}_Results_${dateStr}.zip`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

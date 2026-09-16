@@ -5,3 +5,4 @@ export * from './device-api.js';
 export * from './useDiscoveredServers.js';
 export * from './useAppLicense.js';
 export * from './socket-client.js';
+export * from './theme-api.js';

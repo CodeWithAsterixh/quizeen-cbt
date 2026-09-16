@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, FileArchive, DownloadSimple, Assessment, Submission, Button } from '@cbt/shared';
+import { Plus, FileArchive, Assessment, Submission, Button } from '@cbt/shared';
 import { AssessmentFiltersBar } from './AssessmentFiltersBar';
 import { AssessmentCard } from './AssessmentCard';
-import { ExportResultsModal } from '../grading/ExportResultsModal';
 
 interface AssessmentListViewProps {
   assessments: Assessment[];
@@ -21,17 +20,20 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
   onEditAssessment, onDuplicateAssessment, onDeleteAssessment, onOpenLoader,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sessionFilter, setSessionFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
-  const [isExportOpen, setIsExportOpen] = useState(false);
+
+  const availableSessions = Array.from(new Set(assessments.map((a) => a.session || '2024/2025'))).sort().reverse();
 
   const filtered = assessments.filter((e) => {
     const matchSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase()) || e.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchSession = sessionFilter === 'all' || (e.session || '2024/2025') === sessionFilter;
     const matchType = typeFilter === 'all' || (e.assessmentType ?? 'test') === typeFilter;
     const matchLevel = levelFilter === 'all' || e.educationLevel === levelFilter;
     const matchDept = deptFilter === 'all' || e.department === deptFilter;
-    return matchSearch && matchType && matchLevel && matchDept;
+    return matchSearch && matchSession && matchType && matchLevel && matchDept;
   });
 
   return (
@@ -44,9 +46,6 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Button variant="outline" onClick={() => setIsExportOpen(true)} icon={<DownloadSimple size={18} />}>
-            Export Results
-          </Button>
           {onOpenLoader && (
             <Button variant="secondary" onClick={onOpenLoader} icon={<FileArchive size={18} />}>
               Load Package (.qzn)
@@ -59,8 +58,10 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
       </header>
 
       <AssessmentFiltersBar
-        searchTerm={searchTerm} onSearchChange={setSearchTerm} typeFilter={typeFilter}
-        onTypeChange={setTypeFilter} levelFilter={levelFilter} onLevelChange={setLevelFilter}
+        searchTerm={searchTerm} onSearchChange={setSearchTerm}
+        sessionFilter={sessionFilter} onSessionChange={setSessionFilter} availableSessions={availableSessions}
+        typeFilter={typeFilter} onTypeChange={setTypeFilter}
+        levelFilter={levelFilter} onLevelChange={setLevelFilter}
         deptFilter={deptFilter} onDeptChange={setDeptFilter}
       />
 
@@ -79,11 +80,6 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
           ))}
         </div>
       )}
-
-      <ExportResultsModal
-        isOpen={isExportOpen} assessments={assessments} submissions={submissions}
-        schoolName={schoolName} onClose={() => setIsExportOpen(false)}
-      />
     </div>
   );
 };

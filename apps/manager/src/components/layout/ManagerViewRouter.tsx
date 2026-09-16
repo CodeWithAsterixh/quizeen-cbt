@@ -1,5 +1,5 @@
 import React from 'react';
-import { Assessment, Submission, Student } from '@cbt/shared';
+import { Assessment, Submission, Student, ThemeConfig } from '@cbt/shared';
 import { ManagerTab } from './Sidebar';
 import { DashboardView } from '../../features/dashboard/DashboardView';
 import { AssessmentListView } from '../../features/assessments/AssessmentListView';
@@ -9,6 +9,7 @@ import { GradingQueueView } from '../../features/grading/GradingQueueView';
 import { StudentResultDetailPage } from '../../features/grading/StudentResultDetailPage';
 import { AnalyticsView } from '../../features/analytics/AnalyticsView';
 import { StudentListView } from '../../features/students/StudentListView';
+import { ManagerSettingsView } from '../../features/settings/ManagerSettingsView';
 
 interface Props {
   currentTab: ManagerTab;
@@ -32,6 +33,12 @@ interface Props {
   onGenerateCodes: (ids: string[]) => Promise<void>;
   onDeleteStudent: (id: string) => Promise<void>;
   onUpdateSubmission: (s: Submission) => Promise<void>;
+  onSync: () => Promise<void>;
+  isSyncing: boolean;
+  onOpenServerModal: () => void;
+  currentTheme?: ThemeConfig;
+  schoolName?: string;
+  onNotify: (msg: string) => void;
 }
 
 export const ManagerViewRouter: React.FC<Props> = (props) => {
@@ -40,6 +47,7 @@ export const ManagerViewRouter: React.FC<Props> = (props) => {
     onSelectExam, onSelectSubmission, onNavigate, onOpenCreateExam, onOpenLoader,
     onEditExam, onDuplicateExam, onDeleteExam, onOpenCreateStudent, onEditStudent,
     onMoveStudents, onGenerateCode, onGenerateCodes, onDeleteStudent, onUpdateSubmission,
+    onSync, isSyncing, onOpenServerModal, currentTheme, schoolName, onNotify,
   } = props;
 
   const activeSub = submissions.find((s) => s.id === selectedSubmissionId);
@@ -73,7 +81,8 @@ export const ManagerViewRouter: React.FC<Props> = (props) => {
       {currentTab === 'students' && <StudentListView students={students} onOpenCreate={onOpenCreateStudent} onEditStudent={onEditStudent} onMoveStudents={onMoveStudents} onGenerateCode={onGenerateCode} onGenerateCodes={onGenerateCodes} onDeleteStudent={onDeleteStudent} />}
       {currentTab === 'compiler' && <PackageCompilerView exams={assessments} />}
       {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={onUpdateSubmission} />}
-      {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} />}
+      {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} schoolName={schoolName} />}
+      {currentTab === 'settings' && <ManagerSettingsView onSync={onSync} isSyncing={isSyncing} onOpenServerModal={onOpenServerModal} currentTheme={currentTheme} schoolName={schoolName} onNotify={onNotify} />}
     </>
   );
 };

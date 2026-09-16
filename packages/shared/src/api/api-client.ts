@@ -1,7 +1,8 @@
-import { Assessment, EducationLevel, Department } from '../types/index.js';
+import { Assessment, EducationLevel, Department, ThemeConfig } from '../types/index.js';
 import { createIdempotencyKey } from '../utils/idempotency.js';
 import { serverConfig } from './server-config.js';
 import { studentApi } from './student-api.js';
+import { themeApi } from './theme-api.js';
 
 import { submissionApi } from './submission-api.js';
 import { packageApi } from './package-api.js';
@@ -83,4 +84,6 @@ export const apiClient = {
   generateStudentCode: (id: string, fallback?: any) => studentApi.generateCode(id, fallback),
   generateAllStudentCodes: (classGroup?: string, studentIds?: string[]) => studentApi.generateAllCodes(classGroup, studentIds),
   deleteStudent: (id: string) => studentApi.deleteStudent(id),
+  getTheme: () => themeApi.getTheme(),
+  saveTheme: (theme: Partial<ThemeConfig>) => themeApi.saveTheme(theme),
 };

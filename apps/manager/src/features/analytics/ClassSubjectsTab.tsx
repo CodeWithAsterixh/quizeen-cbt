@@ -7,10 +7,14 @@ import { ClassSubjectCard } from './ClassSubjectCard';
 
 interface ClassSubjectsTabProps {
   subjects: ClassSubjectSummary[];
+  selectedIds?: string[];
+  onToggleSelect?: (subjectId: string) => void;
   onSelectSubject: (subjectId: string) => void;
 }
 
-export const ClassSubjectsTab: React.FC<ClassSubjectsTabProps> = ({ subjects, onSelectSubject }) => {
+export const ClassSubjectsTab: React.FC<ClassSubjectsTabProps> = ({
+  subjects, selectedIds, onToggleSelect, onSelectSubject,
+}) => {
   if (subjects.length === 0) {
     return (
       <Card style={{ textAlign: 'center', padding: '3rem' }}>
@@ -22,7 +26,13 @@ export const ClassSubjectsTab: React.FC<ClassSubjectsTabProps> = ({ subjects, on
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {subjects.map((sub) => (
-        <ClassSubjectCard key={sub.subjectId} sub={sub} onSelectSubject={onSelectSubject} />
+        <ClassSubjectCard
+          key={sub.subjectId}
+          sub={sub}
+          isSelected={selectedIds?.includes(sub.subjectId)}
+          onToggleSelect={onToggleSelect}
+          onSelectSubject={onSelectSubject}
+        />
       ))}
     </div>
   );

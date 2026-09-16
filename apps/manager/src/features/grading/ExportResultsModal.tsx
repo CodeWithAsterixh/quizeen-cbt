@@ -8,11 +8,13 @@ interface Props {
   assessments: Assessment[];
   submissions: Submission[];
   schoolName?: string;
+  title?: string;
+  zipPrefix?: string;
   onClose: () => void;
 }
 
 export const ExportResultsModal: React.FC<Props> = ({
-  isOpen, assessments, submissions, schoolName, onClose,
+  isOpen, assessments, submissions, schoolName, title, zipPrefix, onClose,
 }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => assessments.map((a) => a.id));
   const [isExporting, setIsExporting] = useState(false);
@@ -35,9 +37,9 @@ export const ExportResultsModal: React.FC<Props> = ({
       if (selected.length === 1) {
         const item = selected[0];
         const subs = submissions.filter((s) => s.examId === item.id);
-        downloadAssessmentResultPdf(item, subs, schoolName);
+        downloadAssessmentResultPdf(item, subs, schoolName, zipPrefix ? `${zipPrefix}_${item.subject}` : undefined);
       } else {
-        await exportBatchResultsZip(selected, submissions, schoolName);
+        await exportBatchResultsZip(selected, submissions, schoolName, zipPrefix);
       }
       onClose();
     } finally {
@@ -46,7 +48,7 @@ export const ExportResultsModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Export Assessment Results" maxWidth={560}>
+    <Modal isOpen={isOpen} onClose={onClose} title={title || 'Export Assessment Results'} maxWidth={560}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)' }}>

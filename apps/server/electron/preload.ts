@@ -5,6 +5,12 @@ const serverApi = {
   stopServer: () => ipcRenderer.invoke('server:stop'),
   getStatus: () => ipcRenderer.invoke('server:get-status'),
   detectExisting: (port?: number) => ipcRenderer.invoke('server:detect', port),
+  getTheme: () => ipcRenderer.invoke('server:get-theme'),
+  onThemeChanged: (callback: (theme: any) => void) => {
+    const handler = (_e: any, theme: any) => callback(theme);
+    ipcRenderer.on('server:theme-changed', handler);
+    return () => { ipcRenderer.removeListener('server:theme-changed', handler); };
+  },
   onRequestLogged: (callback: (entry: any) => void) => {
     const handler = (_e: any, entry: any) => callback(entry);
     ipcRenderer.on('server:request-logged', handler);

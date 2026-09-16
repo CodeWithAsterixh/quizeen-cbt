@@ -1,29 +1,21 @@
 import React from 'react';
 import {
-  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear, ArrowsClockwise, MagicWand,
+  Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear,
 } from '@cbt/shared';
 import { Badge, Button } from '@cbt/shared';
 
-export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics';
+export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics' | 'settings';
 
 interface SidebarProps {
   currentTab: ManagerTab;
   onSelectTab: (tab: ManagerTab) => void;
-  onOpenServerSettings: () => void;
-  onOpenThemeSettings?: () => void;
   pendingGradingCount: number;
-  onRefresh?: () => void;
-  isSyncing?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
-  onOpenServerSettings,
-  onOpenThemeSettings,
   pendingGradingCount,
-  onRefresh,
-  isSyncing = false,
 }) => {
   const navItems = [
     { id: 'dashboard' as ManagerTab, label: 'Overview', icon: Gauge },
@@ -37,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: pendingGradingCount > 0 ? `${pendingGradingCount} to mark` : undefined,
     },
     { id: 'analytics' as ManagerTab, label: 'Results & Scores', icon: ChartBar },
+    { id: 'settings' as ManagerTab, label: 'Settings', icon: Gear },
   ];
 
   return (
@@ -66,27 +59,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </nav>
-
-      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {onRefresh && (
-          <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onRefresh} disabled={isSyncing}>
-            <ArrowsClockwise size={18} className={isSyncing ? 'cbt-spin' : ''} />
-            <span style={{
-              opacity: isSyncing?0.7:1
-            }}>Sync Data</span>
-          </Button>
-        )}
-        <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenServerSettings}>
-          <Gear size={18} />
-          <span>Server Connection</span>
-        </Button>
-        {onOpenThemeSettings && (
-          <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenThemeSettings}>
-            <MagicWand size={18} />
-            <span>Theme Preview</span>
-          </Button>
-        )}
-      </div>
     </aside>
   );
 };

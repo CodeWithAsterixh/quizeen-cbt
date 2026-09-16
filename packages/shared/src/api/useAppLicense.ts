@@ -28,10 +28,7 @@ export function useAppLicense() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       const state: LicenseState = body?.data || body;
-      setLicenseState({
-        ...state,
-        serverOnline: true
-      });
+      setLicenseState({ ...state, serverOnline: true });
       setError(null);
       if (state.license?.theme || state.license?.branding) {
         applyThemeCustomization(state.license.theme, state.license.branding);
@@ -42,23 +39,12 @@ export function useAppLicense() {
     } catch (err: any) {
       setError(err?.message || 'Server unreachable');
       setLicenseState((prev) => {
-        // On background polls, preserve active state so transient errors don't lock screen
         if (prev?.status === 'active' && !isInitial) return prev;
-        return {
-          status: 'unlicensed',
-          hardwareId: 'Server Offline',
-          message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
-          serverOnline: false
-        };
+        return { status: 'unlicensed', hardwareId: 'Server Offline', message: 'Server unreachable at ' + serverConfig.getUrl(), serverOnline: false };
       });
       if (isInitial && !hasResolvedRef.current) {
-        // Give UDP discovery time to detect the server and switch the URL
         if (!graceTimerRef.current) {
-          graceTimerRef.current = setTimeout(() => {
-            graceTimerRef.current = null;
-            hasResolvedRef.current = true;
-            setHasResolved(true);
-          }, DISCOVERY_GRACE_MS);
+          graceTimerRef.current = setTimeout(() => { graceTimerRef.current = null; hasResolvedRef.current = true; setHasResolved(true); }, DISCOVERY_GRACE_MS);
         }
       } else {
         hasResolvedRef.current = true;
@@ -68,17 +54,19 @@ export function useAppLicense() {
       isInitialRef.current = false;
       isFetchingRef.current = false;
     }
-  }, []); // stable - no state deps, uses refs instead
+  }, []);
 
   useEffect(() => {
     fetchLicense();
     const handleServerChange = () => { isInitialRef.current = false; fetchLicense(); };
     window.addEventListener('cbt:server-changed', handleServerChange);
     const unsubLicense = socketClient.on('license:changed', fetchLicense);
+    const unsubTheme = socketClient.on('theme:changed', (t: any) => { if (t) applyThemeCustomization(t); });
     const unsubConn = socketClient.onConnectionChange((connected) => { if (connected) fetchLicense(); });
     return () => {
       window.removeEventListener('cbt:server-changed', handleServerChange);
       unsubLicense();
+      unsubTheme();
       unsubConn();
       if (graceTimerRef.current) clearTimeout(graceTimerRef.current);
     };

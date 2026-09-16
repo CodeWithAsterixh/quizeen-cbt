@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, applyThemeCustomization, resetThemeToDefault, ThemeConfig } from '@cbt/shared';
+import { Modal, Button, applyThemeCustomization, resetThemeToDefault, ThemeConfig, apiClient } from '@cbt/shared';
 
 interface ThemeCustomizerModalProps {
   isOpen: boolean;
@@ -21,6 +21,12 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
       { primaryColor: primary, accentColor: accent, surfaceMode: 'light', fontPreset: 'inter' },
       { schoolName }
     );
+  };
+
+  const handleSave = async () => {
+    handleApply();
+    await apiClient.saveTheme({ primaryColor: primary, accentColor: accent });
+    onClose();
   };
 
   const handleReset = () => {
@@ -68,11 +74,12 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, flexWrap: 'wrap', gap: 8 }}>
           <Button variant="ghost" onClick={handleReset}>Reset to Default</Button>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="outline" onClick={onClose}>Close</Button>
-            <Button variant="primary" onClick={handleApply}>Apply Live Preview</Button>
+            <Button variant="outline" onClick={handleApply}>Preview</Button>
+            <Button variant="primary" onClick={handleSave}>Save to All Stations</Button>
           </div>
         </div>
       </div>

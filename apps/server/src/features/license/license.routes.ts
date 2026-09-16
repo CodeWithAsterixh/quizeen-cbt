@@ -2,11 +2,16 @@ import { Router } from 'express';
 import { cryptoLicenseService } from './crypto-license.service.js';
 import { getLicensingPortalUrl, setLicensingPortalUrl } from './portal-config.service.js';
 import { broadcastWsEvent } from '../../core/ws/ws-hub.js';
+import { themeService } from '../theme/theme.service.js';
 
 export const licenseRouter = Router();
 
 licenseRouter.get('/', (_req, res) => {
   const state = cryptoLicenseService.getLicenseState();
+  const custom = themeService.getCustomTheme();
+  if (custom && state.license) {
+    state.license = { ...state.license, theme: { ...state.license.theme, ...custom } };
+  }
   res.json({ success: true, data: state, portalUrl: getLicensingPortalUrl() });
 });
 
