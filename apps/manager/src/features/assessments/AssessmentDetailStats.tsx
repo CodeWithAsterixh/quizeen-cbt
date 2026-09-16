@@ -11,6 +11,7 @@ export const AssessmentDetailStats: React.FC<AssessmentDetailStatsProps> = ({
 }) => {
   const exam = assessment;
   const total = submissions.length;
+  const totalStudentsFullPoints = exam.totalPoints * total;
   const graded = submissions.filter((s) => s.isFinalized || s.status === 'graded');
   const avg = graded.length > 0
     ? Math.round(graded.reduce((a, s) => a + (s.percentage ?? 0), 0) / graded.length)
@@ -21,7 +22,7 @@ export const AssessmentDetailStats: React.FC<AssessmentDetailStatsProps> = ({
 
   const stats = [
     { label: 'Total Submissions', value: total, hint: `${exam.questions.length} questions` },
-    { label: 'Average Score', value: `${avg}%`, hint: `Out of ${exam.totalPoints} pts` },
+    { label: 'Average Score', value: `${avg}%`, hint: `Out of ${totalStudentsFullPoints} pts` },
     { label: 'Pass Rate', value: `${passRate}%`, hint: `Passing mark: ${exam.passingScore || 50}%` },
     { label: 'Time Allowed', value: `${exam.durationMinutes}m`, hint: 'Total time limit' },
   ];

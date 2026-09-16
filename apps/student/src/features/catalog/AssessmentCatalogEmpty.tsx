@@ -19,7 +19,7 @@ export const AssessmentCatalogEmpty: React.FC<Props> = ({
       No Assessments Found For Your Class
     </h2>
     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: 20 }}>
-      There are no active {typeFilter === 'all' ? 'assessments' : typeFilter === 'test' ? 'tests' : 'exams'} scheduled right now for <strong>{student.classGroup}</strong>.
+      There are no {typeFilter === 'all' ? 'assessments' : typeFilter === 'test' ? 'tests' : 'exams'} scheduled for <strong>{student.classGroup}</strong> right now.
     </p>
     <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
       {onRefresh && (

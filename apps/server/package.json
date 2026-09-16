@@ -1,6 +1,6 @@
 {
   "name": "@cbt/server",
-  "version": "2.0.4",
+  "version": "2.0.9",
   "description": "Quizeen CBT Central Server desktop application",
   "author": "Quizeen",
   "private": true,

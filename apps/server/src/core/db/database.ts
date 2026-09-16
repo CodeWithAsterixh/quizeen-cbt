@@ -13,24 +13,27 @@ export function resolveDataDir(): string {
   if (process.env.QUEEZ_DATA_DIR && fs.existsSync(process.env.QUEEZ_DATA_DIR)) {
     return process.env.QUEEZ_DATA_DIR;
   }
-  const candidates = [
-    path.resolve(process.cwd(), 'data'),
-    path.resolve(process.cwd(), 'apps/server/data'),
-    path.resolve(__dirname, '../data'),
-    path.resolve(__dirname, '../../../data'),
-  ];
+  const isDev = fs.existsSync(path.resolve(process.cwd(), 'package.json')) &&
+                fs.existsSync(path.resolve(process.cwd(), 'apps'));
+  if (isDev) {
+    const devData = path.resolve(process.cwd(), 'data');
+    if (fs.existsSync(devData)) return devData;
+  }
+  const common = process.env.PROGRAMDATA || process.env.ALLUSERSPROFILE;
+  if (common) {
+    const pData = path.join(common, 'Queez CBT Suite', 'data');
+    if (fs.existsSync(pData)) return pData;
+  }
+  const appData = process.env.APPDATA || process.env.LOCALAPPDATA;
+  if (appData) {
+    const pData = path.join(appData, 'Queez CBT Suite', 'data');
+    if (fs.existsSync(pData)) return pData;
+  }
+  const candidates = [path.resolve(process.cwd(), 'data'), path.resolve(__dirname, '../data')];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
   }
-  const baseDir = process.env.PROGRAMDATA || process.env.APPDATA || process.env.LOCALAPPDATA;
-  if (baseDir) {
-    const pData = path.join(baseDir, 'Queez CBT Suite', 'data');
-    try {
-      if (!fs.existsSync(pData)) fs.mkdirSync(pData, { recursive: true });
-      return pData;
-    } catch {}
-  }
-  return path.resolve(process.cwd(), 'data');
+  return common ? path.join(common, 'Queez CBT Suite', 'data') : path.resolve(process.cwd(), 'data');
 }
 
 const DATA_DIR = resolveDataDir();
@@ -44,26 +47,28 @@ class DatabaseStore {
     runLegacyMigration(DATA_DIR, this.assessments, this.students, this.submissions);
   }
 
-  public getExams(): Exam[] { return this.assessments.getAll(); }
-  public getExamById(id: string): Exam | undefined { return this.assessments.getById(id); }
-  public saveExam(exam: Exam): void { this.assessments.save(exam); }
-  public deleteExam(id: string): boolean { return this.assessments.delete(id); }
+  getExams(): Exam[] { return this.assessments.getAll(); }
+  getExamById(id: string): Exam | undefined { return this.assessments.getById(id); }
+  saveExam(exam: Exam): void { this.assessments.save(exam); }
+  deleteExam(id: string): boolean { return this.assessments.delete(id); }
 
-  public getSubmissions(): Submission[] { return this.submissions.getAll(); }
-  public getSubmissionById(id: string): Submission | undefined { return this.submissions.getById(id); }
-  public saveSubmission(sub: Submission): void { this.submissions.save(sub); }
+  getSubmissions(): Submission[] { return this.submissions.getAll(); }
+  getSubmissionById(id: string): Submission | undefined { return this.submissions.getById(id); }
+  saveSubmission(sub: Submission): void { this.submissions.save(sub); }
 
-  public getStudents(): Student[] { return this.students.getAll(); }
-  public getStudentByCode(code: string): Student | undefined { return this.students.getByCode(code); }
-  public saveStudent(student: Student): void { this.students.save(student); }
-  public deleteStudent(id: string): boolean { return this.students.delete(id); }
+  getStudents(): Student[] { return this.students.getAll(); }
+  getStudentByCode(code: string): Student | undefined { return this.students.getByCode(code); }
+  saveStudent(student: Student): void { this.students.save(student); }
+  deleteStudent(id: string): boolean { return this.students.delete(id); }
 
-  public resetToSeed(): void {
+  resetToSeed(): void {
     this.assessments.clear();
     this.students.clear();
     this.submissions.clear();
   }
+
+  getDataDir() { return DATA_DIR; }
 }
 
 export const db = new DatabaseStore();
-
+export { DATA_DIR };

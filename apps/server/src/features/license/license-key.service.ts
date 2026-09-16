@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { resolveDataDir } from '../../core/db/database.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let cachedKey: string | null = null;
 
 export function getLicensePublicKey(): string | null {
@@ -13,11 +15,16 @@ export function getLicensePublicKey(): string | null {
     return cachedKey;
   }
 
+  const dataDir = resolveDataDir();
+  const common = process.env.PROGRAMDATA || process.env.ALLUSERSPROFILE || 'C:\\ProgramData';
+  const programDataDir = path.join(common, 'Queez CBT Suite', 'data');
+
   const envFiles = [
+    path.join(dataDir, '.env'),
+    path.join(programDataDir, '.env'),
     path.resolve(process.cwd(), '.env'),
     path.resolve(process.cwd(), '.env.local'),
     path.resolve(process.cwd(), 'apps/server/.env'),
-    path.join(resolveDataDir(), '.env'),
   ];
   for (const f of envFiles) {
     try {
@@ -25,8 +32,7 @@ export function getLicensePublicKey(): string | null {
         const raw = fs.readFileSync(f, 'utf8');
         const m = raw.match(/(?:QUEEZ_LICENSE_PUBLIC_KEY|LICENSE_PUBLIC_KEY)=(?:"([^"]+)"|'([^']+)'|([^\r\n]+))/);
         if (m) {
-          const val = m[1] || m[2] || m[3];
-          cachedKey = val.replace(/\\n/g, '\n').trim();
+          cachedKey = (m[1] || m[2] || m[3]).replace(/\\n/g, '\n').trim();
           return cachedKey;
         }
       }
@@ -34,10 +40,13 @@ export function getLicensePublicKey(): string | null {
   }
 
   const candidatePaths = [
-    path.join(resolveDataDir(), 'license-public.pem'),
-    path.join(resolveDataDir(), 'keys', 'license-public.pem'),
+    path.join(dataDir, 'license-public.pem'),
+    path.join(programDataDir, 'license-public.pem'),
+    path.join('C:\\Program Files\\Queez CBT Suite\\data', 'license-public.pem'),
     path.resolve(process.cwd(), 'config', 'license-public.pem'),
-    path.resolve(process.cwd(), 'apps/server/config', 'license-public.pem'),
+    path.resolve(process.cwd(), 'data', 'license-public.pem'),
+    path.resolve(__dirname, '../config', 'license-public.pem'),
+    path.resolve(__dirname, '../../../config', 'license-public.pem'),
   ];
 
   for (const p of candidatePaths) {
@@ -58,9 +67,7 @@ export function getLicensePublicKey(): string | null {
 export function saveLicensePublicKey(pemKey: string): void {
   cachedKey = pemKey.trim();
   const target = path.join(resolveDataDir(), 'license-public.pem');
-  try {
-    fs.writeFileSync(target, cachedKey, 'utf8');
-  } catch {}
+  try { fs.writeFileSync(target, cachedKey, 'utf8'); } catch {}
 }
 
 export function clearCachedLicenseKey(): void {

@@ -13,13 +13,13 @@ import { useStationUpdater } from './features/device/useStationUpdater';
 import { UpdateProgressModal } from './features/device/UpdateProgressModal';
 
 export const App: React.FC = () => {
-  const { assessments, submissions, refresh, saveSubmission, importAssessments, clearAllAssessments } = useStudentAppStore();
+  const { assessments, submissions, refresh, saveSubmission } = useStudentAppStore();
   const [session, setSession] = useState<StudentSession | null>(null);
   const [activeAssessment, setActiveAssessment] = useState<Assessment | null>(null);
   const [pendingPinAssessment, setPendingPinAssessment] = useState<Assessment | null>(null);
   const [latestSub, setLatestSub] = useState<Submission | null>(null);
   const [view, setView] = useState<'start' | 'catalog' | 'running' | 'completed'>('start');
-  const [modalState, setModalState] = useState({ settings: false, profile: false, pin: false });
+  const [modalState, setModalState] = useState({ profile: false, pin: false });
 
   const { licenseState, isLocked, refreshLicense } = useAppLicense();
   const { isRefreshing, handleRefresh } = useStudentSync(session, setSession, refresh);
@@ -55,7 +55,7 @@ export const App: React.FC = () => {
       />
       <main className="app-content">
         {view === 'start' && (
-          <StartScreen onStartExamClick={() => { setSession(null); setModalState(s => ({ ...s, profile: true })); }} onOpenSettings={() => setModalState(s => ({ ...s, settings: true }))} examCount={assessments.length} />
+          <StartScreen onStartExamClick={() => { setSession(null); setModalState(s => ({ ...s, profile: true })); }} />
         )}
         {view === 'catalog' && session && (
           <AssessmentCatalog
@@ -73,8 +73,6 @@ export const App: React.FC = () => {
       </main>
 
       <AppModals
-        isSettingsOpen={modalState.settings} onCloseSettings={() => setModalState(s => ({ ...s, settings: false }))}
-        onExamsUpdated={importAssessments} examCount={assessments.length} onClearAll={clearAllAssessments}
         isProfileOpen={modalState.profile} onCloseProfile={() => setModalState(s => ({ ...s, profile: false }))}
         onProfileSubmit={(s) => { setSession(s); setModalState(m => ({ ...m, profile: false })); setView('catalog'); }}
         session={session} pendingPinExam={pendingPinAssessment} isPinOpen={modalState.pin}

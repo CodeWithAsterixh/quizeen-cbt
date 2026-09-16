@@ -57,7 +57,7 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
           onClick={() => setActiveTab('questions')}
           icon={<ListNumbers size={16} />}
         >
-          Questions Preview ({exam.questions.length})
+          Questions ({exam.questions.length})
         </Button>
       </div>
 

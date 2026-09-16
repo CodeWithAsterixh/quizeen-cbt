@@ -19,8 +19,8 @@ export const AssessmentQuestionsPreview: React.FC<Props> = ({ questions }) => (
           <span className="badge badge-primary">{q.points} pt{q.points !== 1 ? 's' : ''}</span>
         </div>
         <div style={{ fontSize: '0.95rem', lineHeight: 1.5, marginBottom: 8 }} dangerouslySetInnerHTML={{ __html: q.prompt }} />
-        <div style={{ fontSize: '0.85rem', color: 'var(--color-success)', fontWeight: 600 }}>
-          Answer: {q.correctAnswer}
+        <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+          Correct answer: <b style={{color: 'var(--color-success)'}}>{q.correctAnswer}</b>
         </div>
       </div>
     ))}

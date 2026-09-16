@@ -71,7 +71,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {onRefresh && (
           <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onRefresh} disabled={isSyncing}>
             <ArrowsClockwise size={18} className={isSyncing ? 'cbt-spin' : ''} />
-            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+            <span style={{
+              opacity: isSyncing?0.7:1
+            }}>Sync Data</span>
           </Button>
         )}
         <Button variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={onOpenServerSettings}>

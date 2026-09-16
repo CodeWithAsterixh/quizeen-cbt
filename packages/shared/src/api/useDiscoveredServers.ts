@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DiscoveredServer } from '../types/server-discovery.js';
 import { serverConfig } from './server-config.js';
 
-const DEFAULT_URL = 'http://localhost:4000';
+function isLoopback(url: string): boolean {
+  const lower = url.toLowerCase();
+  return lower.includes('localhost') || lower.includes('127.0.0.1') || lower.includes('0.0.0.0') || lower.includes('[::1]');
+}
 
 interface BeaconPayload {
   ip: string;
@@ -26,14 +29,15 @@ export function useDiscoveredServers() {
 
     const cleanup = electron.onServerDiscovered((data: BeaconPayload) => {
       if (!data?.port) return;
-      const url = `http://${data.ip || '127.0.0.1'}:${data.port}`;
+      const host = data.ip || '127.0.0.1';
+      const url = `http://${host}:${data.port}`;
       setServerMap((prev) => {
         const next = new Map(prev);
         const existing = next.get(url);
         next.set(url, {
           id: url,
           serverName: data.serverName || existing?.serverName || `Server on Port ${data.port}`,
-          ip: data.ip || '127.0.0.1',
+          ip: host,
           port: data.port,
           url,
           lastSeen: Date.now(),
@@ -59,13 +63,14 @@ export function useDiscoveredServers() {
 
   const servers = useMemo(() => Array.from(serverMap.values()), [serverMap]);
 
-  // Auto-connect: if exactly 1 server is discovered and we haven't been manually configured,
-  // switch to it silently. If multiple servers are found, present the picker - don't guess.
+  // Auto-connect: if exactly 1 server is discovered and current URL is any local loopback,
+  // switch to the discovered LAN server.
   useEffect(() => {
     if (servers.length !== 1) return;
     const current = serverConfig.getUrl();
-    if (current !== DEFAULT_URL) return;
-    serverConfig.setUrl(servers[0].url);
+    if (isLoopback(current)) {
+      serverConfig.setUrl(servers[0].url);
+    }
   }, [servers]);
 
   const connectTo = useCallback((url: string) => {

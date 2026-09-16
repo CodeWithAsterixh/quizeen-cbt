@@ -15,4 +15,5 @@ export * from './DepartmentSelector.js';
 export * from './icons.js';
 export * from './theme-engine.js';
 export * from './LicenseLockoutScreen.js';
+export * from './LockoutServerPicker.js';
 

@@ -32,7 +32,7 @@ export const CompilerScheduleRow: React.FC<CompilerScheduleRowProps> = ({
       </div>
 
       {isSelected && (
-        <fieldset style={{ border: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, paddingTop: 10, borderTop: '1px solid var(--color-border)' }}>
+        <fieldset style={{ border: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, paddingTop: 10, borderTop: '1px solid var(--color-border)' }}>
           <legend className="sr-only">Schedule settings for {exam.title}</legend>
           <TextInput label="Class" value={schedule.targetClass} onChange={(e) => onUpdate({ targetClass: e.target.value })} />
           {exam.educationLevel === 'senior_secondary' && (
