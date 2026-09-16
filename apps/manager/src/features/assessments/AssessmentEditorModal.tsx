@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { FloppyDisk, ListNumbers, Gear } from '@cbt/shared';
-import { Assessment, Question, EducationLevel, Department, AssessmentType, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
+import { Assessment, Question, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
 import { QuestionsListTab } from './QuestionsListTab';
 import { AssessmentSettingsTab } from './AssessmentSettingsTab';
 import { useAssessmentForm } from './useAssessmentForm';
@@ -30,8 +30,8 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
     setEditingQIndex(questions.length);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!subject.trim()) return alert('Please enter the Subject in Settings.');
     const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
     const classesStr = selectedClasses.length > 0 ? selectedClasses.join(', ') : 'All';
@@ -49,7 +49,7 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={initialExam ? `Edit: ${initialExam.subject}` : 'Create New Assessment'} subtitle="Manage assessment settings and questions" maxWidth={880}>
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--color-border)', paddingBottom: 10 }}>
           <Button type="button" variant={activeTab === 'questions' ? 'primary' : 'outline'} size="sm" icon={<ListNumbers size={18} />} onClick={() => setActiveTab('questions')}>Questions ({questions.length})</Button>
           <Button type="button" variant={activeTab === 'settings' ? 'primary' : 'outline'} size="sm" icon={<Gear size={18} />} onClick={() => setActiveTab('settings')}>Settings & Availability</Button>
@@ -63,10 +63,10 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{questions.length} questions • {durationMinutes} mins • {isAvailable ? 'Active' : 'Hidden'}</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary" icon={<FloppyDisk size={18} />}>Save Assessment</Button>
+            <Button type="button" variant="primary" onClick={handleSave} icon={<FloppyDisk size={18} />}>Save Assessment</Button>
           </div>
         </div>
-      </form>
+      </div>
     </Modal>
   );
 };

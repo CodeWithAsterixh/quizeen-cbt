@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { deviceApi, DeviceConnectionStatus, UpdatePhase, ActiveExamInfo } from '@cbt/shared';
+import { deviceApi, DeviceConnectionStatus, UpdatePhase, ActiveExamInfo, getAppVersion, socketClient } from '@cbt/shared';
 import { getStationDeviceId, getStationName } from './deviceId';
 
 interface HeartbeatOptions {
@@ -21,6 +21,17 @@ export const useDeviceHeartbeat = ({
   pushCallbackRef.current = onPushUpdateTriggered;
 
   useEffect(() => {
+    const unsub = socketClient.on('device:push-update', (data) => {
+      const target = data?.targetDeviceId;
+      const myId = getStationDeviceId();
+      if (!target || target === '*' || target === 'all' || target === myId) {
+        pushCallbackRef.current?.();
+      }
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
     let isCancelled = false;
 
     const sendHeartbeat = async () => {
@@ -29,7 +40,7 @@ export const useDeviceHeartbeat = ({
           deviceId: getStationDeviceId(),
           deviceName: getStationName(),
           appType: 'student',
-          appVersion: '1.2.0',
+          appVersion: getAppVersion(),
           platform: navigator.platform || 'Windows',
           status,
           currentExam: currentExam || null,

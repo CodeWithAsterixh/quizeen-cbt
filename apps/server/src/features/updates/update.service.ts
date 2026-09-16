@@ -70,6 +70,17 @@ class UpdateService {
     return { filePath, filename: item.filename, size: stat.size };
   }
 
+  getStagedUpdates(): Record<string, AppManifestItem & { exists: boolean; size?: number }> {
+    const manifest = this.getManifest();
+    const res: Record<string, AppManifestItem & { exists: boolean; size?: number }> = {};
+    for (const [k, v] of Object.entries(manifest)) {
+      const p = path.join(this.getUpdatesDir(), v.filename);
+      const exists = fs.existsSync(p);
+      res[k] = { ...v, exists, size: exists ? fs.statSync(p).size : 0 };
+    }
+    return res;
+  }
+
   private compareSemver(a: string, b: string): number {
     const pa = a.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
     const pb = b.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);

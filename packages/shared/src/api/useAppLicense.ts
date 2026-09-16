@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { LicenseState } from '../types/license.js';
 import { serverConfig } from './server-config.js';
+import { socketClient } from './socket-client.js';
 import { applyThemeCustomization } from '../ui/theme-engine.js';
 
 // On first load, if the server is unreachable (e.g. client is on a different
@@ -73,10 +74,12 @@ export function useAppLicense() {
     fetchLicense();
     const handleServerChange = () => { isInitialRef.current = false; fetchLicense(); };
     window.addEventListener('cbt:server-changed', handleServerChange);
-    const interval = setInterval(fetchLicense, 15000);
+    const unsubLicense = socketClient.on('license:changed', fetchLicense);
+    const unsubConn = socketClient.onConnectionChange((connected) => { if (connected) fetchLicense(); });
     return () => {
       window.removeEventListener('cbt:server-changed', handleServerChange);
-      clearInterval(interval);
+      unsubLicense();
+      unsubConn();
       if (graceTimerRef.current) clearTimeout(graceTimerRef.current);
     };
   }, [fetchLicense]);

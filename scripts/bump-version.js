@@ -38,7 +38,21 @@ function updatePackages(newVersion) {
       fs.writeFileSync(p, JSON.stringify(json, null, 2) + '\n', 'utf8');
     }
   }
-  console.log(`\nUpdated all package.json files to version ${newVersion}`);
+  const versionTsPath = path.join(root, 'packages', 'shared', 'src', 'utils', 'version.ts');
+  if (fs.existsSync(versionTsPath)) {
+    const tsContent = `export const APP_VERSION = '${newVersion}';\n\n` +
+      `export function getAppVersion(): string {\n` +
+      `  if (typeof window !== 'undefined') {\n` +
+      `    const electronVer = (window as any).electronApi?.appVersion;\n` +
+      `    if (typeof electronVer === 'string' && electronVer.trim()) {\n` +
+      `      return electronVer.trim();\n` +
+      `    }\n` +
+      `  }\n` +
+      `  return APP_VERSION;\n` +
+      `}\n`;
+    fs.writeFileSync(versionTsPath, tsContent, 'utf8');
+  }
+  console.log(`\nUpdated all package.json and version.ts files to version ${newVersion}`);
   return newVersion;
 }
 

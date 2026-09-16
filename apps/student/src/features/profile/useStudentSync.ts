@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StudentSession, apiClient } from '@cbt/shared';
+import { StudentSession, apiClient, socketClient } from '@cbt/shared';
 
 export function useStudentSync(
   session: StudentSession | null,
@@ -29,8 +29,14 @@ export function useStudentSync(
   useEffect(() => {
     if (!session?.studentCode) return;
     syncStudent();
-    const interval = setInterval(syncStudent, 4000);
-    return () => clearInterval(interval);
+    const unsub = socketClient.on('students:changed', syncStudent);
+    const unsubConn = socketClient.onConnectionChange((connected) => {
+      if (connected) syncStudent();
+    });
+    return () => {
+      unsub();
+      unsubConn();
+    };
   }, [session?.studentCode, syncStudent]);
 
   const handleRefresh = async () => {

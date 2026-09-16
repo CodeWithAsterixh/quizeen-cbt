@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Assessment, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
+import { Assessment, Student, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { Sidebar, ManagerTab } from './components/layout/Sidebar';
 import { ManagerModals } from './components/layout/ManagerModals';
@@ -15,9 +15,10 @@ export const App: React.FC = () => {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const { assessments, submissions, isSyncing, refresh, saveAssessment, deleteAssessment, duplicateAssessment, updateSubmission } = useManagerAppStore();
-  const { students, refresh: refreshStudents, saveStudent, generateCodeForStudent, generateCodesForStudents, deleteStudent } = useStudentStore();
+  const { students, refresh: refreshStudents, saveStudent, moveStudentsClass, generateCodeForStudent, generateCodesForStudents, deleteStudent } = useStudentStore();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [modals, setModals] = useState({ student: false, server: false, theme: false, loader: false });
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -45,18 +46,10 @@ export const App: React.FC = () => {
   const branding = licenseState?.license?.branding;
   return (
     <div className="app-shell">
-      <TitleBar
-        title={branding?.appName || branding?.schoolName || 'Queez'}
-        badge={branding?.shortName ? `${branding.shortName} Assessment office` : 'Management'}
-        iconUrl={branding?.appIconUrl || branding?.logoUrl}
-      />
+      <TitleBar title={branding?.appName || branding?.schoolName || 'Queez'} badge={branding?.shortName ? `${branding.shortName} Assessment office` : 'Management'} iconUrl={branding?.appIconUrl || branding?.logoUrl} />
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
       <div className="manager-body">
-        <Sidebar
-          currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }}
-          onOpenServerSettings={() => setModals(m => ({ ...m, server: true }))} onOpenThemeSettings={() => setModals(m => ({ ...m, theme: true }))}
-          pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} onRefresh={handleRefresh} isSyncing={isSyncing}
-        />
+        <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} onOpenServerSettings={() => setModals(m => ({ ...m, server: true }))} onOpenThemeSettings={() => setModals(m => ({ ...m, theme: true }))} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} onRefresh={handleRefresh} isSyncing={isSyncing} />
         <main className="main-viewport">
           {notice && (
             <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 14, fontWeight: 600, fontSize: '0.88rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -71,20 +64,21 @@ export const App: React.FC = () => {
             onOpenCreateExam={() => { setEditingAssessment(null); setIsEditorOpen(true); }} onOpenLoader={() => setModals(m => ({ ...m, loader: true }))}
             onEditExam={(e) => { setEditingAssessment(e); setIsEditorOpen(true); }} onDuplicateExam={duplicateAssessment}
             onDeleteExam={async (id) => { const r = await deleteAssessment(id); setSelectedExamId(null); notify(r.message); }}
-            onOpenCreateStudent={() => setModals(m => ({ ...m, student: true }))} onGenerateCode={generateCodeForStudent}
-            onGenerateCodes={async (ids) => { const r = await generateCodesForStudents(ids); notify(r.message); }}
-            onDeleteStudent={async (id) => { const r = await deleteStudent(id); notify(r.message); }}
-            onUpdateSubmission={async (s) => { const r = await updateSubmission(s); notify(r.message); }}
+            onOpenCreateStudent={() => { setEditingStudent(null); setModals(m => ({ ...m, student: true })); }}
+            onEditStudent={(s) => { setEditingStudent(s); setModals(m => ({ ...m, student: true })); }}
+            onMoveStudents={async (ids, dir) => { const r = await moveStudentsClass(ids, dir); notify(r.message); }}
+            onGenerateCode={generateCodeForStudent} onGenerateCodes={async (ids) => { const r = await generateCodesForStudents(ids); notify(r.message); }}
+            onDeleteStudent={async (id) => { const r = await deleteStudent(id); notify(r.message); }} onUpdateSubmission={async (s) => { const r = await updateSubmission(s); notify(r.message); }}
           />
         </main>
       </div>
-
       <ManagerModals
         isEditorOpen={isEditorOpen} editingAssessment={editingAssessment}
         onCloseEditor={() => { setIsEditorOpen(false); setEditingAssessment(null); }}
         onSaveAssessment={async (e) => { const r = await saveAssessment(e); setIsEditorOpen(false); setEditingAssessment(null); notify(r.message); }}
-        isStudentModalOpen={modals.student} onCloseStudentModal={() => setModals(m => ({ ...m, student: false }))}
-        onSaveStudent={async (s) => { const r = await saveStudent(s); setModals(m => ({ ...m, student: false })); notify(r.message); }}
+        isStudentModalOpen={modals.student} editingStudent={editingStudent}
+        onCloseStudentModal={() => { setModals(m => ({ ...m, student: false })); setEditingStudent(null); }}
+        onSaveStudent={async (s) => { const r = await saveStudent(s); setModals(m => ({ ...m, student: false })); setEditingStudent(null); notify(r.message); }}
         isServerModalOpen={modals.server} onCloseServerModal={() => setModals(m => ({ ...m, server: false }))}
         isThemeModalOpen={modals.theme} onCloseThemeModal={() => setModals(m => ({ ...m, theme: false }))}
         currentTheme={licenseState?.license?.theme} schoolName={branding?.schoolName}

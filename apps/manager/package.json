@@ -15,6 +15,8 @@
   "dependencies": {
     "@cbt/shared": "*",
     "@phosphor-icons/react": "^2.1.10",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "jszip": "^3.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

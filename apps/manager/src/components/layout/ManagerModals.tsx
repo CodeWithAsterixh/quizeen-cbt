@@ -1,5 +1,5 @@
 import React from 'react';
-import { Assessment, EducationLevel, Department, ThemeConfig } from '@cbt/shared';
+import { Assessment, EducationLevel, Department, ThemeConfig, Student } from '@cbt/shared';
 import { AssessmentEditorModal } from '../../features/assessments/AssessmentEditorModal';
 import { StudentEditorModal } from '../../features/students/StudentEditorModal';
 import { ServerSettingsModal } from './ServerSettingsModal';
@@ -12,8 +12,9 @@ interface Props {
   onCloseEditor: () => void;
   onSaveAssessment: (assessment: Assessment) => Promise<void> | void;
   isStudentModalOpen: boolean;
+  editingStudent?: Student | null;
   onCloseStudentModal: () => void;
-  onSaveStudent: (student: { name: string; educationLevel: EducationLevel; classGroup: string; department?: Department }) => Promise<void>;
+  onSaveStudent: (student: { id?: string; name: string; educationLevel: EducationLevel; classGroup: string; department?: Department }) => Promise<void>;
   isServerModalOpen: boolean;
   onCloseServerModal: () => void;
   isLoaderOpen: boolean;
@@ -27,7 +28,7 @@ interface Props {
 
 export const ManagerModals: React.FC<Props> = ({
   isEditorOpen, editingAssessment, onCloseEditor, onSaveAssessment,
-  isStudentModalOpen, onCloseStudentModal, onSaveStudent,
+  isStudentModalOpen, editingStudent, onCloseStudentModal, onSaveStudent,
   isServerModalOpen, onCloseServerModal,
   isLoaderOpen, onCloseLoader, onImportQzn,
   isThemeModalOpen = false, onCloseThemeModal = () => {},
@@ -36,7 +37,7 @@ export const ManagerModals: React.FC<Props> = ({
   return (
     <>
       <AssessmentEditorModal isOpen={isEditorOpen} initialExam={editingAssessment} onClose={onCloseEditor} onSave={onSaveAssessment} />
-      <StudentEditorModal isOpen={isStudentModalOpen} onClose={onCloseStudentModal} onSave={onSaveStudent} />
+      <StudentEditorModal isOpen={isStudentModalOpen} student={editingStudent} onClose={onCloseStudentModal} onSave={onSaveStudent} />
       <ServerSettingsModal isOpen={isServerModalOpen} onClose={onCloseServerModal} />
       <QznLoaderModal isOpen={isLoaderOpen} onClose={onCloseLoader} onImport={onImportQzn} />
       <ThemeCustomizerModal isOpen={isThemeModalOpen} onClose={onCloseThemeModal} currentTheme={currentTheme} schoolName={schoolName} />

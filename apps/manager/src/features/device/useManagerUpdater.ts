@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { deviceApi, UpdatePhase } from '@cbt/shared';
+import { deviceApi, UpdatePhase, getAppVersion, socketClient } from '@cbt/shared';
 
 export const useManagerUpdater = (isBusyAuthoring: boolean) => {
   const [phase, setPhase] = useState<UpdatePhase>('idle');
   const [progress, setProgress] = useState(0);
-  const [latestVersion, setLatestVersion] = useState('1.2.0');
+  const [latestVersion, setLatestVersion] = useState(getAppVersion());
   const [hasUpdate, setHasUpdate] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +12,7 @@ export const useManagerUpdater = (isBusyAuthoring: boolean) => {
   const checkForUpdate = useCallback(async () => {
     try {
       setPhase('checking');
-      const res = await deviceApi.checkUpdate('manager', '1.2.0');
+      const res = await deviceApi.checkUpdate('manager', getAppVersion());
       if (res.updateAvailable) {
         setLatestVersion(res.latestVersion);
         setHasUpdate(true);
@@ -26,8 +26,9 @@ export const useManagerUpdater = (isBusyAuthoring: boolean) => {
 
   useEffect(() => {
     checkForUpdate();
-    const interval = setInterval(checkForUpdate, 60000);
-    return () => clearInterval(interval);
+    return socketClient.on('updates:available', (data) => {
+      if (!data?.app || data.app === 'manager') checkForUpdate();
+    });
   }, [checkForUpdate]);
 
   const startDownload = useCallback(async () => {
@@ -38,7 +39,14 @@ export const useManagerUpdater = (isBusyAuthoring: boolean) => {
     try {
       const url = deviceApi.getDownloadUrl('manager');
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Download failed from central server');
+      if (!response.ok) {
+        let msg = 'No update package staged on central server';
+        try {
+          const errJson = await response.json();
+          if (errJson?.message) msg = errJson.message;
+        } catch {}
+        throw new Error(msg);
+      }
       const total = Number(response.headers.get('Content-Length')) || 0;
       const reader = response.body?.getReader();
       let loaded = 0;

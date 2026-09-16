@@ -26,6 +26,8 @@ interface Props {
   onDuplicateExam: (a: Assessment) => void;
   onDeleteExam: (id: string) => void;
   onOpenCreateStudent: () => void;
+  onEditStudent?: (s: Student) => void;
+  onMoveStudents?: (ids: string[], direction: 'next' | 'prev') => Promise<void>;
   onGenerateCode: (id: string) => Promise<string>;
   onGenerateCodes: (ids: string[]) => Promise<void>;
   onDeleteStudent: (id: string) => Promise<void>;
@@ -36,8 +38,8 @@ export const ManagerViewRouter: React.FC<Props> = (props) => {
   const {
     currentTab, assessments, submissions, students, selectedExamId, selectedSubmissionId,
     onSelectExam, onSelectSubmission, onNavigate, onOpenCreateExam, onOpenLoader,
-    onEditExam, onDuplicateExam, onDeleteExam, onOpenCreateStudent, onGenerateCode,
-    onGenerateCodes, onDeleteStudent, onUpdateSubmission,
+    onEditExam, onDuplicateExam, onDeleteExam, onOpenCreateStudent, onEditStudent,
+    onMoveStudents, onGenerateCode, onGenerateCodes, onDeleteStudent, onUpdateSubmission,
   } = props;
 
   const activeSub = submissions.find((s) => s.id === selectedSubmissionId);
@@ -67,8 +69,8 @@ export const ManagerViewRouter: React.FC<Props> = (props) => {
   return (
     <>
       {currentTab === 'dashboard' && <DashboardView exams={assessments} submissions={submissions} onNavigate={onNavigate} onOpenCreateExam={onOpenCreateExam} onOpenLoader={onOpenLoader} />}
-      {currentTab === 'exams' && <AssessmentListView assessments={assessments} onOpenAssessment={(e) => onSelectExam(e.id)} onOpenCreate={onOpenCreateExam} onEditAssessment={onEditExam} onDuplicateAssessment={onDuplicateExam} onDeleteAssessment={onDeleteExam} onOpenLoader={onOpenLoader} />}
-      {currentTab === 'students' && <StudentListView students={students} onOpenCreate={onOpenCreateStudent} onGenerateCode={onGenerateCode} onGenerateCodes={onGenerateCodes} onDeleteStudent={onDeleteStudent} />}
+      {currentTab === 'exams' && <AssessmentListView assessments={assessments} submissions={submissions} onOpenAssessment={(e) => onSelectExam(e.id)} onOpenCreate={onOpenCreateExam} onEditAssessment={onEditExam} onDuplicateAssessment={onDuplicateExam} onDeleteAssessment={onDeleteExam} onOpenLoader={onOpenLoader} />}
+      {currentTab === 'students' && <StudentListView students={students} onOpenCreate={onOpenCreateStudent} onEditStudent={onEditStudent} onMoveStudents={onMoveStudents} onGenerateCode={onGenerateCode} onGenerateCodes={onGenerateCodes} onDeleteStudent={onDeleteStudent} />}
       {currentTab === 'compiler' && <PackageCompilerView exams={assessments} />}
       {currentTab === 'grading' && <GradingQueueView submissions={submissions} exams={assessments} onUpdateSubmission={onUpdateSubmission} />}
       {currentTab === 'analytics' && <AnalyticsView submissions={submissions} exams={assessments} />}

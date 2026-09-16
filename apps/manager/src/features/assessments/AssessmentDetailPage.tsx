@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Assessment, Submission, Button } from '@cbt/shared';
-import { ListNumbers, Table } from '@cbt/shared';
+import { Assessment, Submission, Button, ListNumbers, Table } from '@cbt/shared';
 import { AssessmentDetailHeader } from './AssessmentDetailHeader';
 import { AssessmentDetailStats } from './AssessmentDetailStats';
 import { AssessmentDetailResultsTable } from './AssessmentDetailResultsTable';
-
 import { AssessmentQuestionsPreview } from './AssessmentQuestionsPreview';
+import { downloadAssessmentResultPdf } from '../grading/assessmentResultPdf';
 
 interface AssessmentDetailPageProps {
   assessment: Assessment;
@@ -18,13 +17,7 @@ interface AssessmentDetailPageProps {
 }
 
 export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
-  assessment,
-  submissions,
-  onBack,
-  onEdit,
-  onDuplicate,
-  onDelete,
-  onSelectSubmission,
+  assessment, submissions, onBack, onEdit, onDuplicate, onDelete, onSelectSubmission,
 }) => {
   const [activeTab, setActiveTab] = useState<'results' | 'questions'>('results');
   const exam = assessment;
@@ -33,11 +26,8 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <AssessmentDetailHeader
-        assessment={exam}
-        onBack={onBack}
-        onEdit={onEdit}
-        onDuplicate={onDuplicate}
-        onDelete={onDelete}
+        assessment={exam} onBack={onBack} onEdit={onEdit} onDuplicate={onDuplicate}
+        onDelete={onDelete} onExportResults={() => downloadAssessmentResultPdf(exam, examSubmissions)}
       />
 
       <AssessmentDetailStats assessment={exam} submissions={examSubmissions} />
@@ -45,17 +35,13 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
       <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--color-border)', paddingBottom: 8 }}>
         <Button
           variant={activeTab === 'results' ? 'primary' : 'secondary'}
-          size="sm"
-          onClick={() => setActiveTab('results')}
-          icon={<Table size={16} />}
+          size="sm" onClick={() => setActiveTab('results')} icon={<Table size={16} />}
         >
           Student Results ({examSubmissions.length})
         </Button>
         <Button
           variant={activeTab === 'questions' ? 'primary' : 'secondary'}
-          size="sm"
-          onClick={() => setActiveTab('questions')}
-          icon={<ListNumbers size={16} />}
+          size="sm" onClick={() => setActiveTab('questions')} icon={<ListNumbers size={16} />}
         >
           Questions ({exam.questions.length})
         </Button>
@@ -63,9 +49,7 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
 
       {activeTab === 'results' ? (
         <AssessmentDetailResultsTable
-          assessment={exam}
-          submissions={examSubmissions}
-          onSelectSubmission={onSelectSubmission}
+          assessment={exam} submissions={examSubmissions} onSelectSubmission={onSelectSubmission}
         />
       ) : (
         <AssessmentQuestionsPreview questions={exam.questions} />

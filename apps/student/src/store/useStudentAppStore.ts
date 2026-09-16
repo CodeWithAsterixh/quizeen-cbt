@@ -24,12 +24,10 @@ export function useStudentAppStore() {
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     window.addEventListener('cbt:server-changed', refresh);
-    const slowBackup = setInterval(refresh, 60000);
     return () => {
       unsubAss();
       unsubSub();
       unsubConn();
-      clearInterval(slowBackup);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('cbt:server-changed', refresh);
     };

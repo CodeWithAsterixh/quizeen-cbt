@@ -20,17 +20,42 @@ export const studentsService = {
       department: payload.department,
       createdAt: payload.createdAt || getLocalIsoTimestamp(),
     };
-
     db.saveStudent(student);
     return student;
   },
 
-  generateCode(id: string, fallbackStudent?: any): Student | null {
+  update(id: string, payload: Partial<Student>): Student | null {
+    const student = db.getStudents().find((s) => s.id === id);
+    if (!student) return null;
+    const updated: Student = {
+      ...student,
+      name: payload.name ? payload.name.trim() : student.name,
+      educationLevel: payload.educationLevel || student.educationLevel,
+      classGroup: payload.classGroup || student.classGroup,
+      department: payload.department !== undefined ? payload.department : student.department,
+    };
+    db.saveStudent(updated);
+    return updated;
+  },
+
+  promote(studentIds: string[], targetClass: string, level?: any, dept?: any): Student[] {
     const list = db.getStudents();
-    let student = list.find((s) => s.id === id);
-    if (!student && fallbackStudent?.name) {
-      student = this.save({ ...fallbackStudent, id });
+    const updated: Student[] = [];
+    for (const s of list) {
+      if (studentIds.includes(s.id)) {
+        s.classGroup = targetClass;
+        if (level) s.educationLevel = level;
+        if (dept !== undefined) s.department = dept;
+        db.saveStudent(s);
+        updated.push(s);
+      }
     }
+    return updated;
+  },
+
+  generateCode(id: string, fallback?: any): Student | null {
+    const list = db.getStudents();
+    const student = list.find((s) => s.id === id) || (fallback?.name ? this.save({ ...fallback, id }) : null);
     if (!student) return null;
     const existing = new Set(list.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
     student.code = generateStudentCode(existing);
@@ -41,12 +66,7 @@ export const studentsService = {
   generateAllCodes(filterClass?: string, studentIds?: string[]): Student[] {
     const list = db.getStudents();
     const existing = new Set(list.filter((s) => s.code).map((s) => s.code!.toUpperCase()));
-    let target = list;
-    if (studentIds && studentIds.length > 0) {
-      target = list.filter((s) => studentIds.includes(s.id));
-    } else if (filterClass) {
-      target = list.filter((s) => s.classGroup === filterClass);
-    }
+    const target = studentIds?.length ? list.filter((s) => studentIds.includes(s.id)) : filterClass ? list.filter((s) => s.classGroup === filterClass) : list;
     target.forEach((s) => {
       s.code = generateStudentCode(existing);
       existing.add(s.code);

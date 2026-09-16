@@ -1,4 +1,5 @@
 import { DeviceInfo, getLocalIsoTimestamp } from '@cbt/shared';
+import { broadcastWsEvent } from '../../core/ws/ws-hub.js';
 
 class DeviceService {
   private devices = new Map<string, DeviceInfo>();
@@ -28,6 +29,7 @@ class DeviceService {
     };
 
     this.devices.set(data.deviceId, updated);
+    broadcastWsEvent('device:status', updated);
     return { success: true, pushUpdate: shouldPush };
   }
 
@@ -49,9 +51,10 @@ class DeviceService {
   pushUpdate(deviceId: string): boolean {
     if (deviceId === 'all') {
       this.pendingUpdates.add('*');
-      return true;
+    } else {
+      this.pendingUpdates.add(deviceId);
     }
-    this.pendingUpdates.add(deviceId);
+    broadcastWsEvent('device:push-update', { targetDeviceId: deviceId, timestamp: Date.now() });
     return true;
   }
 

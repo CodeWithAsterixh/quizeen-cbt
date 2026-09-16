@@ -1,33 +1,32 @@
 import React, { useState } from 'react';
-import { UserPlus, Users } from '@cbt/shared';
-import { Student, Button, Card } from '@cbt/shared';
+import { UserPlus, Users, Student, Button, Card } from '@cbt/shared';
 import { StudentHeader } from './StudentHeader';
 import { StudentCard } from './StudentCard';
 import { StudentSelectionBar } from './StudentSelectionBar';
 import { SingleCodeModal } from './SingleCodeModal';
 import { printStudentCodesPdf } from './StudentPrintReport';
-
 import { StudentClassTabs } from './StudentClassTabs';
 import { useStudentSelection } from './useStudentSelection';
 
 interface Props {
   students: Student[];
   onOpenCreate: () => void;
+  onEditStudent?: (s: Student) => void;
+  onMoveStudents?: (ids: string[], direction: 'next' | 'prev') => Promise<void>;
   onGenerateCode: (id: string) => Promise<string>;
   onGenerateCodes: (studentIds: string[]) => Promise<void>;
   onDeleteStudent: (id: string) => Promise<void>;
 }
 
 export const StudentListView: React.FC<Props> = ({
-  students, onOpenCreate, onGenerateCode, onGenerateCodes, onDeleteStudent,
+  students, onOpenCreate, onEditStudent, onMoveStudents, onGenerateCode, onGenerateCodes, onDeleteStudent,
 }) => {
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [modalStudent, setModalStudent] = useState<{ student: Student; code: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
   const filtered = selectedClass === 'all' ? students : students.filter((s) => s.classGroup === selectedClass);
-  const filteredIds = filtered.map((s) => s.id);
-  const { selectedIds, isAllSelected, handleToggleSelectAll, handleToggleSelect } = useStudentSelection(filteredIds);
+  const { selectedIds, isAllSelected, handleToggleSelectAll, handleToggleSelect } = useStudentSelection(filtered.map((s) => s.id));
 
   const handleGenerate = async () => {
     if (selectedIds.size === 0) return;
@@ -44,11 +43,12 @@ export const StudentListView: React.FC<Props> = ({
         onPrint={() => printStudentCodesPdf(targetForPrint, selectedClass === 'all' ? undefined : selectedClass)}
         onGenerate={handleGenerate} onOpenCreate={onOpenCreate}
       />
-
       <StudentClassTabs students={students} selectedClass={selectedClass} onSelectClass={setSelectedClass} />
-
-      <StudentSelectionBar isAllSelected={isAllSelected} filteredCount={filtered.length} selectedCount={selectedIds.size} onToggleSelectAll={handleToggleSelectAll} />
-
+      <StudentSelectionBar
+        isAllSelected={isAllSelected} filteredCount={filtered.length} selectedCount={selectedIds.size}
+        onToggleSelectAll={handleToggleSelectAll}
+        onMoveClass={(dir) => { if (onMoveStudents && selectedIds.size > 0) onMoveStudents(Array.from(selectedIds), dir); }}
+      />
       {filtered.length === 0 ? (
         <Card style={{ padding: '2.5rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <Users size={42} color="var(--color-text-muted)" weight="duotone" />
@@ -61,12 +61,11 @@ export const StudentListView: React.FC<Props> = ({
             <StudentCard
               key={s.id} student={s} selected={selectedIds.has(s.id)} onToggleSelect={handleToggleSelect}
               onGenerateCode={async (st) => { const code = await onGenerateCode(st.id); setModalStudent({ student: st, code }); }}
-              onDelete={onDeleteStudent}
+              onEdit={onEditStudent} onDelete={onDeleteStudent}
             />
           ))}
         </div>
       )}
-
       <SingleCodeModal isOpen={Boolean(modalStudent)} student={modalStudent?.student || null} code={modalStudent?.code || ''} onClose={() => setModalStudent(null)} />
     </div>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { deviceApi, DeviceConnectionStatus, UpdatePhase } from '@cbt/shared';
+import { deviceApi, DeviceConnectionStatus, UpdatePhase, getAppVersion, socketClient } from '@cbt/shared';
 import { getManagerDeviceId, getManagerDeviceName } from './deviceId';
 
 interface ManagerHeartbeatOptions {
@@ -19,6 +19,17 @@ export const useManagerHeartbeat = ({
   pushCallbackRef.current = onPushUpdateTriggered;
 
   useEffect(() => {
+    const unsub = socketClient.on('device:push-update', (data) => {
+      const target = data?.targetDeviceId;
+      const myId = getManagerDeviceId();
+      if (!target || target === '*' || target === 'all' || target === myId) {
+        pushCallbackRef.current?.();
+      }
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
     let isCancelled = false;
 
     const sendHeartbeat = async () => {
@@ -27,7 +38,7 @@ export const useManagerHeartbeat = ({
           deviceId: getManagerDeviceId(),
           deviceName: getManagerDeviceName(),
           appType: 'manager',
-          appVersion: '1.2.0',
+          appVersion: getAppVersion(),
           platform: navigator.platform || 'Windows',
           status,
           updateStatus,

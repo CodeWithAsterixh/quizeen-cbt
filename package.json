@@ -19,6 +19,7 @@
     "release": "node scripts/build-release.js",
     "release:suite": "node scripts/build-release.js",
     "package:setup": "node scripts/package-setup.js",
+    "package:server-updater": "node scripts/stage-server-updates.js",
     "release:bump": "node scripts/bump-version.js",
     "release:icons": "node scripts/generate-icons.js",
     "api:audit": "node scripts/audit-api-routes.js",

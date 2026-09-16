@@ -1,10 +1,13 @@
-import React from 'react';
-import { EducationLevel, Department, AssessmentType } from '@cbt/shared';
-import { AssessmentMetaFields } from './AssessmentMetaFields';
-import { AssessmentScheduleFields } from './AssessmentScheduleFields';
-import { AssessmentShuffleFields } from './AssessmentShuffleFields';
+import React, { useState } from 'react';
+import { EducationLevel, Department, AssessmentType, Clock, GraduationCap, CalendarBlank, ArrowsClockwise } from '@cbt/shared';
+import { SettingsGroupRow } from './SettingsGroupRow';
+import { getAvailabilityPhrase, getAudiencePhrase, getTimingPhrase, getShufflingPhrase } from './settings-phrases';
+import { EditAvailabilityModal } from './EditAvailabilityModal';
+import { EditAudienceModal } from './EditAudienceModal';
+import { EditTimingModal } from './EditTimingModal';
+import { EditShufflingModal } from './EditShufflingModal';
 
-interface AssessmentSettingsTabProps {
+interface Props {
   subject: string; setSubject: (v: string) => void;
   session: string; setSession: (v: string) => void;
   assessmentType: AssessmentType; setAssessmentType: (v: AssessmentType) => void;
@@ -20,27 +23,52 @@ interface AssessmentSettingsTabProps {
   shuffleOptions: boolean; setShuffleOptions: (v: boolean) => void;
 }
 
-export const AssessmentSettingsTab: React.FC<AssessmentSettingsTabProps> = (props) => {
+export const AssessmentSettingsTab: React.FC<Props> = (p) => {
+  const [activeModal, setActiveModal] = useState<'timing' | 'audience' | 'availability' | 'shuffling' | null>(null);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <AssessmentMetaFields
-        subject={props.subject} setSubject={props.setSubject}
-        session={props.session} setSession={props.setSession}
-        assessmentType={props.assessmentType} setAssessmentType={props.setAssessmentType}
-        durationMinutes={props.durationMinutes} setDurationMinutes={props.setDurationMinutes}
-        passingScore={props.passingScore} setPassingScore={props.setPassingScore}
-        educationLevel={props.educationLevel} onLevelChange={props.onLevelChange}
-        selectedClasses={props.selectedClasses} onToggleClass={props.onToggleClass}
-        department={props.department} setDepartment={props.setDepartment}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <SettingsGroupRow
+        icon={<Clock size={20} />} title="Subject & Assessment Timing"
+        phrase={getTimingPhrase(p.durationMinutes, p.passingScore, p.assessmentType)}
+        onEdit={() => setActiveModal('timing')} badge={p.subject || 'Not set'}
       />
-      <AssessmentShuffleFields
-        shuffleQuestions={props.shuffleQuestions} setShuffleQuestions={props.setShuffleQuestions}
-        shuffleOptions={props.shuffleOptions} setShuffleOptions={props.setShuffleOptions}
+      <SettingsGroupRow
+        icon={<GraduationCap size={20} />} title="Target Audience & Department"
+        phrase={getAudiencePhrase(p.selectedClasses, p.educationLevel, p.department)}
+        onEdit={() => setActiveModal('audience')}
       />
-      <AssessmentScheduleFields
-        isAvailable={props.isAvailable} setIsAvailable={props.setIsAvailable}
-        availableFrom={props.availableFrom} setAvailableFrom={props.setAvailableFrom}
-        availableTo={props.availableTo} setAvailableTo={props.setAvailableTo}
+      <SettingsGroupRow
+        icon={<CalendarBlank size={20} />} title="Availability & Access Window"
+        phrase={getAvailabilityPhrase(p.isAvailable, p.availableFrom, p.availableTo)}
+        onEdit={() => setActiveModal('availability')}
+      />
+      <SettingsGroupRow
+        icon={<ArrowsClockwise size={20} />} title="Shuffling & Security"
+        phrase={getShufflingPhrase(p.shuffleQuestions, p.shuffleOptions)}
+        onEdit={() => setActiveModal('shuffling')}
+      />
+
+      <EditTimingModal
+        isOpen={activeModal === 'timing'} subject={p.subject} session={p.session}
+        assessmentType={p.assessmentType} durationMinutes={p.durationMinutes} passingScore={p.passingScore}
+        onClose={() => setActiveModal(null)}
+        onSave={(d) => { p.setSubject(d.subject); p.setSession(d.session); p.setAssessmentType(d.assessmentType); p.setDurationMinutes(d.durationMinutes); p.setPassingScore(d.passingScore); }}
+      />
+      <EditAudienceModal
+        isOpen={activeModal === 'audience'} educationLevel={p.educationLevel}
+        selectedClasses={p.selectedClasses} department={p.department} onClose={() => setActiveModal(null)}
+        onSave={(d) => { p.onLevelChange(d.educationLevel); d.selectedClasses.forEach(c => { if (!p.selectedClasses.includes(c)) p.onToggleClass(c); }); p.selectedClasses.forEach(c => { if (!d.selectedClasses.includes(c)) p.onToggleClass(c); }); p.setDepartment(d.department); }}
+      />
+      <EditAvailabilityModal
+        isOpen={activeModal === 'availability'} isAvailable={p.isAvailable}
+        availableFrom={p.availableFrom} availableTo={p.availableTo} onClose={() => setActiveModal(null)}
+        onSave={(d) => { p.setIsAvailable(d.isAvailable); p.setAvailableFrom(d.availableFrom); p.setAvailableTo(d.availableTo); }}
+      />
+      <EditShufflingModal
+        isOpen={activeModal === 'shuffling'} shuffleQuestions={p.shuffleQuestions}
+        shuffleOptions={p.shuffleOptions} onClose={() => setActiveModal(null)}
+        onSave={(d) => { p.setShuffleQuestions(d.shuffleQuestions); p.setShuffleOptions(d.shuffleOptions); }}
       />
     </div>
   );

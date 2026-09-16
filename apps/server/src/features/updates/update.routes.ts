@@ -12,6 +12,11 @@ updateRouter.get('/check', (req, res) => {
   res.json({ success: true, data: result });
 });
 
+updateRouter.get('/status', (_req, res) => {
+  const data = updateService.getStagedUpdates();
+  res.json({ success: true, data });
+});
+
 updateRouter.get('/download/:app', (req, res) => {
   const { app } = req.params;
   const file = updateService.getUpdateFile(app);

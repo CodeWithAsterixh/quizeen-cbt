@@ -1,5 +1,5 @@
 import React from 'react';
-import { Key, Trash } from '@cbt/shared';
+import { Key, Trash, PencilSimple } from '@cbt/shared';
 import { Student, Button, Badge, Card } from '@cbt/shared';
 
 interface Props {
@@ -7,10 +7,11 @@ interface Props {
   selected?: boolean;
   onToggleSelect?: (id: string) => void;
   onGenerateCode: (s: Student) => void;
+  onEdit?: (s: Student) => void;
   onDelete: (id: string) => void;
 }
 
-export const StudentCard: React.FC<Props> = ({ student, selected, onToggleSelect, onGenerateCode, onDelete }) => {
+export const StudentCard: React.FC<Props> = ({ student, selected, onToggleSelect, onGenerateCode, onEdit, onDelete }) => {
   return (
     <Card
       style={{
@@ -37,7 +38,10 @@ export const StudentCard: React.FC<Props> = ({ student, selected, onToggleSelect
             </div>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(student.id)} icon={<Trash size={16} color="#dc2626" />} />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {onEdit && <Button variant="ghost" size="sm" onClick={() => onEdit(student)} icon={<PencilSimple size={16} color="var(--color-primary)" />} />}
+          <Button variant="ghost" size="sm" onClick={() => onDelete(student.id)} icon={<Trash size={16} color="#dc2626" />} />
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-surface-hover)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>

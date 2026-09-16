@@ -173,10 +173,14 @@ Section -Post
     ExecWait 'icacls "$COMMONAPPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     CreateDirectory "$INSTDIR\data"
     ExecWait 'icacls "$INSTDIR\data" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
-    SetOutPath "$COMMONAPPDATA\Queez CBT Suite\data"
-    File "..\config\license-public.pem"
-    SetOutPath "$INSTDIR\data"
-    File "..\config\license-public.pem"
+    ${IfNot} ${FileExists} "$COMMONAPPDATA\Queez CBT Suite\data\license-public.pem"
+      SetOutPath "$COMMONAPPDATA\Queez CBT Suite\data"
+      File "..\config\license-public.pem"
+    ${EndIfNot}
+    ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
+      SetOutPath "$INSTDIR\data"
+      File "..\config\license-public.pem"
+    ${EndIfNot}
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
@@ -187,10 +191,14 @@ Section -Post
   ${Else}
     CreateDirectory "$APPDATA\Queez CBT Suite\data"
     CreateDirectory "$INSTDIR\data"
-    SetOutPath "$APPDATA\Queez CBT Suite\data"
-    File "..\config\license-public.pem"
-    SetOutPath "$INSTDIR\data"
-    File "..\config\license-public.pem"
+    ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
+      SetOutPath "$APPDATA\Queez CBT Suite\data"
+      File "..\config\license-public.pem"
+    ${EndIfNot}
+    ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
+      SetOutPath "$INSTDIR\data"
+      File "..\config\license-public.pem"
+    ${EndIfNot}
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
@@ -279,6 +287,10 @@ Function PageInstallScopeLeave
 FunctionEnd
 
 Function .onInit
+  ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'
+
   ; Check if /allusers argument was passed via command line or elevation
   ${GetParameters} $R0
   ClearErrors

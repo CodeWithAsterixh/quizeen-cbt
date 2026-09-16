@@ -1,4 +1,4 @@
-import { Assessment, Submission, ExamScheduleConfig, EducationLevel, Department } from '../types/index.js';
+import { Assessment, EducationLevel, Department } from '../types/index.js';
 import { createIdempotencyKey } from '../utils/idempotency.js';
 import { serverConfig } from './server-config.js';
 import { studentApi } from './student-api.js';
@@ -79,6 +79,7 @@ export const apiClient = {
   getStudentByCode: (code: string) => studentApi.getStudentByCode(code),
   lookupStudentByCode: (code: string) => studentApi.lookupStudentByCode(code),
   saveStudent: (student: any) => studentApi.saveStudent(student),
+  promoteStudents: (ids: string[], cls: string, lvl?: any, dept?: any) => studentApi.promoteStudents(ids, cls, lvl, dept),
   generateStudentCode: (id: string, fallback?: any) => studentApi.generateCode(id, fallback),
   generateAllStudentCodes: (classGroup?: string, studentIds?: string[]) => studentApi.generateAllCodes(classGroup, studentIds),
   deleteStudent: (id: string) => studentApi.deleteStudent(id),

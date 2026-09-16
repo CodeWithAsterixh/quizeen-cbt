@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DeviceInfo, deviceApi, Button, ArrowsClockwise, Trash } from '@cbt/shared';
+import { DeviceInfo, deviceApi, Button, ArrowsClockwise, Trash, socketClient } from '@cbt/shared';
 import { ServerDeviceRow } from './ServerDeviceRow';
 
 export const ServerDevicesTab: React.FC = () => {
@@ -14,8 +14,9 @@ export const ServerDevicesTab: React.FC = () => {
 
   useEffect(() => {
     fetchDevices();
-    const interval = setInterval(fetchDevices, 3000);
-    return () => clearInterval(interval);
+    const unsub1 = socketClient.on('device:status', fetchDevices);
+    const unsub2 = socketClient.on('device:push-update', fetchDevices);
+    return () => { unsub1(); unsub2(); };
   }, [fetchDevices]);
 
   const handlePush = async (deviceId: string) => {

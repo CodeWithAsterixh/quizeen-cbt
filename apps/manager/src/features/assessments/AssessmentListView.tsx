@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, FileArchive } from '@cbt/shared';
-import { Assessment, Button } from '@cbt/shared';
+import { Plus, FileArchive, DownloadSimple, Assessment, Submission, Button } from '@cbt/shared';
 import { AssessmentFiltersBar } from './AssessmentFiltersBar';
 import { AssessmentCard } from './AssessmentCard';
+import { ExportResultsModal } from '../grading/ExportResultsModal';
 
 interface AssessmentListViewProps {
   assessments: Assessment[];
+  submissions?: Submission[];
+  schoolName?: string;
   onOpenCreate: () => void;
   onOpenAssessment: (assessment: Assessment) => void;
   onEditAssessment: (assessment: Assessment) => void;
@@ -15,21 +17,17 @@ interface AssessmentListViewProps {
 }
 
 export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
-  assessments, onOpenCreate, onOpenAssessment, onEditAssessment, onDuplicateAssessment, onDeleteAssessment, onOpenLoader,
+  assessments, submissions = [], schoolName, onOpenCreate, onOpenAssessment,
+  onEditAssessment, onDuplicateAssessment, onDeleteAssessment, onOpenLoader,
 }) => {
-  const exams = assessments;
-  const onOpenExam = onOpenAssessment;
-  const onEditExam = onEditAssessment;
-  const onDuplicateExam = onDuplicateAssessment;
-  const onDeleteExam = onDeleteAssessment;
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
-  const filtered = exams.filter((e) => {
-    const matchSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.subject.toLowerCase().includes(searchTerm.toLowerCase());
+  const filtered = assessments.filter((e) => {
+    const matchSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase()) || e.subject.toLowerCase().includes(searchTerm.toLowerCase());
     const matchType = typeFilter === 'all' || (e.assessmentType ?? 'test') === typeFilter;
     const matchLevel = levelFilter === 'all' || e.educationLevel === levelFilter;
     const matchDept = deptFilter === 'all' || e.department === deptFilter;
@@ -45,7 +43,10 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
             Create questions and oversee your school tests and examinations.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Button variant="outline" onClick={() => setIsExportOpen(true)} icon={<DownloadSimple size={18} />}>
+            Export Results
+          </Button>
           {onOpenLoader && (
             <Button variant="secondary" onClick={onOpenLoader} icon={<FileArchive size={18} />}>
               Load Package (.qzn)
@@ -58,9 +59,8 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
       </header>
 
       <AssessmentFiltersBar
-        searchTerm={searchTerm} onSearchChange={setSearchTerm}
-        typeFilter={typeFilter} onTypeChange={setTypeFilter}
-        levelFilter={levelFilter} onLevelChange={setLevelFilter}
+        searchTerm={searchTerm} onSearchChange={setSearchTerm} typeFilter={typeFilter}
+        onTypeChange={setTypeFilter} levelFilter={levelFilter} onLevelChange={setLevelFilter}
         deptFilter={deptFilter} onDeptChange={setDeptFilter}
       />
 
@@ -73,16 +73,17 @@ export const AssessmentListView: React.FC<AssessmentListViewProps> = ({
         <div className="card-grid">
           {filtered.map((item) => (
             <AssessmentCard
-              key={item.id}
-              assessment={item}
-              onOpen={onOpenExam}
-              onEdit={onEditExam}
-              onDuplicate={onDuplicateExam}
-              onDelete={onDeleteExam}
+              key={item.id} assessment={item} onOpen={onOpenAssessment}
+              onEdit={onEditAssessment} onDuplicate={onDuplicateAssessment} onDelete={onDeleteAssessment}
             />
           ))}
         </div>
       )}
+
+      <ExportResultsModal
+        isOpen={isExportOpen} assessments={assessments} submissions={submissions}
+        schoolName={schoolName} onClose={() => setIsExportOpen(false)}
+      />
     </div>
   );
 };

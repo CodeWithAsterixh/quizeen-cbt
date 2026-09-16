@@ -1,13 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { deviceApi, UpdatePhase } from '@cbt/shared';
-
-// Read the real app version from Electron's preload (sourced from package.json).
-// Fall back to a clearly-wrong sentinel so the server will always report
-// an update available, which is better than silently skipping the check.
-function getAppVersion(): string {
-  const v = (window as any).electronApi?.appVersion;
-  return typeof v === 'string' && v ? v : '0.0.0';
-}
+import { deviceApi, UpdatePhase, getAppVersion, socketClient } from '@cbt/shared';
 
 export const useStationUpdater = (isExamActive: boolean) => {
   const [phase, setPhase] = useState<UpdatePhase>('idle');
@@ -34,6 +26,12 @@ export const useStationUpdater = (isExamActive: boolean) => {
   }, [isExamActive]);
 
   useEffect(() => {
+    return socketClient.on('updates:available', (data) => {
+      if (!data?.app || data.app === 'student') checkForUpdate();
+    });
+  }, [checkForUpdate]);
+
+  useEffect(() => {
     if (!isExamActive && pendingUpdate && phase === 'idle') setShowModal(true);
   }, [isExamActive, pendingUpdate, phase]);
 
@@ -45,7 +43,14 @@ export const useStationUpdater = (isExamActive: boolean) => {
     try {
       const url = deviceApi.getDownloadUrl('student');
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Download failed from central server');
+      if (!response.ok) {
+        let msg = 'No update package staged on central server';
+        try {
+          const errJson = await response.json();
+          if (errJson?.message) msg = errJson.message;
+        } catch {}
+        throw new Error(msg);
+      }
       const total = Number(response.headers.get('Content-Length')) || 0;
       const reader = response.body?.getReader();
       let loaded = 0;

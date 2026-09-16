@@ -1,6 +1,5 @@
 import React from 'react';
-import { ArrowLeft, PencilSimple, Copy, Trash } from '@cbt/shared';
-import { Assessment, Button } from '@cbt/shared';
+import { ArrowLeft, PencilSimple, Copy, Trash, DownloadSimple, Assessment, Button } from '@cbt/shared';
 
 interface AssessmentDetailHeaderProps {
   assessment: Assessment;
@@ -8,6 +7,7 @@ interface AssessmentDetailHeaderProps {
   onEdit: (assessment: Assessment) => void;
   onDuplicate: (assessment: Assessment) => void;
   onDelete: (id: string) => void;
+  onExportResults?: () => void;
 }
 
 export const AssessmentDetailHeader: React.FC<AssessmentDetailHeaderProps> = ({
@@ -16,6 +16,7 @@ export const AssessmentDetailHeader: React.FC<AssessmentDetailHeaderProps> = ({
   onEdit,
   onDuplicate,
   onDelete,
+  onExportResults,
 }) => {
   const exam = assessment;
   return (
@@ -24,17 +25,9 @@ export const AssessmentDetailHeader: React.FC<AssessmentDetailHeaderProps> = ({
         type="button"
         onClick={onBack}
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--color-primary)',
-          cursor: 'pointer',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          padding: 0,
-          width: 'fit-content',
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: 'transparent', border: 'none', color: 'var(--color-primary)',
+          cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: 0, width: 'fit-content',
         }}
       >
         <ArrowLeft size={16} weight="bold" />
@@ -66,7 +59,12 @@ export const AssessmentDetailHeader: React.FC<AssessmentDetailHeaderProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {onExportResults && (
+            <Button variant="outline" onClick={onExportResults} icon={<DownloadSimple size={16} />}>
+              Export Results (PDF)
+            </Button>
+          )}
           <Button variant="secondary" onClick={() => onDuplicate(exam)} icon={<Copy size={16} />}>
             Duplicate
           </Button>
