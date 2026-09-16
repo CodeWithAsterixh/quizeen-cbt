@@ -1,0 +1,76 @@
+@import 'katex/dist/katex.min.css';
+
+.cbt-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 12px 0;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--color-border);
+}
+
+.cbt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  text-align: left;
+  background: var(--color-surface);
+}
+
+.cbt-table th,
+.cbt-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+}
+
+.cbt-table th {
+  background: var(--color-surface-hover);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cbt-table tr:nth-child(even) {
+  background: var(--color-bg);
+}
+
+.cbt-double-underline {
+  border-bottom: 3px double currentColor;
+  padding-bottom: 1px;
+  font-weight: 700;
+}
+
+.cbt-math-fallback {
+  font-family: monospace;
+  background: var(--color-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cbt-question-image-wrap {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cbt-question-image {
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  cursor: zoom-in;
+  transition: transform 120ms ease;
+}
+
+.cbt-question-image:hover {
+  transform: scale(1.01);
+}
+
+.cbt-question-image-caption {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+}

@@ -11,6 +11,8 @@ export interface Question {
   correctAnswer: string;
   points: number;
   explanation?: string;
+  imageUrl?: string;
+  imageCaption?: string;
 }
 
 export interface Exam {

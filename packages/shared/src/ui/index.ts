@@ -18,4 +18,5 @@ export * from './color-math.js';
 export * from './color-palette-engine.js';
 export * from './LicenseLockoutScreen.js';
 export * from './LockoutServerPicker.js';
+export * from './equation-parser.js';
 

@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@types/katex": "^0.16.8",
     "jszip": "^3.10.1",
+    "katex": "^0.18.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

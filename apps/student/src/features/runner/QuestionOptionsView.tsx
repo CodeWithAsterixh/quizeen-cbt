@@ -1,5 +1,5 @@
 import React from 'react';
-import { Question, Button, TextEditor } from '@cbt/shared';
+import { Question, Button, TextEditor, RichContent } from '@cbt/shared';
 
 interface QuestionOptionsViewProps {
   question: Question;
@@ -40,7 +40,7 @@ export const QuestionOptionsView: React.FC<QuestionOptionsViewProps> = ({
               <span style={{ width: 28, height: 28, borderRadius: 'var(--radius-full)', background: isSelected ? 'var(--color-primary)' : 'var(--color-border)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: isSelected ? 'var(--color-surface)' : 'var(--color-text)', flexShrink: 0 }}>
                 {letter}
               </span>
-              <span>{opt}</span>
+              <RichContent html={opt} inline />
             </Button>
           );
         })}

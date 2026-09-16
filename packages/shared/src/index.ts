@@ -8,3 +8,4 @@ export * from './utils/availability.js';
 export * from './utils/date-utils.js';
 export * from './utils/idempotency.js';
 export * from './utils/version.js';
+export * from './utils/image-utils.js';

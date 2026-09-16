@@ -45,6 +45,13 @@ export const GradeQuestionItem: React.FC<GradeQuestionItemProps> = ({
         <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
           <div style={{ fontSize: '0.95rem', marginBottom: '0.85rem', lineHeight: 1.5 }}><RichContent html={question.prompt} /></div>
 
+          {question.imageUrl && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: 6, background: 'var(--color-bg)', borderRadius: 6, marginBottom: '0.85rem' }}>
+              <img src={question.imageUrl} alt={question.imageCaption || 'Diagram'} style={{ maxHeight: 150, maxWidth: '100%', objectFit: 'contain' }} />
+              {question.imageCaption && <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>{question.imageCaption}</span>}
+            </div>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
             <div style={{ background: 'var(--color-surface-hover)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: `1px solid ${isMatched ? 'var(--color-success)' : 'var(--color-border)'}` }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Student Answer</div>

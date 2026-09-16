@@ -1,6 +1,6 @@
 import React from 'react';
 import { PencilSimple, Trash, CheckCircle } from '@cbt/shared';
-import { Question, Card, Badge, Button } from '@cbt/shared';
+import { Question, Card, Badge, Button, RichContent } from '@cbt/shared';
 import { QuestionItemEditor } from './QuestionItemEditor';
 
 interface QuestionPreviewCardProps {
@@ -20,17 +20,11 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
   if (isEditing) {
     return (
       <QuestionItemEditor
-        question={question}
-        index={index}
-        totalQuestions={totalQuestions}
-        onUpdate={onUpdate}
-        onDelete={onDelete}
-        onDone={onDoneEdit}
+        question={question} index={index} totalQuestions={totalQuestions}
+        onUpdate={onUpdate} onDelete={onDelete} onDone={onDoneEdit}
       />
     );
   }
-
-  const cleanPrompt = question.prompt.replace(/<[^>]*>?/gm, '').trim();
 
   return (
     <Card accent="none" style={{ display: 'flex', flexDirection: 'column', gap: 10, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
@@ -50,9 +44,16 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
         </div>
       </div>
 
-      <div style={{ fontSize: '0.92rem', color: 'var(--color-text)', lineHeight: 1.5, fontWeight: 500 }}>
-        {cleanPrompt || 'Empty question prompt'}
+      <div style={{ fontSize: '0.92rem', color: 'var(--color-text)', lineHeight: 1.5 }}>
+        <RichContent html={question.prompt || '*(Empty prompt)*'} />
       </div>
+
+      {question.imageUrl && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: 6, background: 'var(--color-bg)', borderRadius: 6 }}>
+          <img src={question.imageUrl} alt={question.imageCaption || 'Diagram'} style={{ maxHeight: 160, maxWidth: '100%', objectFit: 'contain' }} />
+          {question.imageCaption && <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>{question.imageCaption}</span>}
+        </div>
+      )}
 
       {question.options && question.options.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6 }}>
@@ -70,7 +71,7 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
                 }}
               >
                 {isCorrect ? <CheckCircle size={15} weight="bold" color="var(--color-success)" /> : <span style={{ opacity: 0.6 }}>{String.fromCharCode(65 + i)}.</span>}
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt}</span>
+                <RichContent html={opt} inline />
               </div>
             );
           })}
