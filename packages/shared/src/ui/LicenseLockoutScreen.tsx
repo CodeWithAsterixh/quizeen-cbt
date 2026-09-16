@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { WarningIcon } from '@phosphor-icons/react';
+import React from 'react';
 import { LicenseState } from '../types/license.js';
 import { LockoutServerPicker } from './LockoutServerPicker.js';
 
@@ -17,18 +18,10 @@ const MESSAGES: Record<string, string> = {
 };
 
 export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry }) => {
-  const [copied, setCopied] = useState(false);
   const status = licenseState?.status || 'unlicensed';
+  const serverActive = licenseState?.serverOnline;
   const title = TITLES[status] || 'License Inactive';
   const desc = licenseState?.message || MESSAGES[status] || 'License verification failed.';
-  const hwId = licenseState?.hardwareId || '';
-
-  const handleCopy = () => {
-    if (!hwId) return;
-    navigator.clipboard.writeText(hwId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div style={{
@@ -44,41 +37,14 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
         boxShadow: 'var(--shadow-lg, 0 10px 15px -3px rgba(77, 114, 152, 0.1))', textAlign: 'center'
       }}>
         <div style={{
-          width: 48, height: 48, borderRadius: '50%', background: 'var(--color-danger-light, #fad6d6)',
+          width: 48, height: 48, borderRadius: '50%',
           color: 'var(--color-danger, #c94444)', display: 'flex', alignItems: 'center',
           justifyContent: 'center', margin: '0 auto 12px', fontWeight: 800, fontSize: 20
-        }}>!</div>
-        <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--color-text, #233748)' }}>{title}</h2>
+        }}><WarningIcon size={40} weight='duotone'/></div>
+        <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--color-text, #233748)' }}>{serverActive?title:"Server Offline"}</h2>
         <p style={{ margin: '0 0 16px', color: 'var(--color-text-muted, #4d7298)', fontSize: 13, lineHeight: 1.5 }}>
-          {desc}
+          {serverActive?desc:"You are not connected to a server"}
         </p>
-        <div style={{
-          background: 'var(--color-surface-hover, #f0f7f6)', padding: '10px 12px', borderRadius: 'var(--radius-md, 8px)',
-          marginBottom: 16, fontSize: 12, textAlign: 'left', border: '1px solid var(--color-border, #d2e3dc)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ color: 'var(--color-text-subtle, #77a6b6)', fontWeight: 600, fontSize: 11, letterSpacing: 0.5 }}>
-              SERVER HARDWARE ID
-            </span>
-            {hwId && (
-              <button
-                type="button"
-                onClick={handleCopy}
-                style={{
-                  background: copied ? 'var(--color-success, #55913e)' : 'var(--color-surface, #ffffff)',
-                  color: copied ? '#ffffff' : 'var(--color-primary, #4d7298)',
-                  border: '1px solid var(--color-border, #d2e3dc)', borderRadius: 'var(--radius-sm, 4px)',
-                  padding: '2px 6px', fontSize: 10, fontWeight: 600, cursor: 'pointer'
-                }}
-              >
-                {copied ? 'Copied' : 'Copy ID'}
-              </button>
-            )}
-          </div>
-          <div style={{ fontFamily: 'monospace', color: 'var(--color-primary, #4d7298)', wordBreak: 'break-all', fontWeight: 700, fontSize: 12 }}>
-            {hwId || 'Resolving...'}
-          </div>
-        </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           <button onClick={onRetry} style={{
             padding: '8px 20px', borderRadius: 'var(--radius-md, 8px)', border: 'none',

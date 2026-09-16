@@ -44,4 +44,5 @@ export interface LicenseState {
   hardwareId: string;
   daysRemaining?: number;
   message?: string;
+  serverOnline?:boolean
 }

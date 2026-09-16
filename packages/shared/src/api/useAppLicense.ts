@@ -27,7 +27,10 @@ export function useAppLicense() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       const state: LicenseState = body?.data || body;
-      setLicenseState(state);
+      setLicenseState({
+        ...state,
+        serverOnline: true
+      });
       setError(null);
       if (state.license?.theme || state.license?.branding) {
         applyThemeCustomization(state.license.theme, state.license.branding);
@@ -44,6 +47,7 @@ export function useAppLicense() {
           status: 'unlicensed',
           hardwareId: 'Server Offline',
           message: 'Central Server is not running or unreachable at ' + serverConfig.getUrl(),
+          serverOnline: false
         };
       });
       if (isInitial && !hasResolvedRef.current) {
