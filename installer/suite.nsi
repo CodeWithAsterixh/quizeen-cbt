@@ -169,18 +169,18 @@ Section -Post
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ${If} $InstallScope == "all"
-    CreateDirectory "$COMMONAPPDATA\Queez CBT Suite\data"
-    ExecWait 'icacls "$COMMONAPPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    CreateDirectory "$APPDATA\Queez CBT Suite\data"
+    ExecWait 'icacls "$APPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     CreateDirectory "$INSTDIR\data"
     ExecWait 'icacls "$INSTDIR\data" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
-    ${IfNot} ${FileExists} "$COMMONAPPDATA\Queez CBT Suite\data\license-public.pem"
-      SetOutPath "$COMMONAPPDATA\Queez CBT Suite\data"
+    ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
+      SetOutPath "$APPDATA\Queez CBT Suite\data"
       File "..\config\license-public.pem"
-    ${EndIfNot}
+    ${EndIf}
     ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
       SetOutPath "$INSTDIR\data"
       File "..\config\license-public.pem"
-    ${EndIfNot}
+    ${EndIf}
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
@@ -194,11 +194,11 @@ Section -Post
     ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
       SetOutPath "$APPDATA\Queez CBT Suite\data"
       File "..\config\license-public.pem"
-    ${EndIfNot}
+    ${EndIf}
     ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
       SetOutPath "$INSTDIR\data"
       File "..\config\license-public.pem"
-    ${EndIfNot}
+    ${EndIf}
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
