@@ -1,6 +1,6 @@
 import { Assessment } from '../types/types.js';
 
-export type AvailabilityStatus = 'available' | 'upcoming' | 'expired' | 'unavailable';
+export type AvailabilityStatus = 'available' | 'upcoming' | 'finished' | 'unavailable';
 
 export interface AssessmentAvailabilityInfo {
   isAvailable: boolean;
@@ -48,7 +48,7 @@ export function getAssessmentAvailabilityInfo(
     const toDate = new Date(assessment.availableTo);
     if (!isNaN(toDate.getTime()) && nowMs > toDate.getTime()) {
       const timeStr = toDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      return { isAvailable: false, status: 'expired', label: 'Expired', badgeColor: 'rose', detail: `Closed ${timeStr}` };
+      return { isAvailable: false, status: 'finished', label: 'Finished', badgeColor: 'rose', detail: `Closed ${timeStr}` };
     }
   }
 
