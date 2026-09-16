@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LogEntry } from './types';
-import { computeServerMetrics, buildGraphBuckets } from './serverGraphUtils';
-import { ServerGraphChart } from './ServerGraphChart';
+import { computeServerMetrics } from './serverGraphUtils';
+import { ServerGraph } from './chart/ServerGraph';
 
 interface Props {
   logs: LogEntry[];
@@ -10,7 +10,6 @@ interface Props {
 export const ServerVisualGraphTab: React.FC<Props> = ({ logs }) => {
   const [metric, setMetric] = useState<'latency' | 'status'>('latency');
   const metrics = computeServerMetrics(logs);
-  const buckets = buildGraphBuckets(logs);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -65,9 +64,9 @@ export const ServerVisualGraphTab: React.FC<Props> = ({ logs }) => {
 
       <div className="server-card" style={{ padding: '1.25rem' }}>
         <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--color-text)' }}>
-          {metric === 'latency' ? 'Latency Over Recent Requests (ms)' : 'Status Health (Green = 2xx/3xx, Red = 4xx/5xx)'}
+          {metric === 'latency' ? 'Live Latency & Traffic Stream (ms)' : 'Status Health (Green = OK, Red = Error)'}
         </div>
-        <ServerGraphChart buckets={buckets} metric={metric} />
+        <ServerGraph logs={logs} metric={metric} />
       </div>
     </div>
   );
