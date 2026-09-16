@@ -34,27 +34,30 @@ export async function fetchAndSyncStudentData(
         apiClient.getSubmissions(),
       ]);
 
+      const safeAssessments = remoteAssessments || [];
+      const safeSubs = remoteSubs || [];
+      const currentExamIds = new Set(safeAssessments.map((a) => a.id));
+
+      // Push only offline submissions that actually belong to an assessment on this server
       const localSubs = await submissionStore.getAll();
-      const remoteIds = new Set((remoteSubs || []).map((s) => s.id));
-      await pushOfflineSubmissions(localSubs, remoteIds);
+      const relevantOfflineSubs = localSubs.filter((s) => currentExamIds.has(s.examId));
+      const remoteIds = new Set(safeSubs.map((s) => s.id));
+      if (relevantOfflineSubs.length > 0) {
+        await pushOfflineSubmissions(relevantOfflineSubs, remoteIds);
+      }
 
-      const subMap = new Map<string, Submission>();
-      localSubs.forEach((s) => subMap.set(s.id, s));
-      (remoteSubs || []).forEach((s) => subMap.set(s.id, s));
-      const mergedSubs = Array.from(subMap.values());
-      if (mergedSubs.length > 0) await submissionStore.saveBatch(mergedSubs);
+      // Overwrite local store to mirror current active server only
+      await assessmentStore.clear();
+      if (safeAssessments.length > 0) await assessmentStore.saveBatch(safeAssessments);
 
-      const localAssessments = await assessmentStore.getAll();
-      const assMap = new Map<string, Assessment>();
-      localAssessments.forEach((a) => assMap.set(a.id, a));
-      (remoteAssessments || []).forEach((a) => assMap.set(a.id, a));
-      const mergedAssessments = Array.from(assMap.values());
-      if (mergedAssessments.length > 0) await assessmentStore.saveBatch(mergedAssessments);
+      await submissionStore.clear();
+      if (safeSubs.length > 0) await submissionStore.saveBatch(safeSubs);
 
-      return { assessments: mergedAssessments, submissions: mergedSubs };
+      return { assessments: safeAssessments, submissions: safeSubs };
     }
   } catch {}
 
+  // Offline fallback: only use local storage if server is unreachable
   const [stored, storedSubs] = await Promise.all([
     assessmentStore.getAll(),
     submissionStore.getAll(),

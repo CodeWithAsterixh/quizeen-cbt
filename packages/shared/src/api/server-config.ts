@@ -19,11 +19,20 @@ export const serverConfig = {
   setUrl: (url: string): void => {
     const clean = url.trim().replace(/\/+$/, '');
     if (!clean) return;
+    const isDifferent = clean !== activeUrl;
     activeUrl = clean;
     lastCheckTime = 0;
     lastCheckResult = null;
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem('cbt_server_url', activeUrl);
+      if (isDifferent) {
+        try {
+          ['cbt_exams', 'cbt_submissions', 'cbt_students'].forEach((k) => {
+            window.localStorage.removeItem(k);
+            (window as any).electronApi?.writeStorage?.(k, '[]');
+          });
+        } catch {}
+      }
       window.dispatchEvent(new CustomEvent('cbt:server-changed', { detail: activeUrl }));
     }
     urlListeners.forEach((fn) => { try { fn(activeUrl); } catch {} });

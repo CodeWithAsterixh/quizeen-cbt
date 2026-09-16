@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Student, LocalStore, apiClient, socketClient, getNextClassInfo, getPreviousClassInfo } from '@cbt/shared';
 import { generateSingleCode, generateBatchCodes } from './studentCodeGen';
 
@@ -7,22 +7,18 @@ const studentStore = new LocalStore<Student>('students');
 export function useStudentStore() {
   const [students, setStudents] = useState<Student[]>([]);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       if (await apiClient.isAvailable()) {
-        const remote = await apiClient.getStudents();
-        const local = await studentStore.getAll();
-        const map = new Map<string, Student>();
-        local.forEach((s) => map.set(s.id, s));
-        (remote || []).forEach((s) => map.set(s.id, s));
-        const merged = Array.from(map.values());
-        if (merged.length > 0) await studentStore.saveBatch(merged);
-        setStudents(merged);
+        const remote = (await apiClient.getStudents()) || [];
+        await studentStore.clear();
+        if (remote.length > 0) await studentStore.saveBatch(remote);
+        setStudents(remote);
         return;
       }
     } catch {}
     setStudents(await studentStore.getAll());
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
@@ -30,12 +26,13 @@ export function useStudentStore() {
     const unsubConn = socketClient.onConnectionChange((c) => { if (c) refresh(); });
     const onFocus = () => refresh();
     window.addEventListener('focus', onFocus);
+    window.addEventListener('cbt:server-changed', refresh);
     return () => {
       unsubStudents(); unsubConn();
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('cbt:server-changed', refresh);
     };
-  }, []);
+  }, [refresh]);
 
   const saveStudent = async (data: Partial<Student> & { name: string; educationLevel: any; classGroup: string; department?: any }) => {
     const existing = data.id ? students.find((s) => s.id === data.id) : null;
