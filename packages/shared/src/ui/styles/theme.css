@@ -50,9 +50,9 @@
   --radius-panel: 10px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px rgba(77, 114, 152, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(77, 114, 152, 0.08), 0 2px 4px -2px rgba(77, 114, 152, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(77, 114, 152, 0.1);
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 
   /* Compatibility aliases for design system tokens */
   --cbt-bg: var(--color-bg); --cbt-surface: var(--color-surface);

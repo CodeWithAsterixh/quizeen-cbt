@@ -16,7 +16,7 @@ export const ServerVisualGraphTab: React.FC<Props> = ({ logs }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>
-            Interactive Visual Graph
+            Traffic Graph
           </h2>
           <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--color-text-subtle)' }}>
             Track live server speed and response health across incoming requests.

@@ -34,7 +34,7 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
         maxWidth: 460, width: '100%', background: 'var(--color-surface, #ffffff)',
         padding: '28px 24px', borderRadius: 'var(--radius-panel, 10px)',
         border: '1px solid var(--color-border, #d2e3dc)',
-        boxShadow: 'var(--shadow-lg, 0 10px 15px -3px rgba(77, 114, 152, 0.1))', textAlign: 'center'
+        textAlign: 'center'
       }}>
         <div style={{
           width: 48, height: 48, borderRadius: '50%',

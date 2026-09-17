@@ -16,11 +16,11 @@
 .server-content { flex: 1; display: flex; flex-direction: column; padding: 1.25rem; gap: 1rem; overflow-y: auto; }
 
 .server-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
-.server-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem; box-shadow: var(--shadow-sm); }
+.server-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem; box-shadow: none; }
 .server-card-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--color-text-subtle); margin-bottom: 0.5rem; }
 .server-status-val { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
 .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-.status-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.status-dot.active { background: #10b981; box-shadow: none; }
 .status-dot.inactive { background: #ef4444; }
 
 .ip-list { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.25rem; }

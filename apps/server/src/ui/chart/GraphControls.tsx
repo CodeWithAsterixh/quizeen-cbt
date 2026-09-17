@@ -29,7 +29,6 @@ export const GraphControls: React.FC<Props> = ({
           <span style={{
             width: 7, height: 7, borderRadius: '50%',
             background: isLive ? 'var(--color-success)' : '#d97706',
-            boxShadow: isLive ? '0 0 6px var(--color-success)' : 'none',
           }} />
           {isLive ? 'LIVE' : `PAUSED (-${offset} req)`}
         </button>

@@ -16,7 +16,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({ summary, onSelect }) => {
       style={{
         display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         gap: 16, cursor: 'pointer', padding: '1.25rem',
-        transition: 'transform 140ms ease, box-shadow 140ms ease',
+        transition: 'transform 140ms ease',
       }}
       onClick={() => onSelect(summary.className)}
     >

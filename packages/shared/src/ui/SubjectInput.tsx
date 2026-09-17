@@ -63,7 +63,7 @@ export const SubjectInput: React.FC<SubjectInputProps> = ({
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
           background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-          borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: 210,
+          borderRadius: 8, maxHeight: 210,
           overflowY: 'auto', zIndex: 1100,
         }}>
           {filtered.map((sub, i) => (

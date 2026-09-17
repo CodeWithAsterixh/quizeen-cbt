@@ -19,12 +19,11 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease;
 }
 
 .cbt-input-wrapper:focus-within, .custom-input-wrapper:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .cbt-input-wrapper.has-error, .custom-input-wrapper.has-error {

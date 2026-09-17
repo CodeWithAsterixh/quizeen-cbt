@@ -15,12 +15,12 @@
 .btn-primary {
   background: var(--color-primary);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  box-shadow: none;
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.5);
+  box-shadow: none;
 }
 .btn-secondary {
   background: var(--color-surface);

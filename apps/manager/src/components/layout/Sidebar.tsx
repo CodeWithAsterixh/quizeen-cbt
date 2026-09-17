@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="sidebar-nav" aria-label="Main manager menu">
         <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid var(--color-border)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
           {logoUrl && (
-            <div style={{ width: 28, height: 28, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, overflow: 'hidden',  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <img src={logoUrl} alt="Logo" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           )}
