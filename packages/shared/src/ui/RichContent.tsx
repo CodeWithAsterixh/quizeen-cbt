@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { parseComplexWriting } from './equation-parser.js';
+import './styles/equation.css';
 
 export interface RichContentProps {
   html: string;

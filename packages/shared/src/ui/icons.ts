@@ -1,77 +1,69 @@
-export {
-  Archive,
-  ArrowCounterClockwise,
-  ArrowLeft,
-  ArrowRight,
-  ArrowsClockwise,
-  ArrowsOutSimple,
-  Backspace,
-  BookOpen,
-  Broadcast,
-  Buildings,
-  Calculator,
-  CalendarBlank,
-  CaretDown,
-  CaretLeft,
-  CaretRight,
-  ChartBar,
-  Check,
-  CheckCircle,
-  CheckSquare,
-  CheckSquare as CheckSquareIcon,
-  ClipboardText,
-  Clock,
-  Clock as ClockIcon,
-  Compass,
-  Copy,
-  Copy as CopyIcon,
-  Divide,
-  DoorOpen,
-  DotsSixVertical,
-  DownloadSimple,
-  Equals,
-  Eye,
-  FileArchive,
-  FloppyDisk,
-  Gauge,
-  Gear,
-  GraduationCap,
-  HardDrives,
-  IdentificationBadge,
-  Image,
-  Image as ImageIcon,
-  Function,
-  Key,
-  ListNumbers,
-  Lock,
-  LockKey,
-  MagicWand,
-  MagnifyingGlass,
-  Minus,
-  PencilSimple,
-  PencilSimple as PencilSimpleIcon,
-  Percent,
-  Pi,
-  Play,
-  Plus,
-  PlusMinus,
-  Printer,
-  Pulse,
-  SignOut,
-  Square,
-  Stop,
-  Table,
-  Tray,
-  TrendUp,
-  Trophy,
-  Trash,
-  Trash as TrashIcon,
-  UploadSimple,
-  UserCircle,
-  UserPlus,
-  Users,
-  Warning,
-  WarningCircle,
-  X,
-  XCircle,
-} from '@phosphor-icons/react';
+export { Archive } from '@phosphor-icons/react/dist/csr/Archive.es.js';
+export { ArrowCounterClockwise } from '@phosphor-icons/react/dist/csr/ArrowCounterClockwise.es.js';
+export { ArrowLeft } from '@phosphor-icons/react/dist/csr/ArrowLeft.es.js';
+export { ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight.es.js';
+export { ArrowsClockwise } from '@phosphor-icons/react/dist/csr/ArrowsClockwise.es.js';
+export { ArrowsOutSimple } from '@phosphor-icons/react/dist/csr/ArrowsOutSimple.es.js';
+export { Backspace } from '@phosphor-icons/react/dist/csr/Backspace.es.js';
+export { BookOpen } from '@phosphor-icons/react/dist/csr/BookOpen.es.js';
+export { Broadcast } from '@phosphor-icons/react/dist/csr/Broadcast.es.js';
+export { Buildings } from '@phosphor-icons/react/dist/csr/Buildings.es.js';
+export { Calculator } from '@phosphor-icons/react/dist/csr/Calculator.es.js';
+export { CalendarBlank } from '@phosphor-icons/react/dist/csr/CalendarBlank.es.js';
+export { CaretDown } from '@phosphor-icons/react/dist/csr/CaretDown.es.js';
+export { CaretLeft } from '@phosphor-icons/react/dist/csr/CaretLeft.es.js';
+export { CaretRight } from '@phosphor-icons/react/dist/csr/CaretRight.es.js';
+export { ChartBar } from '@phosphor-icons/react/dist/csr/ChartBar.es.js';
+export { Check } from '@phosphor-icons/react/dist/csr/Check.es.js';
+export { CheckCircle } from '@phosphor-icons/react/dist/csr/CheckCircle.es.js';
+export { CheckSquare, CheckSquare as CheckSquareIcon } from '@phosphor-icons/react/dist/csr/CheckSquare.es.js';
+export { ClipboardText } from '@phosphor-icons/react/dist/csr/ClipboardText.es.js';
+export { Clock, Clock as ClockIcon } from '@phosphor-icons/react/dist/csr/Clock.es.js';
+export { Compass } from '@phosphor-icons/react/dist/csr/Compass.es.js';
+export { Copy, Copy as CopyIcon } from '@phosphor-icons/react/dist/csr/Copy.es.js';
+export { Divide } from '@phosphor-icons/react/dist/csr/Divide.es.js';
+export { DoorOpen } from '@phosphor-icons/react/dist/csr/DoorOpen.es.js';
+export { DotsSixVertical } from '@phosphor-icons/react/dist/csr/DotsSixVertical.es.js';
+export { DownloadSimple } from '@phosphor-icons/react/dist/csr/DownloadSimple.es.js';
+export { Equals } from '@phosphor-icons/react/dist/csr/Equals.es.js';
+export { Eye } from '@phosphor-icons/react/dist/csr/Eye.es.js';
+export { FileArchive } from '@phosphor-icons/react/dist/csr/FileArchive.es.js';
+export { FloppyDisk } from '@phosphor-icons/react/dist/csr/FloppyDisk.es.js';
+export { Gauge } from '@phosphor-icons/react/dist/csr/Gauge.es.js';
+export { Gear } from '@phosphor-icons/react/dist/csr/Gear.es.js';
+export { GraduationCap } from '@phosphor-icons/react/dist/csr/GraduationCap.es.js';
+export { HardDrives } from '@phosphor-icons/react/dist/csr/HardDrives.es.js';
+export { IdentificationBadge } from '@phosphor-icons/react/dist/csr/IdentificationBadge.es.js';
+export { Image, Image as ImageIcon } from '@phosphor-icons/react/dist/csr/Image.es.js';
+export { Function } from '@phosphor-icons/react/dist/csr/Function.es.js';
+export { Key } from '@phosphor-icons/react/dist/csr/Key.es.js';
+export { ListNumbers } from '@phosphor-icons/react/dist/csr/ListNumbers.es.js';
+export { Lock } from '@phosphor-icons/react/dist/csr/Lock.es.js';
+export { LockKey } from '@phosphor-icons/react/dist/csr/LockKey.es.js';
+export { MagicWand } from '@phosphor-icons/react/dist/csr/MagicWand.es.js';
+export { MagnifyingGlass } from '@phosphor-icons/react/dist/csr/MagnifyingGlass.es.js';
+export { Minus } from '@phosphor-icons/react/dist/csr/Minus.es.js';
+export { PencilSimple, PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/csr/PencilSimple.es.js';
+export { Percent } from '@phosphor-icons/react/dist/csr/Percent.es.js';
+export { Pi } from '@phosphor-icons/react/dist/csr/Pi.es.js';
+export { Play } from '@phosphor-icons/react/dist/csr/Play.es.js';
+export { Plus } from '@phosphor-icons/react/dist/csr/Plus.es.js';
+export { PlusMinus } from '@phosphor-icons/react/dist/csr/PlusMinus.es.js';
+export { Printer } from '@phosphor-icons/react/dist/csr/Printer.es.js';
+export { Pulse } from '@phosphor-icons/react/dist/csr/Pulse.es.js';
+export { SignOut } from '@phosphor-icons/react/dist/csr/SignOut.es.js';
+export { Square } from '@phosphor-icons/react/dist/csr/Square.es.js';
+export { Stop } from '@phosphor-icons/react/dist/csr/Stop.es.js';
+export { Table } from '@phosphor-icons/react/dist/csr/Table.es.js';
+export { Tray } from '@phosphor-icons/react/dist/csr/Tray.es.js';
+export { TrendUp } from '@phosphor-icons/react/dist/csr/TrendUp.es.js';
+export { Trophy } from '@phosphor-icons/react/dist/csr/Trophy.es.js';
+export { Trash, Trash as TrashIcon } from '@phosphor-icons/react/dist/csr/Trash.es.js';
+export { UploadSimple } from '@phosphor-icons/react/dist/csr/UploadSimple.es.js';
+export { UserCircle } from '@phosphor-icons/react/dist/csr/UserCircle.es.js';
+export { UserPlus } from '@phosphor-icons/react/dist/csr/UserPlus.es.js';
+export { Users } from '@phosphor-icons/react/dist/csr/Users.es.js';
+export { Warning } from '@phosphor-icons/react/dist/csr/Warning.es.js';
+export { WarningCircle } from '@phosphor-icons/react/dist/csr/WarningCircle.es.js';
+export { X } from '@phosphor-icons/react/dist/csr/X.es.js';
+export { XCircle } from '@phosphor-icons/react/dist/csr/XCircle.es.js';

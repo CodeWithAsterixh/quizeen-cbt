@@ -29,7 +29,7 @@ export function isDeviceConnected(deviceId: string): boolean {
   return false;
 }
 
-export function initWebSocketServer(server: http.Server): WebSocketServer {
+export function initWebSocketServer(server: http.Server, getStatus?: () => any): WebSocketServer {
   closeWebSocketServer();
   wss = new WebSocketServer({ server });
 
@@ -40,14 +40,18 @@ export function initWebSocketServer(server: http.Server): WebSocketServer {
     ws.on('message', (raw) => {
       try {
         const parsed = JSON.parse(raw.toString());
+        if (parsed?.event === 'server:get-status' && getStatus) {
+          try { ws.send(JSON.stringify({ event: 'server:status', data: getStatus(), timestamp: Date.now() })); } catch {}
+        }
         if (parsed?.event) messageHandlers.forEach((fn) => { try { fn(parsed.event, parsed.data, ws); } catch {} });
       } catch {}
     });
-    ws.on('close', () => {
-      disconnectHandlers.forEach((fn) => { try { fn(ws); } catch {} });
-    });
+    ws.on('close', () => disconnectHandlers.forEach((fn) => { try { fn(ws); } catch {} }));
 
-    try { ws.send(JSON.stringify({ event: 'connection:ack', timestamp: Date.now() })); } catch {}
+    try {
+      ws.send(JSON.stringify({ event: 'connection:ack', timestamp: Date.now() }));
+      if (getStatus) ws.send(JSON.stringify({ event: 'server:status', data: getStatus(), timestamp: Date.now() }));
+    } catch {}
   });
 
   pingInterval = setInterval(() => {

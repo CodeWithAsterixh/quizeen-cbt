@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TitleBar, applyThemeCustomization, serverConfig, bakedWhitelabelConfig } from '@cbt/shared';
+import { TitleBar, applyThemeCustomization, serverConfig, bakedWhitelabelConfig, socketClient } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
@@ -36,23 +36,23 @@ export const App: React.FC = () => {
       }
     }).catch(() => {});
 
-    const poll = async () => {
-      try {
-        const s = await api.getStatus();
-        if (s) {
-          setStatus(s);
-          if (s.running) {
-            setErrorMessage(null);
-            const target = `http://127.0.0.1:${s.port}`;
-            if (serverConfig.getUrl() !== target) serverConfig.setUrl(target);
-          }
-        }
-      } catch {}
+    const applyStatus = (s: any) => {
+      if (!s) return;
+      setStatus(s);
+      if (s.running) {
+        setErrorMessage(null);
+        const target = `http://127.0.0.1:${s.port}`;
+        if (serverConfig.getUrl() !== target) serverConfig.setUrl(target);
+      }
     };
-    poll();
-    const interval = setInterval(poll, 1000);
-    const cleanup = api.onRequestLogged?.((entry: LogEntry) => { setLogs((prev) => [...prev.slice(-499), entry]); });
-    return () => { clearInterval(interval); cleanup?.(); unsubTheme?.(); };
+    api.getStatus().then(applyStatus).catch(() => {});
+    const unsubSocketStatus = socketClient.on('server:status', applyStatus);
+    const unsubSocketConn = socketClient.onConnectionChange((c) => { if (c) socketClient.send('server:get-status'); });
+    const cleanup = api.onRequestLogged?.((entry: LogEntry) => {
+      setLogs((prev) => [...prev.slice(-499), entry]);
+      setStatus((prev) => ({ ...prev, totalRequests: (prev?.totalRequests || 0) + 1 }));
+    });
+    return () => { cleanup?.(); unsubTheme?.(); unsubSocketStatus?.(); unsubSocketConn?.(); };
   }, []);
 
   const handleToggle = async (port: number) => {

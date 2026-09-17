@@ -15,7 +15,27 @@ export default defineConfig(() => {
             electron([
               {
                 entry: 'electron/main.ts',
+                onstart(options) {
+                  options.startup();
+                },
                 vite: {
+                  resolve: {
+                    alias: {
+                      '@cbt/shared': path.resolve(__dirname, '../../packages/shared/src/node.ts'),
+                    },
+                  },
+                  build: {
+                    rollupOptions: {
+                      external: [
+                        'electron',
+                        'express',
+                        'cors',
+                        'ws',
+                        'jszip',
+                        /^node:.*/,
+                      ],
+                    },
+                  },
                   define: {
                     'process.env.WS_NO_BUFFER_UTIL': '"true"',
                     'process.env.WS_NO_UTF_8_VALIDATE': '"true"',
@@ -42,13 +62,11 @@ export default defineConfig(() => {
     },
     server: {
       port: 5176,
+      strictPort: true,
     },
     define: {
       'process.env.WS_NO_BUFFER_UTIL': '"true"',
       'process.env.WS_NO_UTF_8_VALIDATE': '"true"',
-    },
-    optimizeDeps: {
-      include: ['@phosphor-icons/react'],
     },
   };
 });

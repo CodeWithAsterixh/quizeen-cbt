@@ -14,10 +14,8 @@ export function useTitleBar() {
     if (isElectron) {
       document.documentElement.style.setProperty('--titlebar-height', '34px');
       checkMaximized();
-      window.addEventListener('resize', checkMaximized);
       const unsubscribe = window.electronApi?.onMaximizeChange?.((max) => setIsMax(Boolean(max)));
       return () => {
-        window.removeEventListener('resize', checkMaximized);
         unsubscribe?.();
       };
     } else {

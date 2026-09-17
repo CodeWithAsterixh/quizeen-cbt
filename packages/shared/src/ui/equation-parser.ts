@@ -1,14 +1,24 @@
 import katex from 'katex';
 import { parseMarkdownTables } from './table-parser.js';
 
+const mathCache = new Map<string, string>();
+
 function renderMath(math: string, displayMode: boolean): string {
+  const trimmed = math.trim();
+  const key = `${displayMode ? 'D' : 'I'}:${trimmed}`;
+  const cached = mathCache.get(key);
+  if (cached !== undefined) return cached;
+
   try {
-    return katex.renderToString(math.trim(), {
+    const res = katex.renderToString(trimmed, {
       displayMode,
       throwOnError: false,
       output: 'htmlAndMathml',
       strict: false,
     });
+    if (mathCache.size > 2000) mathCache.clear();
+    mathCache.set(key, res);
+    return res;
   } catch {
     return `<span class="cbt-math-fallback">${math}</span>`;
   }
@@ -16,6 +26,7 @@ function renderMath(math: string, displayMode: boolean): string {
 
 export function parseComplexWriting(raw: string): string {
   if (!raw || typeof raw !== 'string') return '';
+  if (!/[\|\$\\\^~=]/.test(raw)) return raw;
 
   let out = raw;
 

@@ -3,7 +3,7 @@ import { createApp, RequestLogEntry } from '../src/app.js';
 import { getHardwareId } from '../src/features/license/hardware.service.js';
 import { ServerBeacon, getLocalIpAddresses } from './discovery.js';
 import { findFallbackPort, probeQueezServer } from './port-fallback.js';
-import { initWebSocketServer, closeWebSocketServer } from '../src/core/ws/ws-hub.js';
+import { initWebSocketServer, closeWebSocketServer, broadcastWsEvent } from '../src/core/ws/ws-hub.js';
 import { ensureFirewallRule } from './firewall.js';
 
 export interface StartServerResult {
@@ -42,8 +42,9 @@ export class ServerManager {
         srv.listen(port, '0.0.0.0', () => {
           this.startedAt = Date.now();
           ensureFirewallRule(port);
-          try { initWebSocketServer(srv); } catch {}
+          try { initWebSocketServer(srv, () => this.getStatus()); } catch {}
           try { this.beacon.start(port); } catch {}
+          try { broadcastWsEvent('server:status', this.getStatus()); } catch {}
           resolve({ success: true, port });
         });
       } catch (err: any) {
@@ -76,6 +77,7 @@ export class ServerManager {
   }
 
   stop(): void {
+    try { broadcastWsEvent('server:status', { running: false, port: this.currentPort, uptimeSeconds: 0, ips: getLocalIpAddresses(), totalRequests: this.requestCount, hardwareId: getHardwareId() }); } catch {}
     try { closeWebSocketServer(); } catch {}
     this.beacon.stop();
     if (this.server) { try { this.server.close(); } catch {} this.server = null; }

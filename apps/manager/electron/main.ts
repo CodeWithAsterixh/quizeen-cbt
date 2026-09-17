@@ -22,6 +22,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
       devTools: false,
     },
   });
@@ -37,7 +38,8 @@ function createWindow() {
     }
   });
 
-  const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5175';
+  const devUrl = (process.env.VITE_DEV_SERVER_URL && process.env.VITE_DEV_SERVER_URL.includes('5175'))
+    ? process.env.VITE_DEV_SERVER_URL : 'http://localhost:5175';
 
   if (!app.isPackaged) {
     mainWindow.loadURL(devUrl);

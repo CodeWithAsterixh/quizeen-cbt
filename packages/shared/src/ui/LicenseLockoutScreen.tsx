@@ -1,4 +1,4 @@
-import { WarningIcon } from '@phosphor-icons/react';
+import { WarningCircle as WarningIcon } from './icons.js';
 import React from 'react';
 import { LicenseState } from '../types/license.js';
 import { LockoutServerPicker } from './LockoutServerPicker.js';
@@ -27,7 +27,7 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
     <div style={{
       position: 'fixed', inset: 0, zIndex: 99999, display: 'flex',
       alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(35, 55, 72, 0.45)', backdropFilter: 'blur(6px)',
+      background: 'rgba(28, 44, 58, 0.75)',
       color: 'var(--color-text, #233748)', padding: 24, fontFamily: 'var(--font-family, sans-serif)'
     }}>
       <div style={{
