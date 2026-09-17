@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Assessment, Student, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
+import { Assessment, Student, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { Sidebar, ManagerTab } from './components/layout/Sidebar';
 import { ManagerModals } from './components/layout/ManagerModals';
@@ -46,7 +46,7 @@ export const App: React.FC = () => {
   const branding = licenseState?.license?.branding;
   return (
     <div className="app-shell">
-      <TitleBar title={branding?.appName || branding?.schoolName || 'Queez'} badge={branding?.shortName ? `${branding.shortName} Assessment office` : 'Management'} iconUrl={branding?.appIconUrl || branding?.logoUrl} />
+      <TitleBar title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.managerName || bakedWhitelabelConfig?.suiteName || 'Assessment Manager'} badge={(branding?.shortName || bakedWhitelabelConfig?.shortName) ? `${branding?.shortName || bakedWhitelabelConfig?.shortName} Assessment Office` : 'Management'} iconUrl={branding?.appIconUrl || branding?.logoUrl} />
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
       <div className="manager-body">
         <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} />

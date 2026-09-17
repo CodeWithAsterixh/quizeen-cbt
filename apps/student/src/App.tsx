@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen } from '@cbt/shared';
+import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { AppModals } from './components/layout/AppModals';
 import { StartScreen } from './features/start/StartScreen';
@@ -49,8 +49,8 @@ export const App: React.FC = () => {
   return (
     <div className="app-shell">
       <TitleBar
-        title={branding?.appName || branding?.schoolName || 'Queez'}
-        badge={branding?.shortName ? `${branding.shortName} Student Portal` : 'Student Portal'}
+        title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.studentName || bakedWhitelabelConfig?.suiteName || 'Student Portal'}
+        badge={(branding?.shortName || bakedWhitelabelConfig?.shortName) ? `${branding?.shortName || bakedWhitelabelConfig?.shortName} Student Portal` : 'Student Portal'}
         iconUrl={branding?.appIconUrl || branding?.logoUrl}
       />
       <main className="app-content">

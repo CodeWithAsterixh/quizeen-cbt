@@ -6,6 +6,7 @@ import { resolveDataDir } from '../../core/db/database.js';
 import { getHardwareId } from './hardware.service.js';
 import { tamperTrapService } from './tamper-trap.service.js';
 import { getLicensePublicKey, clearCachedLicenseKey } from './license-key.service.js';
+import { getWhitelabelLicenseState } from './whitelabel-state.service.js';
 
 class CryptoLicenseService {
   private licenseFile = path.join(resolveDataDir(), 'license.json');
@@ -32,11 +33,10 @@ class CryptoLicenseService {
 
   public getLicenseState(): LicenseState {
     const hwId = getHardwareId();
+    const wl = getWhitelabelLicenseState(hwId);
+    if (wl) return wl;
     const trap = tamperTrapService.verifyAndRecordTimestamp();
-    if (!trap.valid) {
-      return { status: 'tampered', hardwareId: hwId, message: trap.reason };
-    }
-
+    if (!trap.valid) return { status: 'tampered', hardwareId: hwId, message: trap.reason };
     if (!fs.existsSync(this.licenseFile)) {
       return { status: 'unlicensed', hardwareId: hwId, message: 'No license installed' };
     }

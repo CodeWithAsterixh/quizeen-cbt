@@ -82,14 +82,14 @@ FunctionEnd
 
 ; Page 1: Welcome
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfRelaunched
-!define MUI_WELCOMEPAGE_TITLE "Welcome to Queez CBT Suite Setup"
-!define MUI_WELCOMEPAGE_TEXT "This setup wizard will install the Queez Computer Based Testing System on your computer.$\r$\n$\r$\nQueez is an offline assessment suite built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TITLE "Welcome to ${SUITE_NAME} Setup"
+!define MUI_WELCOMEPAGE_TEXT "This setup wizard will install the ${SUITE_NAME} on your computer.$\r$\n$\r$\n${SUITE_NAME} is an offline assessment suite built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
 !insertmacro MUI_PAGE_WELCOME
 
 ; Page 2: License Agreement
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfRelaunched
 !define MUI_LICENSEPAGE_CHECKBOX
-!define MUI_LICENSEPAGE_TEXT_TOP "Please review the license terms before proceeding. You must accept these terms to install Queez CBT Suite."
+!define MUI_LICENSEPAGE_TEXT_TOP "Please review the license terms before proceeding. You must accept these terms to install ${SUITE_NAME}."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "If you accept the terms of the agreement, select the checkbox below and click Next."
 !insertmacro MUI_PAGE_LICENSE "${LICENSE_PATH}"
 
@@ -101,20 +101,20 @@ InstType "Full Suite (Server, Manager and Student)"
 InstType "Admin Workstation (Server and Manager)"
 InstType "Student Lab Station (Student Portal Only)"
 
-!define MUI_COMPONENTSPAGE_TEXT_TOP "Choose which Queez applications to install based on this computer's role:"
+!define MUI_COMPONENTSPAGE_TEXT_TOP "Choose which ${SUITE_NAME} applications to install based on this computer's role:"
 !define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Available Applications:"
 !insertmacro MUI_PAGE_COMPONENTS
 
 ; Page 4: Install Location
-!define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install Queez CBT Suite in the following folder. To install in a different folder, click Browse and select another folder."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install ${SUITE_NAME} in the following folder. To install in a different folder, click Browse and select another folder."
 !insertmacro MUI_PAGE_DIRECTORY
 
 ; Page 5: Start Menu Folder
 Var STARTMENU_FOLDER
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
-!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\Quizeen\Queez CBT Suite"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${BRANDING_TEXT}\${SUITE_NAME}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "Queez CBT Suite"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${SUITE_NAME}"
 !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
 
 ; Page 6: Progress
@@ -122,9 +122,9 @@ Var STARTMENU_FOLDER
 
 ; Page 7: Finish
 !define MUI_FINISHPAGE_TITLE "Installation Finished"
-!define MUI_FINISHPAGE_TEXT "Queez CBT Suite has been installed successfully.$\r$\n$\r$\nYour applications are ready to use in the Start Menu under the Queez CBT Suite folder."
+!define MUI_FINISHPAGE_TEXT "${SUITE_NAME} has been installed successfully.$\r$\n$\r$\nYour applications are ready to use in the Start Menu under the ${SUITE_NAME} folder."
 !define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Open Queez Assessment Manager"
+!define MUI_FINISHPAGE_RUN_TEXT "Open ${MANAGER_NAME}"
 !define MUI_FINISHPAGE_RUN_FUNCTION "LaunchManager"
 !insertmacro MUI_PAGE_FINISH
 
@@ -139,7 +139,7 @@ Var STARTMENU_FOLDER
 ; Component Sections
 ; ------------------------------------------------------------------------------
 
-Section "Queez Local Server" SecServer
+Section "${SERVER_NAME}" SecServer
   SectionIn 1 2
   SetOutPath "$INSTDIR\Server"
   File /r "${SERVER_DIR}\*.*"
@@ -150,13 +150,13 @@ Section "Queez Local Server" SecServer
   ${EndIf}
 SectionEnd
 
-Section "Queez Assessment Manager" SecManager
+Section "${MANAGER_NAME}" SecManager
   SectionIn 1 2
   SetOutPath "$INSTDIR\Manager"
   File /r "${MANAGER_DIR}\*.*"
 SectionEnd
 
-Section "Queez Student Portal" SecStudent
+Section "${STUDENT_NAME}" SecStudent
   SectionIn 1 3
   SetOutPath "$INSTDIR\Student"
   File /r "${STUDENT_DIR}\*.*"
@@ -189,49 +189,49 @@ Section -Post
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ${If} $InstallScope == "all"
-    CreateDirectory "$APPDATA\Queez CBT Suite\data"
-    ExecWait 'icacls "$APPDATA\Queez CBT Suite" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    CreateDirectory "$APPDATA\${SUITE_NAME}\data"
+    ExecWait 'icacls "$APPDATA\${SUITE_NAME}" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     CreateDirectory "$INSTDIR\data"
     ExecWait 'icacls "$INSTDIR\data" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
-    CreateDirectory "$APPDATA\Queez CBT Suite\data\updates"
-    ExecWait 'icacls "$APPDATA\Queez CBT Suite\data\updates" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
+    CreateDirectory "$APPDATA\${SUITE_NAME}\data\updates"
+    ExecWait 'icacls "$APPDATA\${SUITE_NAME}\data\updates" /grant *S-1-5-32-545:(OI)(CI)M /T /Q'
     ${If} ${FileExists} "..\data\updates\*.*"
-      SetOutPath "$APPDATA\Queez CBT Suite\data\updates"
+      SetOutPath "$APPDATA\${SUITE_NAME}\data\updates"
       File /r "..\data\updates\*.*"
     ${EndIf}
-    ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
-      SetOutPath "$APPDATA\Queez CBT Suite\data"
+    ${IfNot} ${FileExists} "$APPDATA\${SUITE_NAME}\data\license-public.pem"
+      SetOutPath "$APPDATA\${SUITE_NAME}\data"
       File "..\config\license-public.pem"
     ${EndIf}
     ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
       SetOutPath "$INSTDIR\data"
       File "..\config\license-public.pem"
     ${EndIf}
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
-    WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
-    WriteRegStr HKLM "Software\Quizeen\Queez CBT Suite" "InstallScope" "all"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayName" "${SUITE_NAME}"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "all"
   ${Else}
-    CreateDirectory "$APPDATA\Queez CBT Suite\data"
+    CreateDirectory "$APPDATA\${SUITE_NAME}\data"
     CreateDirectory "$INSTDIR\data"
-    ${IfNot} ${FileExists} "$APPDATA\Queez CBT Suite\data\license-public.pem"
-      SetOutPath "$APPDATA\Queez CBT Suite\data"
+    ${IfNot} ${FileExists} "$APPDATA\${SUITE_NAME}\data\license-public.pem"
+      SetOutPath "$APPDATA\${SUITE_NAME}\data"
       File "..\config\license-public.pem"
     ${EndIf}
     ${IfNot} ${FileExists} "$INSTDIR\data\license-public.pem"
       SetOutPath "$INSTDIR\data"
       File "..\config\license-public.pem"
     ${EndIf}
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayName" "Queez CBT Suite"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayVersion" "${VERSION}"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "Publisher" "Quizeen"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "UninstallString" '"$INSTDIR\uninstall.exe"'
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
-    WriteRegStr HKCU "Software\Quizeen\Queez CBT Suite" "Install_Dir" "$INSTDIR"
-    WriteRegStr HKCU "Software\Quizeen\Queez CBT Suite" "InstallScope" "current"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayName" "${SUITE_NAME}"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "current"
   ${EndIf}
 
   System::Call 'shell32.dll::SHChangeNotify(i, i, p, p) v (0x08000000, 0, 0, 0)'
@@ -265,7 +265,7 @@ Function PageInstallScopeShow
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0u 0u 300u 28u "Please select whether you wish to make Queez CBT Suite available to all users on this computer or only for yourself."
+  ${NSD_CreateLabel} 0u 0u 300u 28u "Please select whether you wish to make ${SUITE_NAME} available to all users on this computer or only for yourself."
   Pop $0
 
   ${NSD_CreateRadioButton} 15u 35u 285u 14u "Anyone who uses this computer (all users)"
@@ -303,12 +303,12 @@ Function PageInstallScopeLeave
 
     StrCpy $InstallScope "all"
     SetShellVarContext all
-    StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+    StrCpy $INSTDIR "$PROGRAMFILES64\${SUITE_NAME}"
   ${Else}
     ; User selected Current User
     StrCpy $InstallScope "current"
     SetShellVarContext current
-    StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Queez CBT Suite"
+    StrCpy $INSTDIR "$LOCALAPPDATA\Programs\${SUITE_NAME}"
   ${EndIf}
 FunctionEnd
 
@@ -325,11 +325,11 @@ Function .onInit
     StrCpy $Relaunched 1
     StrCpy $InstallScope "all"
     SetShellVarContext all
-    ReadRegStr $1 HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ReadRegStr $1 HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
     ${Else}
-      StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+      StrCpy $INSTDIR "$PROGRAMFILES64\${SUITE_NAME}"
     ${EndIf}
     ; Bring the elevated installer window to the foreground immediately.
     ; Without this it appears behind the user's current app after UAC approval.
@@ -345,30 +345,30 @@ Function .onInit
   ${If} $0 == "Admin"
     StrCpy $InstallScope "all"
     SetShellVarContext all
-    ReadRegStr $1 HKLM "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ReadRegStr $1 HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
     ${Else}
-      StrCpy $INSTDIR "$PROGRAMFILES64\Queez CBT Suite"
+      StrCpy $INSTDIR "$PROGRAMFILES64\${SUITE_NAME}"
     ${EndIf}
   ${Else}
     StrCpy $InstallScope "current"
     SetShellVarContext current
-    ReadRegStr $1 HKCU "Software\Quizeen\Queez CBT Suite" "Install_Dir"
+    ReadRegStr $1 HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
     ${Else}
-      StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Queez CBT Suite"
+      StrCpy $INSTDIR "$LOCALAPPDATA\Programs\${SUITE_NAME}"
     ${EndIf}
   ${EndIf}
 FunctionEnd
 
 Function un.onInit
-  ReadRegStr $0 HKLM "Software\Quizeen\Queez CBT Suite" "InstallScope"
+  ReadRegStr $0 HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope"
   ${If} $0 == "all"
     SetShellVarContext all
   ${Else}
-    ReadRegStr $0 HKCU "Software\Quizeen\Queez CBT Suite" "InstallScope"
+    ReadRegStr $0 HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope"
     ${If} $0 == "current"
       SetShellVarContext current
     ${Else}
@@ -438,6 +438,10 @@ Section "Uninstall"
   Delete "$INSTDIR\uninstall.exe"
   RMDir "$INSTDIR"
 
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}"
+  DeleteRegKey HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}"
+  DeleteRegKey HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"
   DeleteRegKey HKLM "Software\Quizeen\Queez CBT Suite"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\QueezCBTSuite"

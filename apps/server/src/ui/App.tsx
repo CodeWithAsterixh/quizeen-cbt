@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TitleBar, applyThemeCustomization, serverConfig } from '@cbt/shared';
+import { TitleBar, applyThemeCustomization, serverConfig, bakedWhitelabelConfig } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
@@ -25,7 +25,7 @@ export const App: React.FC = () => {
     const api = (window as any).serverApi;
     if (!api) return;
     if (localStorage.getItem('cbt_server_autostart') === 'true') api.startServer(4000);
-    api.detectExisting?.(4000).then((r: any) => { if (r?.active) setInfoMessage(`Active Queez Server detected at ${r.url}.`); }).catch(() => {});
+    api.detectExisting?.(4000).then((r: any) => { if (r?.active) setInfoMessage(`Active Server detected at ${r.url}.`); }).catch(() => {});
     api.getTheme?.().then((t: any) => { if (t) applyThemeCustomization(t); }).catch(() => {});
     const unsubTheme = api.onThemeChanged?.((t: any) => { if (t) applyThemeCustomization(t); });
 
@@ -76,7 +76,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="server-window">
-      <TitleBar title={branding?.appName || branding?.schoolName || 'Queez'} badge="CBT Server" iconUrl={branding?.appIconUrl || branding?.logoUrl} onClose={handleClose} />
+      <TitleBar title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.suiteName || 'CBT Server'} badge="CBT Server" iconUrl={branding?.appIconUrl || branding?.logoUrl} onClose={handleClose} />
       <div className="server-body">
         <ServerSidebar currentTab={currentTab} onSelectTab={setCurrentTab} requestCount={logs.length} isRunning={Boolean(status?.running)} port={status?.port || 4000} />
         <main className="server-content">

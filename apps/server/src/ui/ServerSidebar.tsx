@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, HardDrives, ChartBar, Pulse, Broadcast, LockKey } from '@cbt/shared';
+import { Badge, HardDrives, ChartBar, Pulse, Broadcast, LockKey, bakedWhitelabelConfig } from '@cbt/shared';
 
 export type ServerTab = 'overview' | 'devices' | 'license' | 'graph' | 'requests';
 
@@ -17,7 +17,7 @@ export const ServerSidebar: React.FC<Props> = ({
   const items = [
     { id: 'overview' as ServerTab, label: 'Overview', icon: HardDrives },
     { id: 'devices' as ServerTab, label: 'Devices', icon: Broadcast },
-    { id: 'license' as ServerTab, label: 'License', icon: LockKey },
+    { id: 'license' as ServerTab, label: bakedWhitelabelConfig?.unlicensedMode ? 'Status' : 'License', icon: LockKey },
     { id: 'graph' as ServerTab, label: 'Visual Graph', icon: ChartBar },
     {
       id: 'requests' as ServerTab,

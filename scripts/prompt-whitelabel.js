@@ -12,6 +12,12 @@ function askQuestion(rl, query, defaultVal = '') {
 
 async function promptWhitelabelConfig() {
   const args = process.argv.slice(2);
+  const configArg = args.find(a => a.startsWith('--config='))?.split('=')[1];
+  if (configArg && fs.existsSync(configArg)) {
+    const raw = JSON.parse(fs.readFileSync(configArg, 'utf8'));
+    return { isWhitelabel: true, ...raw };
+  }
+
   const schoolArg = args.find(a => a.startsWith('--school='))?.split('=')[1];
   const isWhitelabelFlag = args.includes('--whitelabel') || Boolean(schoolArg);
 
@@ -39,19 +45,28 @@ async function promptWhitelabelConfig() {
     console.log('\n--- Custom Institutional Whitelabel Setup ---');
     const schoolName = schoolArg || await askQuestion(rl, 'Institution or School Name', 'Apex Academy');
     const suiteName = await askQuestion(rl, 'Suite Title', `${schoolName} CBT Suite`);
+    const shortName = await askQuestion(rl, 'Short Institution Name / Acronym', schoolName.split(' ')[0]);
     const studentName = await askQuestion(rl, 'Student Portal Name', `${schoolName} Student Portal`);
     const managerName = await askQuestion(rl, 'Manager Console Name', `${schoolName} Assessment Manager`);
     const serverName = await askQuestion(rl, 'Server Application Name', `${schoolName} Local Server`);
+    const primaryColor = await askQuestion(rl, 'Primary Brand Color (hex)', '#1e40af');
+    const accentColor = await askQuestion(rl, 'Secondary Accent Color (hex)', '#f59e0b');
+    const noLicenseAns = await askQuestion(rl, 'Build license-free (no key activation required)? (Y/n)', 'Y');
+    const unlicensedMode = args.includes('--no-license') || noLicenseAns.toLowerCase() !== 'n';
     const iconPath = await askQuestion(rl, 'Custom .ico path (leave blank for standard icon)', '');
 
     return {
       isWhitelabel: true,
+      unlicensedMode,
       schoolName,
+      shortName,
       suiteName,
       brandingText: schoolName,
       studentName,
       managerName,
       serverName,
+      primaryColor,
+      accentColor,
       iconPath: iconPath && fs.existsSync(iconPath) ? iconPath : undefined,
     };
   } finally {

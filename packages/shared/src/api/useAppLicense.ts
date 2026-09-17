@@ -3,6 +3,7 @@ import { LicenseState } from '../types/license.js';
 import { serverConfig } from './server-config.js';
 import { socketClient } from './socket-client.js';
 import { applyThemeCustomization } from '../ui/theme-engine.js';
+import { bakedWhitelabelConfig } from '../whitelabel-data.js';
 
 // On first load, if the server is unreachable (e.g. client is on a different
 // machine and still pointing at localhost), hold off showing the lockout screen
@@ -47,7 +48,8 @@ export function useAppLicense() {
       setError(err?.message || 'Server unreachable');
       setLicenseState((prev) => {
         if (prev?.status === 'active' && !isInitial) return prev;
-        return { status: 'unlicensed', hardwareId: 'Server Offline', message: 'Server unreachable at ' + serverConfig.getUrl(), serverOnline: false };
+        const s = bakedWhitelabelConfig?.unlicensedMode ? 'active' : 'unlicensed';
+        return { status: s, hardwareId: 'Server Offline', message: 'Server unreachable at ' + serverConfig.getUrl(), serverOnline: false };
       });
       if (isInitial && !hasResolvedRef.current) {
         if (!graceTimerRef.current) {
@@ -64,6 +66,9 @@ export function useAppLicense() {
   }, []);
 
   useEffect(() => {
+    if (bakedWhitelabelConfig?.isWhitelabel && (bakedWhitelabelConfig.primaryColor || bakedWhitelabelConfig.accentColor)) {
+      applyThemeCustomization({ primaryColor: bakedWhitelabelConfig.primaryColor, accentColor: bakedWhitelabelConfig.accentColor });
+    }
     fetchLicense();
     const handleServerChange = () => { isInitialRef.current = false; fetchLicense(); };
     window.addEventListener('cbt:server-changed', handleServerChange);
@@ -79,7 +84,7 @@ export function useAppLicense() {
     };
   }, [fetchLicense]);
 
-  const isLocked = Boolean(hasResolved && licenseState && licenseState.status !== 'active');
+  const isLocked = Boolean(!bakedWhitelabelConfig?.unlicensedMode && hasResolved && licenseState && licenseState.status !== 'active');
 
   return {
     licenseState,
