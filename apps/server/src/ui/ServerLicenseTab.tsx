@@ -9,7 +9,7 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
   const getUrl = useCallback((p: string) => `http://127.0.0.1:${port}/api/${p}`, [port]);
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(getUrl('license'));
+      const res = await fetch(getUrl('license'), { signal: AbortSignal.timeout(1500) });
       if (res.ok) {
         const d = (await res.json()).data;
         setState(d);

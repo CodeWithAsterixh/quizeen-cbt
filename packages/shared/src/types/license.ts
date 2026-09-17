@@ -18,6 +18,14 @@ export interface ThemeConfig {
   fontPreset: 'inter' | 'system' | 'sans';
 }
 
+export const DEFAULT_THEME: ThemeConfig = {
+  primaryColor: '#059669',
+  accentColor: '#0d9488',
+  surfaceMode: 'light',
+  borderRadius: 'md',
+  fontPreset: 'inter',
+};
+
 export interface LicensePayload {
   licenseId: string;
   issuedAt: string;

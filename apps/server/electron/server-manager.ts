@@ -43,8 +43,7 @@ export class ServerManager {
           this.startedAt = Date.now();
           ensureFirewallRule(port);
           try { initWebSocketServer(srv, () => this.getStatus()); } catch {}
-          try { this.beacon.start(port); } catch {}
-          try { broadcastWsEvent('server:status', this.getStatus()); } catch {}
+          try { this.beacon.start(port); broadcastWsEvent('server:status', this.getStatus()); } catch {}
           resolve({ success: true, port });
         });
       } catch (err: any) {
@@ -66,9 +65,7 @@ export class ServerManager {
       const fallback = await this.tryListen(fallbackPort);
       if (fallback.success) {
         this.currentPort = fallbackPort;
-        const msg = probe.active
-          ? `Another Queez Server is active on port ${requestedPort}. Started on port ${fallbackPort}.`
-          : `Port ${requestedPort} is in use. Started on port ${fallbackPort}.`;
+        const msg = (probe.active ? `Another Queez Server is active on port ${requestedPort}. ` : `Port ${requestedPort} is in use. `) + `Started on port ${fallbackPort}.`;
         return { success: true, port: fallbackPort, fallbackFrom: requestedPort, message: msg };
       }
     }
@@ -80,7 +77,10 @@ export class ServerManager {
     try { broadcastWsEvent('server:status', { running: false, port: this.currentPort, uptimeSeconds: 0, ips: getLocalIpAddresses(), totalRequests: this.requestCount, hardwareId: getHardwareId() }); } catch {}
     try { closeWebSocketServer(); } catch {}
     this.beacon.stop();
-    if (this.server) { try { this.server.close(); } catch {} this.server = null; }
+    if (this.server) {
+      try { (this.server as any).closeAllConnections?.(); (this.server as any).closeIdleConnections?.(); this.server.close(); } catch {}
+      this.server = null;
+    }
     this.startedAt = 0;
   }
 

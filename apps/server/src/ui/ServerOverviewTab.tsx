@@ -7,11 +7,12 @@ import { ServerStats } from './ServerStats';
 interface Props {
   status: ServerStatus;
   onToggle: (port: number) => void;
+  isPending?: boolean;
   errorMessage?: string | null;
   infoMessage?: string | null;
 }
 
-export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle, errorMessage, infoMessage }) => {
+export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle, isPending, errorMessage, infoMessage }) => {
   const [copied, setCopied] = useState(false);
   const [hwId, setHwId] = useState(status.hardwareId || '');
 
@@ -20,7 +21,7 @@ export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle, errorMess
       setHwId(status.hardwareId);
       return;
     }
-    fetch(`http://127.0.0.1:${status.port || 4000}/api/license`)
+    fetch(`http://127.0.0.1:${status.port || 4000}/api/license`, { signal: AbortSignal.timeout(1500) })
       .then((r) => r.json())
       .then((d) => { if (d?.data?.hardwareId) setHwId(d.data.hardwareId); })
       .catch(() => {});
@@ -36,7 +37,7 @@ export const ServerOverviewTab: React.FC<Props> = ({ status, onToggle, errorMess
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div className="server-cards-grid">
-        <ServerControls status={status} onToggle={onToggle} errorMessage={errorMessage} infoMessage={infoMessage} />
+        <ServerControls status={status} onToggle={onToggle} isPending={isPending} errorMessage={errorMessage} infoMessage={infoMessage} />
         <ServerStats status={status} />
       </div>
 

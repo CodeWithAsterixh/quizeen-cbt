@@ -1,13 +1,7 @@
-import { ThemeConfig, SchoolBrandingConfig } from '../types/license.js';
+import { ThemeConfig, SchoolBrandingConfig, DEFAULT_THEME } from '../types/license.js';
 import { applyColorPalette } from './color-palette-engine.js';
 
-export const DEFAULT_THEME: ThemeConfig = {
-  primaryColor: '#059669',
-  accentColor: '#0d9488',
-  surfaceMode: 'light',
-  borderRadius: 'md',
-  fontPreset: 'inter',
-};
+export { DEFAULT_THEME };
 
 export function applyThemeCustomization(
   theme?: Partial<ThemeConfig> | null,

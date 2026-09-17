@@ -8,6 +8,7 @@ export const deviceApi = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
         body: JSON.stringify(device),
+        signal: AbortSignal.timeout(1500),
       });
       if (!res.ok) return { success: false };
       const json = await res.json();
@@ -22,6 +23,7 @@ export const deviceApi = {
       const res = await fetch(`${serverConfig.getApiBase()}/devices?_t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' },
+        signal: AbortSignal.timeout(1500),
       });
       if (!res.ok) return [];
       const json = await res.json();
@@ -36,6 +38,7 @@ export const deviceApi = {
       const res = await fetch(`${serverConfig.getApiBase()}/devices/${deviceId}/push-update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(1500),
       });
       const json = await res.json().catch(() => ({}));
       return { success: res.ok, message: json?.message };
@@ -46,7 +49,10 @@ export const deviceApi = {
 
   async clearOfflineDevices(): Promise<boolean> {
     try {
-      const res = await fetch(`${serverConfig.getApiBase()}/devices/offline`, { method: 'DELETE' });
+      const res = await fetch(`${serverConfig.getApiBase()}/devices/offline`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(1500),
+      });
       return res.ok;
     } catch {
       return false;
@@ -56,7 +62,7 @@ export const deviceApi = {
   async checkUpdate(app: string, currentVersion: string): Promise<UpdateCheckResult> {
     try {
       const url = `${serverConfig.getApiBase()}/updates/check?app=${app}&v=${currentVersion}&_t=${Date.now()}`;
-      const res = await fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      const res = await fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(1500) });
       if (!res.ok) return { updateAvailable: false, currentVersion, latestVersion: currentVersion };
       const json = await res.json();
       return json.data || { updateAvailable: false, currentVersion, latestVersion: currentVersion };

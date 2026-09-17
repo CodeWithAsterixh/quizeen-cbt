@@ -5,11 +5,12 @@ import { ServerStatus } from './types';
 interface Props {
   status: ServerStatus;
   onToggle: (port: number) => void;
+  isPending?: boolean;
   errorMessage?: string | null;
   infoMessage?: string | null;
 }
 
-export const ServerControls: React.FC<Props> = ({ status, onToggle, errorMessage, infoMessage }) => {
+export const ServerControls: React.FC<Props> = ({ status, onToggle, isPending, errorMessage, infoMessage }) => {
   const [port, setPort] = useState(status.port || 4000);
   const [copiedIp, setCopiedIp] = useState<string | null>(null);
   const [autoStart, setAutoStart] = useState(false);
@@ -51,19 +52,23 @@ export const ServerControls: React.FC<Props> = ({ status, onToggle, errorMessage
         <input
           type="number"
           value={port}
-          disabled={status.running}
+          disabled={status.running || isPending}
           onChange={(e) => setPort(parseInt(e.target.value, 10) || 4000)}
           style={{ width: '80px', padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}
         />
         <button
+          disabled={isPending}
           onClick={() => onToggle(port)}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem',
             background: status.running ? '#ef4444' : '#10b981', color: '#fff',
-            border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600,
+            border: 'none', borderRadius: '4px', cursor: isPending ? 'not-allowed' : 'pointer',
+            opacity: isPending ? 0.7 : 1, fontWeight: 600,
           }}
         >
-          {status.running ? <><Stop weight="bold" /> Stop Server</> : <><Play weight="bold" /> Start Server</>}
+          {isPending
+            ? (status.running ? 'Stopping...' : 'Starting...')
+            : (status.running ? <><Stop weight="bold" /> Stop Server</> : <><Play weight="bold" /> Start Server</>)}
         </button>
       </div>
       <div className="ip-list">

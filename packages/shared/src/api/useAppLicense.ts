@@ -25,7 +25,7 @@ export function useAppLicense() {
     isFetchingRef.current = true;
     const isInitial = isInitialRef.current;
     try {
-      const res = await fetch(`${serverConfig.getUrl()}/api/license`);
+      const res = await fetch(`${serverConfig.getUrl()}/api/license`, { signal: AbortSignal.timeout(2000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       const state: LicenseState = body?.data || body;

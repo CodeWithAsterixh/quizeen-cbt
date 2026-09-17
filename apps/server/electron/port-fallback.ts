@@ -27,7 +27,7 @@ export async function findFallbackPort(startPort: number): Promise<number> {
 
 export function probeQueezServer(port: number): Promise<{ active: boolean; url: string }> {
   return new Promise((resolve) => {
-    const req = http.get(`http://127.0.0.1:${port}/health`, { timeout: 1200 }, (res) => {
+    const req = http.get(`http://127.0.0.1:${port}/health`, { timeout: 300 }, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {

@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
-
+  const [isPending, setIsPending] = useState(false);
   const [branding, setBranding] = useState<any>(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export const App: React.FC = () => {
     api.getTheme?.().then((t: any) => { if (t) applyThemeCustomization(t); }).catch(() => {});
     const unsubTheme = api.onThemeChanged?.((t: any) => { if (t) applyThemeCustomization(t); });
 
-    fetch('http://127.0.0.1:4000/api/license').then(r => r.json()).then(d => {
+    fetch('http://127.0.0.1:4000/api/license', { signal: AbortSignal.timeout(1500) }).then(r => r.json()).then(d => {
       if (d?.data?.license?.branding) {
         setBranding(d.data.license.branding);
         (window as any).electronApi?.applyBranding?.(d.data.license.branding);
@@ -57,8 +57,8 @@ export const App: React.FC = () => {
 
   const handleToggle = async (port: number) => {
     const api = (window as any).serverApi;
-    if (!api) return;
-    setErrorMessage(null); setInfoMessage(null);
+    if (!api || isPending) return;
+    setIsPending(true); setErrorMessage(null); setInfoMessage(null);
     try {
       if (status.running) await api.stopServer();
       else {
@@ -69,6 +69,7 @@ export const App: React.FC = () => {
       const s = await api.getStatus();
       if (s) setStatus(s);
     } catch (err: any) { setErrorMessage(err?.message || 'Failed to communicate with server'); }
+    finally { setIsPending(false); }
   };
 
   const handleClose = () => status.running ? setIsWarningOpen(true) : (window as any).electronApi?.closeWindow();
@@ -83,7 +84,7 @@ export const App: React.FC = () => {
       <div className="server-body">
         <ServerSidebar currentTab={currentTab} onSelectTab={setCurrentTab} requestCount={logs.length} isRunning={Boolean(status?.running)} port={status?.port || 4000} logoUrl={appLogo} />
         <main className="server-content">
-          {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
+          {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} isPending={isPending} errorMessage={errorMessage} infoMessage={infoMessage} />}
           {currentTab === 'devices' && <ServerDevicesTab />}
           {currentTab === 'license' && <ServerLicenseTab port={status?.port || 4000} />}
           {currentTab === 'graph' && <ServerVisualGraphTab logs={logs || []} />}

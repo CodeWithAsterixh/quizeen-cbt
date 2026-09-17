@@ -8,9 +8,8 @@ import { themeService } from '../src/features/theme/theme.service.js';
 import { applyRuntimeBranding, applyCachedBranding } from './branding-service.js';
 import { cryptoLicenseService } from '../src/features/license/crypto-license.service.js';
 
-app.commandLine.appendSwitch('enable-low-end-device-mode');
-app.commandLine.appendSwitch('js-flags', '--max-old-space-size=384 --optimize_for_size');
-app.commandLine.appendSwitch('disk-cache-size', '16777216');
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=384');
+app.commandLine.appendSwitch('enable-features', 'NetworkServiceInProcess');
 
 let mainWindow: BrowserWindow | null = null;
 const serverManager = new ServerManager((entry) => mainWindow?.webContents.send('server:request-logged', entry));
@@ -54,14 +53,7 @@ app.whenReady().then(() => {
     else applyCachedBranding(mainWindow);
   } catch { applyCachedBranding(mainWindow); }
 
-  ipcMain.handle('server:start', async (_e, port) => {
-    const res = await serverManager.start(port);
-    try {
-      const lic = cryptoLicenseService.getLicenseState();
-      if (lic.status === 'active' && lic.license?.branding) applyRuntimeBranding(lic.license.branding, mainWindow);
-    } catch {}
-    return res;
-  });
+  ipcMain.handle('server:start', async (_e, port) => serverManager.start(port));
   ipcMain.handle('server:stop', async () => { serverManager.stop(); return true; });
   ipcMain.handle('server:get-status', async () => serverManager.getStatus());
   ipcMain.handle('server:detect', async (_e, port) => serverManager.detectExisting(port));
