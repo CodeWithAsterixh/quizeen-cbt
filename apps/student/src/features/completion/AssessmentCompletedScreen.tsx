@@ -53,7 +53,7 @@ export const AssessmentCompletedScreen: React.FC<AssessmentCompletedScreenProps>
           Exit
         </Button>
       </Card>
-      <PoweredByQueez style={{ marginTop: '1.25rem', opacity: 0.8 }} size={16} />
+      <PoweredByQueez style={{ marginTop: '1.25rem', opacity: 0.85 }} size={30} />
     </main>
   );
 };

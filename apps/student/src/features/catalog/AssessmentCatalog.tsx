@@ -76,7 +76,7 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
         </section>
       )}
       <footer style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
-        <PoweredByQueez size={14} style={{ opacity: 0.75 }} />
+        <PoweredByQueez size={30} style={{ opacity: 0.85 }} />
       </footer>
     </main>
   );

@@ -65,7 +65,7 @@ export const ServerSidebar: React.FC<Props> = ({
           <div>{isRunning ? 'Listening on' : 'Server is'}</div>
           <strong style={{ color: 'var(--color-text)' }}>{isRunning ? `Port ${port}` : 'Stopped'}</strong>
         </div>
-        {!bakedWhitelabelConfig?.isWhitelabel && <PoweredByQueez size={14} />}
+        {!bakedWhitelabelConfig?.isWhitelabel && <PoweredByQueez size={30} />}
       </div>
     </aside>
   );

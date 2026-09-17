@@ -75,7 +75,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick, logo
           Enter Student ID
         </Button>
       </Card>
-      <PoweredByQueez style={{ marginTop: '1.25rem', opacity: 0.8 }} size={16} />
+      <PoweredByQueez style={{ marginTop: '1.5rem', opacity: 0.9 }} size={32} />
     </section>
   );
 };

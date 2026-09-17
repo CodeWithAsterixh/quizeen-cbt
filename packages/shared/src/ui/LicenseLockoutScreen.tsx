@@ -57,7 +57,7 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
         </div>
         <LockoutServerPicker onRetry={onRetry} />
         <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
-          <PoweredByQueez size={14} />
+          <PoweredByQueez size={30} />
         </div>
       </div>
     </div>

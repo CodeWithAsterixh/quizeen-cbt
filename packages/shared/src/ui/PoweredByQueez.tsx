@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { bakedWhitelabelConfig } from '../whitelabel-data.js';
+import { QueezLogo } from './QueezLogo.js';
 
 export interface PoweredByQueezProps {
   className?: string;
@@ -8,23 +9,24 @@ export interface PoweredByQueezProps {
   textColor?: string;
   logoSrc?: string;
   isWhitelabel?: boolean;
+  layout?: 'stacked' | 'inline';
 }
 
 export const PoweredByQueez: React.FC<PoweredByQueezProps> = ({
   className,
   style,
-  size = 14,
+  size = 30,
   textColor,
-  logoSrc = '/icon.png',
+  logoSrc,
   isWhitelabel,
+  layout = 'stacked',
 }) => {
-  const [src, setSrc] = useState(logoSrc);
-  const [failed, setFailed] = useState(false);
-
   const isWl = isWhitelabel ?? Boolean(bakedWhitelabelConfig?.isWhitelabel);
   if (isWl) {
     return null;
   }
+
+  const logoWidth = Math.round((size * 230) / 355);
 
   return (
     <div
@@ -32,35 +34,54 @@ export const PoweredByQueez: React.FC<PoweredByQueezProps> = ({
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 6,
-        fontSize: '0.72rem',
-        color: textColor || 'var(--color-text-subtle, var(--color-text-muted, #64748b))',
+        gap: 9,
+        fontSize: '0.78rem',
+        color: textColor || 'var(--color-text-muted, #4d7298)',
         userSelect: 'none',
         ...style,
       }}
     >
-      {!failed && (
+      {logoSrc ? (
         <img
-          src={src}
+          src={logoSrc}
           alt="Queez Logo"
-          width={size}
+          width={logoWidth}
           height={size}
-          onError={() => {
-            if (src !== './icon.png') setSrc('./icon.png');
-            else setFailed(true);
-          }}
-          style={{
-            width: size,
-            height: size,
-            objectFit: 'contain',
-            borderRadius: 3,
-            flexShrink: 0,
-          }}
+          style={{ width: logoWidth, height: size, objectFit: 'contain', flexShrink: 0 }}
         />
+      ) : (
+        <QueezLogo size={size} />
       )}
-      <span style={{ fontWeight: 500, letterSpacing: '0.01em' }}>
-        Powered by Queez CBT Suite
-      </span>
+      {layout === 'inline' ? (
+        <span style={{ fontWeight: 600, letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
+          Powered by Queez CBT Suite
+        </span>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15, textAlign: 'left' }}>
+          <span
+            style={{
+              fontSize: '0.62rem',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontWeight: 600,
+              opacity: 0.75,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Powered by
+          </span>
+          <span
+            style={{
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              color: textColor || 'var(--color-primary, #4d7298)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Queez CBT Suite
+          </span>
+        </div>
+      )}
     </div>
   );
 };
