@@ -62,11 +62,14 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
             return (
               <div
                 key={i}
+                onClick={() => onUpdate({ correctAnswer: opt })}
+                title="Click to select as correct answer"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 6, fontSize: '0.84rem',
+                  cursor: 'pointer', userSelect: 'none', transition: 'all 0.15s ease',
                   background: isCorrect ? 'var(--color-bg-subtle, #f0fdf4)' : 'var(--color-bg-alt, #f8fafc)',
-                  border: isCorrect ? '1px solid var(--color-success, #10b981)' : '1px solid var(--color-border)',
-                  color: isCorrect ? 'var(--color-success, #047857)' : 'var(--color-text-muted)',
+                  border: isCorrect ? '1.5px solid var(--color-success, #10b981)' : '1px solid var(--color-border)',
+                  color: isCorrect ? 'var(--color-success, #047857)' : 'var(--color-text)',
                   fontWeight: isCorrect ? 600 : 400,
                 }}
               >

@@ -59,8 +59,8 @@ export const FORMULA_CATEGORIES: SubjectCategory[] = [
     name: 'Biology',
     snippets: [
       { label: 'Genotype', code: '$X^H X^h$', description: 'Sex-linked allele' },
-      { label: 'Cross', code: '$Rr \\times Rr$', description: 'Monohybrid cross' },
-      { label: 'Punnett Table', code: '| | B | b |\n|---|---|---|\n| B | BB | Bb |\n| b | Bb | bb |', description: 'Punnett square grid' },
+      { label: 'Genetic Cross', code: '$Rr \\times Rr$', description: 'Monohybrid cross' },
+      { label: 'Photosynthesis', code: '$6CO_2 + 6H_2O \\rightarrow C_6H_{12}O_6 + 6O_2$', description: 'Light reaction' },
       { label: 'Species', code: '*Homo sapiens*', description: 'Binomial nomenclature' },
     ],
   },
@@ -68,8 +68,10 @@ export const FORMULA_CATEGORIES: SubjectCategory[] = [
     id: 'acc',
     name: 'Accounting',
     snippets: [
-      { label: 'Ledger Table', code: '| Date | Particulars | Debit (NGN) | Credit (NGN) |\n|---|---|---|---|\n| 2026-01-01 | Bank | 100,000 | - |\n| 2026-01-01 | Capital | - | 100,000 |', description: 'Debit & Credit ledger' },
-      { label: 'Balance Sheet', code: '| Assets | NGN | Liabilities | NGN |\n|---|---|---|---|\n| Cash | 50,000 | Capital | 50,000 |', description: 'Balance sheet table' },
+      { label: 'Accounting Eq', code: '$Assets = Liabilities + Equity$', description: 'Fundamental equation' },
+      { label: 'Simple Interest', code: '$I = \\frac{P \\times R \\times T}{100}$', description: 'Interest calculation' },
+      { label: 'Depreciation', code: '$D = \\frac{Cost - Salvage}{Life}$', description: 'Straight line depreciation' },
+      { label: 'Gross Profit', code: '$Profit = Revenue - COGS$', description: 'Profit equation' },
       { label: 'Total Double Line', code: '==NGN 500,000==', description: 'Double underline total' },
       { label: 'Currency', code: 'NGN, $, GBP, EUR', description: 'Currency symbols' },
     ],
