@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Exam, ExamScheduleConfig, compileExamZip, Card, TextInput } from '@cbt/shared';
+import { Exam, ExamScheduleConfig, compileExamZip, Card, TextInput, toast } from '@cbt/shared';
 import { CompilerHeader } from './CompilerHeader';
 import { CompilerScheduleRow } from './CompilerScheduleRow';
 
@@ -20,8 +20,9 @@ export const PackageCompilerView: React.FC<PackageCompilerViewProps> = ({ exams 
     setIsCompiling(true);
     try {
       await downloadCompiledPackage(exams, selectedIds, schedules, packageName);
+      toast.success(`Package "${packageName}.qzn" saved successfully.`);
     } catch (err: unknown) {
-      alert(`Could not save file: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      toast.error(`Could not save file: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsCompiling(false);
     }

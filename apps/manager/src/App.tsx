@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Assessment, Student, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig } from '@cbt/shared';
+import { Assessment, Student, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig, toast, GlobalDialogHost } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { Sidebar, ManagerTab } from './components/layout/Sidebar';
 import { ManagerModals } from './components/layout/ManagerModals';
@@ -20,8 +20,6 @@ export const App: React.FC = () => {
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [modals, setModals] = useState({ student: false, server: false, theme: false, loader: false });
-  const [notice, setNotice] = useState<string | null>(null);
-
   const { licenseState, isLocked, refreshLicense } = useAppLicense();
   const isAuthoring = isEditorOpen || modals.student;
   const updater = useManagerUpdater(isAuthoring);
@@ -32,7 +30,7 @@ export const App: React.FC = () => {
     onPushUpdateTriggered: () => { if (!isAuthoring) updater.startDownload(); },
   });
 
-  const notify = (m: string) => { setNotice(m); setTimeout(() => setNotice(null), 3500); };
+  const notify = (m: string) => { toast.success(m); };
   const handleRefresh = async () => { await Promise.all([refresh(), refreshStudents()]); };
 
   useEffect(() => {
@@ -54,11 +52,6 @@ export const App: React.FC = () => {
       <div className="manager-body">
         <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} logoUrl={appLogo} />
         <main className="main-viewport">
-          {notice && (
-            <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 14, fontWeight: 600, fontSize: '0.88rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>{notice}</span><button onClick={() => setNotice(null)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>X</button>
-            </div>
-          )}
           <ManagerViewRouter
             currentTab={currentTab} assessments={assessments} submissions={submissions} students={students}
             selectedExamId={selectedExamId} selectedSubmissionId={selectedSubmissionId}
@@ -90,6 +83,7 @@ export const App: React.FC = () => {
         isLoaderOpen={modals.loader} onCloseLoader={() => setModals(m => ({ ...m, loader: false }))}
         onImportQzn={async (items) => { for (const item of items) await saveAssessment(item); await handleRefresh(); notify(`Imported ${items.length} assessment(s) successfully.`); }}
       />
+      <GlobalDialogHost />
     </div>
   );
 };

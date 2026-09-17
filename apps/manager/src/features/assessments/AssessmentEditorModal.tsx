@@ -1,6 +1,6 @@
 import React from 'react';
 import { FloppyDisk, ListNumbers, Gear, ArrowCounterClockwise, ArrowClockwise, SubjectInput } from '@cbt/shared';
-import { Assessment, Question, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
+import { Assessment, Question, EDUCATION_LEVELS, Modal, Button, toast } from '@cbt/shared';
 import { QuestionsListTab } from './QuestionsListTab';
 import { AssessmentSettingsTab } from './AssessmentSettingsTab';
 import { useAssessmentForm } from './useAssessmentForm';
@@ -34,7 +34,7 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
 
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!subject.trim()) return alert('Please enter the Subject in Settings.');
+    if (!subject.trim()) return toast.warning('Please enter the Subject in Settings.');
     const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
     const classesStr = selectedClasses.length > 0 ? selectedClasses.join(', ') : 'All';
     onSave({

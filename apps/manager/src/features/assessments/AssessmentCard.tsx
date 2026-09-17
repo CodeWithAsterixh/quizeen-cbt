@@ -1,4 +1,4 @@
-import { Assessment, Button, getAssessmentAvailabilityInfo } from '@cbt/shared';
+import { Assessment, Button, getAssessmentAvailabilityInfo, dialog } from '@cbt/shared';
 import { ArrowRight, CopyIcon, PencilSimpleIcon, TrashIcon } from '@cbt/shared';
 import React from 'react';
 
@@ -66,7 +66,20 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
           <Button variant="outline" size="sm" onClick={() => onDuplicate(assessment)} title="Duplicate Assessment">
             <CopyIcon weight="duotone" size={14} />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => { if (confirm(`Delete "${assessment.subject}"?`)) onDelete(assessment.id); }} title="Delete Assessment">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              dialog.confirm({
+                title: 'Delete Assessment',
+                message: `Are you sure you want to delete "${assessment.subject}"? This action cannot be undone.`,
+                confirmLabel: 'Delete Assessment',
+                variant: 'danger',
+                onConfirm: () => onDelete(assessment.id),
+              });
+            }}
+            title="Delete Assessment"
+          >
             <TrashIcon weight="duotone" size={14} color="var(--color-danger)" />
           </Button>
         </div>

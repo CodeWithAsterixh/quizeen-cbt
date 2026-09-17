@@ -4,6 +4,7 @@
 @import '../../../../packages/shared/src/ui/styles/cards.css';
 @import '../../../../packages/shared/src/ui/styles/badges.css';
 @import '../../../../packages/shared/src/ui/styles/modals.css';
+@import '../../../../packages/shared/src/ui/styles/toasts.css';
 @import '../../../../packages/shared/src/ui/styles/title-bar.css';
 
 .server-window { display: flex; flex-direction: column; height: 100vh; background: var(--color-bg); overflow: hidden; }

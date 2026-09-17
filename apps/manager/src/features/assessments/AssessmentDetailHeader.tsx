@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, PencilSimple, Copy, Trash, DownloadSimple, Assessment, Button } from '@cbt/shared';
+import { ArrowLeft, PencilSimple, Copy, Trash, DownloadSimple, Assessment, Button, dialog } from '@cbt/shared';
 
 interface AssessmentDetailHeaderProps {
   assessment: Assessment;
@@ -68,7 +68,19 @@ export const AssessmentDetailHeader: React.FC<AssessmentDetailHeaderProps> = ({
           <Button variant="secondary" onClick={() => onDuplicate(exam)} icon={<Copy size={16} />}>
             Duplicate
           </Button>
-          <Button variant="outline" onClick={() => { if (confirm(`Delete "${exam.subject}"?`)) onDelete(exam.id); }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              dialog.confirm({
+                title: 'Delete Assessment',
+                message: `Are you sure you want to delete "${exam.subject}"? This action cannot be undone.`,
+                confirmLabel: 'Delete Assessment',
+                variant: 'danger',
+                onConfirm: () => onDelete(exam.id),
+              });
+            }}
+            title="Delete Assessment"
+          >
             <Trash size={16} color="var(--color-danger)" />
           </Button>
           <Button variant="primary" onClick={() => onEdit(exam)} icon={<PencilSimple size={16} />}>

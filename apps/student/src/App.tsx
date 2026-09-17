@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig, useDiscoveredServers } from '@cbt/shared';
+import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig, useDiscoveredServers, GlobalDialogHost } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { AppModals } from './components/layout/AppModals';
 import { StartScreen } from './features/start/StartScreen';
@@ -91,6 +91,7 @@ export const App: React.FC = () => {
         latestVersion={updater.latestVersion} error={updater.error}
         onStart={updater.startDownload} onDismiss={updater.dismissModal}
       />
+      <GlobalDialogHost />
     </div>
   );
 };

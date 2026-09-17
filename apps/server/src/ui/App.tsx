@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TitleBar, applyThemeCustomization, serverConfig, bakedWhitelabelConfig, socketClient } from '@cbt/shared';
+import { TitleBar, applyThemeCustomization, serverConfig, bakedWhitelabelConfig, socketClient, GlobalDialogHost } from '@cbt/shared';
 import { ServerSidebar, ServerTab } from './ServerSidebar';
 import { ServerOverviewTab } from './ServerOverviewTab';
 import { ServerDevicesTab } from './ServerDevicesTab';
@@ -18,8 +18,7 @@ export const App: React.FC = () => {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-  const [branding, setBranding] = useState<any>(null);
+  const [isPending, setIsPending] = useState(false); const [branding, setBranding] = useState<any>(null);
 
   useEffect(() => {
     const api = (window as any).serverApi;
@@ -92,6 +91,7 @@ export const App: React.FC = () => {
         </main>
       </div>
       <CloseWarningModal isOpen={isWarningOpen} onClose={() => setIsWarningOpen(false)} onConfirm={handleExit} />
+      <GlobalDialogHost />
     </div>
   );
 };
