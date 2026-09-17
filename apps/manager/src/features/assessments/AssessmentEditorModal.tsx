@@ -1,5 +1,5 @@
 import React from 'react';
-import { FloppyDisk, ListNumbers, Gear, ArrowCounterClockwise, ArrowClockwise } from '@cbt/shared';
+import { FloppyDisk, ListNumbers, Gear, ArrowCounterClockwise, ArrowClockwise, SubjectInput } from '@cbt/shared';
 import { Assessment, Question, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
 import { QuestionsListTab } from './QuestionsListTab';
 import { AssessmentSettingsTab } from './AssessmentSettingsTab';
@@ -75,13 +75,9 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
             <Button type="button" variant={activeTab === 'questions' ? 'primary' : 'outline'} size="sm" icon={<ListNumbers size={18} />} onClick={() => setActiveTab('questions')}>Questions ({questions.length})</Button>
             <Button type="button" variant={activeTab === 'settings' ? 'primary' : 'outline'} size="sm" icon={<Gear size={18} />} onClick={() => setActiveTab('settings')}>Settings & Availability</Button>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 260 }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text-muted)' }}>Subject:</span>
-            <input
-              type="text" value={subject} onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Mathematics, English..."
-              style={{ padding: '5px 10px', fontSize: '0.9rem', fontWeight: 600, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', minWidth: 200 }}
-            />
+            <SubjectInput value={subject} onChangeValue={setSubject} style={{ padding: '5px 10px', minWidth: 200 }} />
           </div>
         </div>
         {activeTab === 'questions' ? (

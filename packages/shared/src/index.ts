@@ -10,3 +10,4 @@ export * from './utils/idempotency.js';
 export * from './utils/version.js';
 export * from './utils/image-utils.js';
 export * from './whitelabel-data.js';
+export * from './data/subjects.js';

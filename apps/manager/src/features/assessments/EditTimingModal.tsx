@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, TextInput, NumberInput, SelectDropdown, AssessmentType } from '@cbt/shared';
+import { Modal, Button, TextInput, NumberInput, SelectDropdown, AssessmentType, SubjectInput } from '@cbt/shared';
 
 interface Props {
   isOpen: boolean;
@@ -42,7 +42,7 @@ export const EditTimingModal: React.FC<Props> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Assessment Details & Timing" maxWidth={500}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <TextInput label="Subject Name" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+        <SubjectInput label="Subject Name" value={subject} onChangeValue={setSubject} required />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <TextInput label="Academic Session" value={session} onChange={(e) => setSession(e.target.value)} placeholder="e.g. 2025/2026" />
           <SelectDropdown

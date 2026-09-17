@@ -1,6 +1,6 @@
 import React from 'react';
 import { MagnifyingGlass } from '@cbt/shared';
-import { EDUCATION_LEVELS, DEPARTMENTS, Card, TextInput, SelectDropdown } from '@cbt/shared';
+import { EDUCATION_LEVELS, DEPARTMENTS, Card, SubjectInput, SelectDropdown } from '@cbt/shared';
 
 interface AssessmentFiltersBarProps {
   searchTerm: string;
@@ -41,10 +41,10 @@ export const AssessmentFiltersBar: React.FC<AssessmentFiltersBarProps> = ({
   return (
     <Card style={{ padding: '14px 18px' }}>
       <div className="filters-grid">
-        <TextInput
+        <SubjectInput
           placeholder="Search by assessment or subject..."
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChangeValue={onSearchChange}
           icon={<MagnifyingGlass size={18} />}
         />
         <SelectDropdown value={sessionFilter} onChange={(val) => onSessionChange(val)} options={sessionOptions} />
