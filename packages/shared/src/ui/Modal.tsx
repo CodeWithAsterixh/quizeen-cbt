@@ -9,6 +9,7 @@ export interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxWidth?: number;
+  minHeight?: number;
   fullScreen?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   footer,
   maxWidth,
+  minHeight,
   fullScreen = false,
 }) => {
   if (!isOpen) return null;
@@ -28,7 +30,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className={`cbt-modal-backdrop ${fullScreen ? 'fullscreen' : ''}`} role="dialog" aria-modal="true" onClick={onClose}>
       <div
         className={`cbt-modal-dialog ${fullScreen ? 'fullscreen' : ''}`}
-        style={!fullScreen && maxWidth ? { maxWidth } : undefined}
+        style={!fullScreen ? { maxWidth, minHeight } : undefined}
         onClick={(e) => e.stopPropagation()}
       >
         <header className="cbt-modal-header">

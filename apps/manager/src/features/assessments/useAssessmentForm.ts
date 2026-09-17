@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Assessment, Question, EducationLevel, Department, AssessmentType } from '@cbt/shared';
+import { Assessment, Question, EducationLevel, Department, AssessmentType, getDefaultAcademicSession } from '@cbt/shared';
 
 const defaultQ: Question = {
   id: 'q_default', prompt: 'Sample Question 1', type: 'multiple_choice',
@@ -11,7 +11,7 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
   const [activeTab, setActiveTab] = useState<'questions' | 'settings'>(initialTab);
   const [editingQIndex, setEditingQIndex] = useState<number | null>(null);
   const [subject, setSubject] = useState(initialExam?.subject ?? 'Mathematics');
-  const [session, setSession] = useState(initialExam?.session ?? '2024/2025');
+  const [session, setSession] = useState(initialExam?.session ?? getDefaultAcademicSession());
   const [assessmentType, setAssessmentType] = useState<AssessmentType>(initialExam?.assessmentType ?? 'test');
   const [isAvailable, setIsAvailable] = useState(initialExam?.isAvailable ?? true);
   const [availableFrom, setAvailableFrom] = useState(initialExam?.availableFrom ?? '');
@@ -32,7 +32,7 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
       setActiveTab(initialExam ? initialTab : 'settings');
       setEditingQIndex(null);
       setSubject(initialExam?.subject ?? 'Mathematics');
-      setSession(initialExam?.session ?? '2024/2025');
+      setSession(initialExam?.session ?? getDefaultAcademicSession());
       setAssessmentType(initialExam?.assessmentType ?? 'test');
       setIsAvailable(initialExam?.isAvailable ?? true);
       setAvailableFrom(initialExam?.availableFrom ?? '');

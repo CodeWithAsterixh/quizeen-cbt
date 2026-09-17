@@ -47,18 +47,16 @@ export const App: React.FC = () => {
   }
 
   const branding = licenseState?.license?.branding;
-  const rawLogo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const rawLogo = branding?.logoUrl || branding?.appIconUrl || bakedWhitelabelConfig?.logo || bakedWhitelabelConfig?.appIconUrl;
   const appLogo = rawLogo && (rawLogo.startsWith('data:image/') || rawLogo.startsWith('/') || rawLogo.startsWith('http')) ? rawLogo : '/icon.png';
+  const portalTitle = bakedWhitelabelConfig?.studentName || (branding?.schoolName ? `${branding.schoolName} Student Portal` : 'Student Portal');
 
   return (
     <div className="app-shell">
-      <TitleBar
-        title={bakedWhitelabelConfig?.studentName || (branding?.schoolName ? `${branding.schoolName} Student Portal` : 'Student Portal')}
-        iconUrl={appLogo}
-      />
+      <TitleBar title={portalTitle} iconUrl={appLogo} />
       <main className="app-content">
         {view === 'start' && (
-          <StartScreen onStartExamClick={() => { setSession(null); setModalState(s => ({ ...s, profile: true })); }} />
+          <StartScreen portalTitle={portalTitle} logoUrl={appLogo} onStartExamClick={() => { setSession(null); setModalState(s => ({ ...s, profile: true })); }} />
         )}
         {view === 'catalog' && session && (
           <AssessmentCatalog

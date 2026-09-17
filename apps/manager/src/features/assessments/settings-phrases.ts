@@ -1,3 +1,5 @@
+import { ASSESSMENT_TYPES } from '@cbt/shared';
+
 export function formatDateTimeNice(iso?: string): string {
   if (!iso) return '';
   const d = new Date(iso);
@@ -23,7 +25,8 @@ export function getAudiencePhrase(classes: string[], level?: string, department?
 }
 
 export function getTimingPhrase(durationMinutes: number, passingScore: number, assessmentType?: string): string {
-  const typeStr = assessmentType ? assessmentType.toUpperCase() : 'TEST';
+  const match = ASSESSMENT_TYPES.find((t) => t.id === assessmentType);
+  const typeStr = match ? match.label : (assessmentType ? assessmentType.replace(/_/g, ' ') : 'Test');
   return `${durationMinutes} mins | Pass score ${passingScore}% | Type: ${typeStr}`;
 }
 

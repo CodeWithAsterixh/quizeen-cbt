@@ -1,6 +1,6 @@
 import React from 'react';
 import { MagnifyingGlass } from '@cbt/shared';
-import { EDUCATION_LEVELS, DEPARTMENTS, Card, SubjectInput, SelectDropdown } from '@cbt/shared';
+import { EDUCATION_LEVELS, DEPARTMENTS, Card, SubjectInput, SelectDropdown, ASSESSMENT_TYPES } from '@cbt/shared';
 
 interface AssessmentFiltersBarProps {
   searchTerm: string;
@@ -25,9 +25,8 @@ export const AssessmentFiltersBar: React.FC<AssessmentFiltersBarProps> = ({
     ...availableSessions.map((s) => ({ value: s, label: s })),
   ];
   const typeOptions = [
-    { value: 'all', label: 'All Types (Tests & Exams)' },
-    { value: 'test', label: 'Tests Only' },
-    { value: 'exam', label: 'Exams Only' },
+    { value: 'all', label: 'All Assessment Types' },
+    ...ASSESSMENT_TYPES.map((t) => ({ value: t.id, label: t.label })),
   ];
   const levelOptions = [
     { value: 'all', label: 'All School Levels' },

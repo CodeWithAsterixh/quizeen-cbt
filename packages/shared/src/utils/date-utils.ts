@@ -27,3 +27,10 @@ export function formatLocalDateTime(date: Date | string): string {
   if (isNaN(d.getTime())) return '';
   return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
 }
+
+export function getDefaultAcademicSession(date: Date = new Date()): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  return month >= 8 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+}

@@ -8,6 +8,7 @@ import {
   DEPARTMENTS,
   Card,
   TextInput,
+  AcademicSessionInput,
   SelectDropdown,
   Button,
 } from '@cbt/shared';
@@ -39,7 +40,7 @@ export const AssessmentMetaFields: React.FC<AssessmentMetaFieldsProps> = ({
   return (
     <Card accent="blue" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
       <TextInput label="Subject" placeholder="e.g. Mathematics" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-      <TextInput label="Academic Session" placeholder="e.g. 2024/2025" value={session} onChange={(e) => setSession(e.target.value)} required />
+      <AcademicSessionInput label="Academic Session" value={session} onChange={setSession} required />
       <div>
         <label className="cbt-input-label" style={{ marginBottom: 6, display: 'block' }}>Assessment Type</label>
         <div style={{ display: 'flex', gap: 8 }}>
