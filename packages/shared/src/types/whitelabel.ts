@@ -12,4 +12,7 @@ export interface WhitelabelConfig {
   accentColor?: string;
   iconPath?: string;
   appIconUrl?: string;
+  version?: string;
+  isDryRun?: boolean;
+  [key: string]: any;
 }
