@@ -1,4 +1,4 @@
-import { Button, Card, Assessment, Exam, StudentSession, Submission, isAssessmentAvailable } from '@cbt/shared';
+import { Button, Card, Assessment, Exam, StudentSession, Submission, isAssessmentAvailable, PoweredByQueez } from '@cbt/shared';
 import { Tray } from '@cbt/shared';
 import React, { useState } from 'react';
 import { AssessmentCard } from './AssessmentCard';
@@ -75,6 +75,9 @@ export const AssessmentCatalog: React.FC<AssessmentCatalogProps> = ({
           ))}
         </section>
       )}
+      <footer style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
+        <PoweredByQueez size={14} style={{ opacity: 0.75 }} />
+      </footer>
     </main>
   );
 };

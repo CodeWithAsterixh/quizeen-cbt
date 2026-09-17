@@ -1,6 +1,5 @@
 import React from 'react';
-import { CheckCircle, ArrowRight } from '@cbt/shared';
-import { Submission, Card, Button } from '@cbt/shared';
+import { CheckCircle, ArrowRight, Submission, Card, Button, PoweredByQueez } from '@cbt/shared';
 import { CompletionReceipt } from './CompletionReceipt';
 
 interface AssessmentCompletedScreenProps {
@@ -54,6 +53,7 @@ export const AssessmentCompletedScreen: React.FC<AssessmentCompletedScreenProps>
           Exit
         </Button>
       </Card>
+      <PoweredByQueez style={{ marginTop: '1.25rem', opacity: 0.8 }} size={16} />
     </main>
   );
 };

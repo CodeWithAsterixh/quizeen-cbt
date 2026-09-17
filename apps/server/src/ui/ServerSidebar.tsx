@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, HardDrives, ChartBar, Pulse, Broadcast, LockKey, bakedWhitelabelConfig } from '@cbt/shared';
+import { Badge, HardDrives, ChartBar, Pulse, Broadcast, LockKey, bakedWhitelabelConfig, PoweredByQueez } from '@cbt/shared';
 
 export type ServerTab = 'overview' | 'devices' | 'license' | 'graph' | 'requests';
 
@@ -60,11 +60,12 @@ export const ServerSidebar: React.FC<Props> = ({
         })}
       </nav>
 
-      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ padding: '12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>
           <div>{isRunning ? 'Listening on' : 'Server is'}</div>
           <strong style={{ color: 'var(--color-text)' }}>{isRunning ? `Port ${port}` : 'Stopped'}</strong>
         </div>
+        {!bakedWhitelabelConfig?.isWhitelabel && <PoweredByQueez size={14} />}
       </div>
     </aside>
   );

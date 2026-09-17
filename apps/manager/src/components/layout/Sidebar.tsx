@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Gauge, BookOpen, Users, Archive, ClipboardText, ChartBar, Gear,
 } from '@cbt/shared';
-import { Badge, Button } from '@cbt/shared';
+import { Badge, Button, PoweredByQueez, bakedWhitelabelConfig } from '@cbt/shared';
 
 export type ManagerTab = 'dashboard' | 'exams' | 'students' | 'compiler' | 'grading' | 'analytics' | 'settings';
 
@@ -66,6 +66,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </nav>
+      {!bakedWhitelabelConfig?.isWhitelabel && (
+        <div style={{ padding: '12px 4px 2px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'center' }}>
+          <PoweredByQueez size={14} />
+        </div>
+      )}
     </aside>
   );
 };

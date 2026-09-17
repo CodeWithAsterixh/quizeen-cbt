@@ -1,4 +1,4 @@
-import { Button, Card, GraduationCap, useAppLicense, bakedWhitelabelConfig } from "@cbt/shared";
+import { Button, Card, GraduationCap, useAppLicense, bakedWhitelabelConfig, PoweredByQueez } from "@cbt/shared";
 import React, { useState, useEffect } from "react";
 
 interface StartScreenProps {
@@ -75,9 +75,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick, logo
           Enter Student ID
         </Button>
       </Card>
-      <div style={{ marginTop: '1.25rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', opacity: 0.75 }}>
-        Powered by Queez CBT
-      </div>
+      <PoweredByQueez style={{ marginTop: '1.25rem', opacity: 0.8 }} size={16} />
     </section>
   );
 };

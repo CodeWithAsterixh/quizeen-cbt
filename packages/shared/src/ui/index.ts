@@ -22,4 +22,5 @@ export * from './equation-parser.js';
 export * from './editor-shortcuts.js';
 export * from './SubjectInput.js';
 export * from './AcademicSessionInput.js';
+export * from './PoweredByQueez.js';
 

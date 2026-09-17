@@ -2,6 +2,7 @@ import { WarningCircle as WarningIcon } from './icons.js';
 import React from 'react';
 import { LicenseState } from '../types/license.js';
 import { LockoutServerPicker } from './LockoutServerPicker.js';
+import { PoweredByQueez } from './PoweredByQueez.js';
 
 interface Props { licenseState: LicenseState | null; onRetry: () => void; }
 
@@ -55,8 +56,8 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
           </button>
         </div>
         <LockoutServerPicker onRetry={onRetry} />
-        <div style={{ marginTop: 14, fontSize: 11, color: 'var(--color-text-muted, #4d7298)', opacity: 0.75 }}>
-          Powered by Queez CBT
+        <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+          <PoweredByQueez size={14} />
         </div>
       </div>
     </div>
