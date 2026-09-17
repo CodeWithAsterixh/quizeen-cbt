@@ -101,84 +101,249 @@ function makeMultiResolutionIco(img) {
   return Buffer.concat(buffers);
 }
 
-function saveAppIcons(nativeImg) {
+const ROLE_SVGS = {
+  server: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="6" rx="2"></rect><rect x="2" y="10" width="20" height="6" rx="2"></rect><rect x="2" y="18" width="20" height="4" rx="2"></rect><circle cx="6" cy="5" r="1" fill="#4ade80"></circle><circle cx="6" cy="13" r="1" fill="#4ade80"></circle></svg>',
+  manager: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
+  student: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"></path></svg>',
+  uninstall: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
+  installer: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+};
+
+function toDataUri(input) {
+  if (!input || typeof input !== 'string') return '';
+  const trimmed = input.trim();
+  if (trimmed.startsWith('data:image/')) return trimmed;
+  if (fs.existsSync(trimmed)) {
+    try {
+      const ext = path.extname(trimmed).toLowerCase();
+      let mime = 'image/png';
+      if (ext === '.jpg' || ext === '.jpeg') mime = 'image/jpeg';
+      else if (ext === '.svg') mime = 'image/svg+xml';
+      else if (ext === '.webp') mime = 'image/webp';
+      const buf = fs.readFileSync(trimmed);
+      return `data:${mime};base64,${buf.toString('base64')}`;
+    } catch (e) {
+      console.error('Failed to read logo file:', e.message);
+      return '';
+    }
+  }
+  return '';
+}
+
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const getArg = (prefix) => {
+    const item = args.find((a) => a.startsWith(`--${prefix}=`));
+    return item ? item.split('=')[1].replace(/^"|"$/g, '') : '';
+  };
+  const root = path.resolve(__dirname, '..');
+  let baked = {};
+  try {
+    const bakedPath = path.join(root, 'packages/shared/src/whitelabel-data.ts');
+    if (fs.existsSync(bakedPath)) {
+      const match = fs.readFileSync(bakedPath, 'utf8').match(/bakedWhitelabelConfig:\s*WhitelabelConfig\s*=\s*(\{[\s\S]*?\});/);
+      if (match) baked = JSON.parse(match[1]);
+    }
+  } catch {}
+
+  const configPath = getArg('config');
+  if (configPath && fs.existsSync(configPath)) {
+    try {
+      const fromCfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      baked = { ...baked, ...fromCfg };
+    } catch {}
+  }
+
+  const rawLogo = getArg('logo') || baked.iconPath || baked.logo || baked.appIconUrl || '';
+  const logo = toDataUri(rawLogo);
+  const primary = getArg('primary') || baked.primaryColor || '#059669';
+  const accent = getArg('accent') || baked.accentColor || '#0d9488';
+  const school = getArg('school') || baked.schoolName || '';
+  const short = getArg('short') || baked.shortName || '';
+  const badges = baked.badges || {};
+  const badgeColors = baked.badgeColors || {};
+
+  return { logo, primary, accent, school, short, badges, badgeColors };
+}
+
+function buildHtml(role, cfg) {
+  const primary = cfg.primary || '#059669';
+  const accent = cfg.accent || '#0d9488';
+
+  const roleDefaults = {
+    server: { label: 'SRV', bg: primary },
+    manager: { label: 'MGR', bg: primary },
+    student: { label: 'STU', bg: accent },
+    uninstall: { label: 'UNINST', bg: '#dc2626' },
+    installer: { label: 'CBT', bg: primary },
+  };
+
+  const label = (cfg.badges && cfg.badges[role]) || roleDefaults[role].label;
+  const bg = (cfg.badgeColors && cfg.badgeColors[role]) || roleDefaults[role].bg;
+  const svg = ROLE_SVGS[role] || ROLE_SVGS.installer;
+
+  let center = '';
+  if (cfg.logo) {
+    center = `<img class="logo-img" src="${cfg.logo}" />`;
+  } else if (cfg.short || cfg.school) {
+    const text = (cfg.short || cfg.school.split(' ')[0] || 'CBT').slice(0, 4).toUpperCase();
+    center = `<div class="emblem" style="background: linear-gradient(135deg, ${primary}, ${accent});">
+      <span class="emblem-text">${text}</span>
+      <span class="emblem-sub">CBT</span>
+    </div>`;
+  } else {
+    center = `<div class="emblem" style="background: linear-gradient(135deg, ${primary}, ${accent});">${SVG_CONTENT}</div>`;
+  }
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 512px; height: 512px; overflow: hidden; background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .icon-stage {
+      position: relative;
+      width: 512px;
+      height: 512px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+    .logo-img {
+      width: 470px;
+      height: 470px;
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
+    }
+    .emblem {
+      width: 440px;
+      height: 440px;
+      border-radius: 96px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .emblem-text {
+      font-size: 110px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .emblem-sub {
+      font-size: 28px;
+      font-weight: 700;
+      opacity: 0.85;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+    .badge {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: 136px;
+      height: 136px;
+      border-radius: 50%;
+      background: ${bg};
+      border: 7px solid #ffffff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .badge-label {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin-top: 1px;
+      text-transform: uppercase;
+    }
+  </style></head><body>
+    <div class="icon-stage">
+      ${center}
+      <div class="badge">
+        ${svg}
+        <span class="badge-label">${label}</span>
+      </div>
+    </div>
+  </body></html>`;
+}
+
+function saveRoleIcons(role, nativeImg) {
+  const root = path.resolve(__dirname, '..');
   const png256 = nativeImg.resize({ width: 256, height: 256, quality: 'best' }).toPNG();
   const icoBuf = makeMultiResolutionIco(nativeImg);
-  const root = path.resolve(__dirname, '..');
-  const targets = [
-    path.join(root, 'apps', 'manager', 'resources'),
-    path.join(root, 'apps', 'student', 'resources'),
-    path.join(root, 'apps', 'server', 'resources'),
-  ];
 
-  targets.forEach((resDir) => {
-    fs.mkdirSync(resDir, { recursive: true });
-    fs.writeFileSync(path.join(resDir, 'icon.png'), png256);
-    fs.writeFileSync(path.join(resDir, 'icon.ico'), icoBuf);
-    fs.writeFileSync(path.join(resDir, 'icon.svg'), SVG_CONTENT, 'utf8');
-    console.log(`Generated icons in ${resDir}`);
-  });
+  const writeIco = (dir, name) => {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, `${name}.ico`), icoBuf);
+    fs.writeFileSync(path.join(dir, `${name}.png`), png256);
+  };
 
-  const publicDirs = [
-    path.join(root, 'apps', 'manager', 'public'),
-    path.join(root, 'apps', 'student', 'public'),
-    path.join(root, 'apps', 'server', 'public'),
-  ];
-  publicDirs.forEach((pDir) => {
-    fs.mkdirSync(pDir, { recursive: true });
-    fs.writeFileSync(path.join(pDir, 'icon.png'), png256);
-  });
-  console.log('App icons successfully generated.');
+  if (role === 'server' || role === 'manager' || role === 'student') {
+    writeIco(path.join(root, 'apps', role, 'resources'), 'icon');
+    const pub = path.join(root, 'apps', role, 'public');
+    fs.mkdirSync(pub, { recursive: true });
+    fs.writeFileSync(path.join(pub, 'icon.png'), png256);
+    console.log(`Generated role icon for ${role}`);
+  } else if (role === 'uninstall') {
+    writeIco(path.join(root, 'installer', 'resources'), 'uninstall');
+    console.log(`Generated role icon for uninstall`);
+  } else if (role === 'installer') {
+    writeIco(path.join(root, 'installer', 'resources'), 'installer');
+    console.log(`Generated role icon for installer`);
+  }
 }
 
 if (process.versions.electron) {
   const { app, BrowserWindow } = require('electron');
   app.whenReady().then(async () => {
+    const cfg = parseArgs();
     const win = new BrowserWindow({
       width: 512,
       height: 512,
       show: false,
       transparent: true,
       frame: false,
-      webPreferences: { offscreen: true },
+      webPreferences: {
+        offscreen: true,
+        webSecurity: false,
+        allowRunningInsecureContent: true,
+        images: true,
+      },
     });
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              width: 512px;
-              height: 512px;
-              overflow: hidden;
-              background: transparent;
-            }
-            svg {
-              width: 512px;
-              height: 512px;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          ${SVG_CONTENT}
-        </body>
-      </html>
-    `;
-
-    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
-    await new Promise((r) => setTimeout(r, 800));
-
-    const image = await win.webContents.capturePage({ x: 0, y: 0, width: 512, height: 512 });
-    saveAppIcons(image);
+    const roles = ['server', 'manager', 'student', 'uninstall', 'installer'];
+    for (const role of roles) {
+      const html = buildHtml(role, cfg);
+      await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+      await win.webContents.executeJavaScript(`
+        new Promise((resolve) => {
+          const img = document.querySelector('img');
+          if (!img) return resolve(true);
+          if (img.complete && img.naturalWidth > 0) return resolve(true);
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          setTimeout(() => resolve(true), 1200);
+        })
+      `);
+      await new Promise((r) => setTimeout(r, 400));
+      const image = await win.webContents.capturePage({ x: 0, y: 0, width: 512, height: 512 });
+      saveRoleIcons(role, image);
+    }
+    console.log('App and installer icons successfully generated.');
     app.quit();
   });
 } else {
   const electronBin = require('electron');
-  const res = spawnSync(electronBin, [__filename], { stdio: 'inherit' });
+  const res = spawnSync(electronBin, [__filename, ...process.argv.slice(2)], { stdio: 'inherit' });
   if (res.status !== 0) {
     console.error('Failed to generate icons with Electron');
     process.exit(res.status || 1);

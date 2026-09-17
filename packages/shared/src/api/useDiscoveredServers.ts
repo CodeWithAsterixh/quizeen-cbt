@@ -66,11 +66,15 @@ export function useDiscoveredServers() {
   // Auto-connect: if exactly 1 server is discovered and current URL is any local loopback,
   // switch to the discovered LAN server.
   useEffect(() => {
-    if (servers.length !== 1) return;
+    if (!servers.length) return;
     const current = serverConfig.getUrl();
-    if (isLoopback(current)) {
-      serverConfig.setUrl(servers[0].url);
-    }
+    serverConfig.testConnection().then((res) => {
+      if (!res.ok && servers[0]?.url) {
+        serverConfig.setUrl(servers[0].url);
+      } else if (isLoopback(current) && servers[0]?.url && servers[0].url !== current) {
+        serverConfig.setUrl(servers[0].url);
+      }
+    });
   }, [servers]);
 
   const connectTo = useCallback((url: string) => {

@@ -25,7 +25,10 @@ Var Relaunched
   !define VERSION "2.0.6"
 !endif
 !ifndef ICON_PATH
-  !define ICON_PATH "..\apps\manager\resources\icon.ico"
+  !define ICON_PATH "..\installer\resources\installer.ico"
+!endif
+!ifndef UNICON_PATH
+  !define UNICON_PATH "..\installer\resources\uninstall.ico"
 !endif
 !ifndef LICENSE_PATH
   !define LICENSE_PATH "LICENSE.txt"
@@ -67,7 +70,7 @@ BrandingText "${BRANDING_TEXT}"
 
 ; Installer visuals
 !define MUI_ICON "${ICON_PATH}"
-!define MUI_UNICON "${ICON_PATH}"
+!define MUI_UNICON "${UNICON_PATH}"
 !define MUI_ABORTWARNING
 
 ; ------------------------------------------------------------------------------
@@ -185,7 +188,7 @@ Section -Post
       CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
       CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
     ${EndIf}
-    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk" "$INSTDIR\uninstall.exe"
+    CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ${If} $InstallScope == "all"
@@ -213,6 +216,7 @@ Section -Post
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "all"
   ${Else}
     CreateDirectory "$APPDATA\${SUITE_NAME}\data"
@@ -231,6 +235,7 @@ Section -Post
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "current"
   ${EndIf}
 
@@ -366,15 +371,38 @@ FunctionEnd
 Function un.onInit
   ReadRegStr $0 HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope"
   ${If} $0 == "all"
+    StrCpy $InstallScope "all"
     SetShellVarContext all
   ${Else}
     ReadRegStr $0 HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope"
     ${If} $0 == "current"
+      StrCpy $InstallScope "current"
       SetShellVarContext current
     ${Else}
+      StrCpy $InstallScope "all"
       SetShellVarContext all
     ${EndIf}
   ${EndIf}
+
+  ; Check if elevated administrator permissions are required
+  ${If} $InstallScope == "all"
+    UserInfo::GetAccountType
+    Pop $1
+    ${If} $1 != "Admin"
+      ClearErrors
+      ${If} ${FileExists} "$INSTDIR\uninstall.exe"
+        ExecShell "runas" "$INSTDIR\uninstall.exe"
+      ${Else}
+        ExecShell "runas" "$EXEPATH"
+      ${EndIf}
+      Quit
+    ${EndIf}
+  ${EndIf}
+
+  ; Terminate running suite instances before removal starts
+  ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'
 FunctionEnd
 
 ; Launch helper
@@ -394,8 +422,23 @@ FunctionEnd
 
 Section "Uninstall"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
+  ${If} $STARTMENU_FOLDER == ""
+    ReadRegStr $STARTMENU_FOLDER HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder"
+  ${EndIf}
+  ${If} $STARTMENU_FOLDER == ""
+    ReadRegStr $STARTMENU_FOLDER HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder"
+  ${EndIf}
+  ${If} $STARTMENU_FOLDER == ""
+    StrCpy $STARTMENU_FOLDER "${SUITE_NAME}"
+  ${EndIf}
 
-  ; Delete shortcuts in active context
+  ; Terminate running suite instances to release file locks
+  ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
+  ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'
+
+  ; Delete shortcuts in all users context
+  SetShellVarContext all
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk"
@@ -404,7 +447,11 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
-  RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
+  RMDir /r "$SMPROGRAMS\$STARTMENU_FOLDER"
+  ${If} $STARTMENU_FOLDER != "${SUITE_NAME}"
+    RMDir /r "$SMPROGRAMS\${SUITE_NAME}"
+  ${EndIf}
+  RMDir /r "$SMPROGRAMS\Queez CBT Suite"
 
   Delete "$DESKTOP\${SERVER_NAME}.lnk"
   Delete "$DESKTOP\${MANAGER_NAME}.lnk"
@@ -413,7 +460,7 @@ Section "Uninstall"
   Delete "$DESKTOP\Queez Assessment Manager.lnk"
   Delete "$DESKTOP\Queez Student Portal.lnk"
 
-  ; Clean current context as well to prevent stray shortcuts
+  ; Clean current user context as well to prevent stray shortcuts
   SetShellVarContext current
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk"
@@ -423,7 +470,11 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Assessment Manager.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Queez Student Portal.lnk"
   Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall Queez CBT Suite.lnk"
-  RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
+  RMDir /r "$SMPROGRAMS\$STARTMENU_FOLDER"
+  ${If} $STARTMENU_FOLDER != "${SUITE_NAME}"
+    RMDir /r "$SMPROGRAMS\${SUITE_NAME}"
+  ${EndIf}
+  RMDir /r "$SMPROGRAMS\Queez CBT Suite"
 
   Delete "$DESKTOP\${SERVER_NAME}.lnk"
   Delete "$DESKTOP\${MANAGER_NAME}.lnk"
@@ -432,11 +483,23 @@ Section "Uninstall"
   Delete "$DESKTOP\Queez Assessment Manager.lnk"
   Delete "$DESKTOP\Queez Student Portal.lnk"
 
+  ; Clean firewall rules
+  ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Server"'
+  ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Discovery"'
+
+  ; Remove application files and directories
   RMDir /r "$INSTDIR\Server"
   RMDir /r "$INSTDIR\Manager"
   RMDir /r "$INSTDIR\Student"
+  RMDir /r "$INSTDIR\data"
   Delete "$INSTDIR\uninstall.exe"
-  RMDir "$INSTDIR"
+  Delete "$INSTDIR\*.*"
+  ${If} $INSTDIR != ""
+  ${AndIf} $INSTDIR != "$PROGRAMFILES"
+  ${AndIf} $INSTDIR != "$PROGRAMFILES64"
+  ${AndIf} $INSTDIR != "$LOCALAPPDATA"
+    RMDir /r "$INSTDIR"
+  ${EndIf}
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}"
   DeleteRegKey HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}"

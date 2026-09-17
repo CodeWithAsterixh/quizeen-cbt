@@ -1,14 +1,16 @@
-import { Button, Card, GraduationCap, useAppLicense } from "@cbt/shared";
+import { Button, Card, GraduationCap, useAppLicense, bakedWhitelabelConfig } from "@cbt/shared";
 import React from "react";
 
 interface StartScreenProps {
   onStartExamClick: () => void;
 }
 
-export const StartScreen: React.FC<StartScreenProps> = ({
-  onStartExamClick,
-}) => {
-  const { licenseState} = useAppLicense();
+export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick }) => {
+  const { licenseState } = useAppLicense();
+  const branding = licenseState?.license?.branding;
+  const logo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const appTitle = branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.studentName || bakedWhitelabelConfig?.suiteName || 'CBT Portal';
+
   return (
     <section
       aria-label="Student Welcome Screen"
@@ -37,18 +39,24 @@ export const StartScreen: React.FC<StartScreenProps> = ({
       >
         <div
           style={{
-            width: 72,
-            height: 72,
-            borderRadius: "var(--radius-full)",
-            backgroundColor: "var(--color-primary-light)",
+            width: 80,
+            height: 80,
+            borderRadius: "var(--radius-lg, 12px)",
+            backgroundColor: "#ffffff",
             color: "var(--color-primary)",
             border: "1px solid var(--color-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >
-          <GraduationCap size={40} weight="fill" />
+          {logo ? (
+            <img src={logo} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 6 }} />
+          ) : (
+            <GraduationCap size={44} weight="fill" />
+          )}
         </div>
 
         <div>
@@ -60,7 +68,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               color: "var(--color-text)",
             }}
           >
-            Welcome to {licenseState?.license?.branding.appName}
+            Welcome to {appTitle}
           </h1>
           <p
             style={{

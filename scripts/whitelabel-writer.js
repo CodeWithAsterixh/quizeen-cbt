@@ -19,6 +19,9 @@ function sanitizeConfig(config) {
     accentColor: config.accentColor || undefined,
     iconPath: config.iconPath || undefined,
     appIconUrl: config.appIconUrl || undefined,
+    logo: config.logo || undefined,
+    badges: config.badges || undefined,
+    badgeColors: config.badgeColors || undefined,
     version: config.version || undefined,
   };
 }

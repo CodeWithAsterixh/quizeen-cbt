@@ -49,8 +49,8 @@ async function promptWhitelabelConfig() {
     const studentName = await askQuestion(rl, 'Student Portal Name', `${schoolName} Student Portal`);
     const managerName = await askQuestion(rl, 'Manager Console Name', `${schoolName} Assessment Manager`);
     const serverName = await askQuestion(rl, 'Server Application Name', `${schoolName} Local Server`);
-    const primaryColor = await askQuestion(rl, 'Primary Brand Color (hex)', '#1e40af');
-    const accentColor = await askQuestion(rl, 'Secondary Accent Color (hex)', '#f59e0b');
+    const primaryColor = await askQuestion(rl, 'Primary Brand Color (hex)', '#059669');
+    const accentColor = await askQuestion(rl, 'Secondary Accent Color (hex)', '#0d9488');
     const noLicenseAns = await askQuestion(rl, 'Build license-free (no key activation required)? (Y/n)', 'Y');
     const unlicensedMode = args.includes('--no-license') || noLicenseAns.toLowerCase() !== 'n';
     const iconPath = await askQuestion(rl, 'Custom .ico path (leave blank for standard icon)', '');

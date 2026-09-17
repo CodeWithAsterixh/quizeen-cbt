@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig } from '@cbt/shared';
+import { Assessment, StudentSession, Submission, useAppLicense, LicenseLockoutScreen, bakedWhitelabelConfig, useDiscoveredServers } from '@cbt/shared';
 import { TitleBar } from './components/layout/TitleBar';
 import { AppModals } from './components/layout/AppModals';
 import { StartScreen } from './features/start/StartScreen';
@@ -13,6 +13,7 @@ import { useStationUpdater } from './features/device/useStationUpdater';
 import { UpdateProgressModal } from './features/device/UpdateProgressModal';
 
 export const App: React.FC = () => {
+  useDiscoveredServers();
   const { assessments, submissions, refresh, saveSubmission } = useStudentAppStore();
   const [session, setSession] = useState<StudentSession | null>(null);
   const [activeAssessment, setActiveAssessment] = useState<Assessment | null>(null);

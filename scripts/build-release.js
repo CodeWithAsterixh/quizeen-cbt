@@ -6,6 +6,7 @@ const { runNsisWithProgress } = require('./run-nsis.js');
 const { findMakeNsis } = require('./find-makensis.js');
 const { promptWhitelabelConfig } = require('./prompt-whitelabel.js');
 const { bakeWhitelabel, clearBakedWhitelabel } = require('./whitelabel-writer.js');
+const { backupOriginalIcons, cleanupWhitelabelBuild } = require('./clean-whitelabel.js');
 
 const root = path.resolve(__dirname, '..');
 
@@ -37,12 +38,21 @@ async function main() {
     if (whitelabel.isWhitelabel) {
       console.log('\n--- Baking Whitelabel Configuration ---');
       bakeWhitelabel(whitelabel);
+      backupOriginalIcons(root);
     } else {
       clearBakedWhitelabel();
     }
 
     console.log('\n--- Step 1: Generating Icons ---');
-    run('node scripts/generate-icons.js');
+    let iconCmd = 'node scripts/generate-icons.js';
+    if (whitelabel.isWhitelabel) {
+      if (whitelabel.iconPath) iconCmd += ` --logo="${whitelabel.iconPath}"`;
+      if (whitelabel.primaryColor) iconCmd += ` --primary="${whitelabel.primaryColor}"`;
+      if (whitelabel.accentColor) iconCmd += ` --accent="${whitelabel.accentColor}"`;
+      if (whitelabel.schoolName) iconCmd += ` --school="${whitelabel.schoolName}"`;
+      if (whitelabel.shortName) iconCmd += ` --short="${whitelabel.shortName}"`;
+    }
+    run(iconCmd);
 
     console.log('\n--- Step 2: Packaging Server, Manager, and Student in Parallel ---');
     await Promise.all([
@@ -67,7 +77,8 @@ async function main() {
       `/DSERVER_DIR=${path.join(root, 'apps/server/release/win-unpacked')}`,
       `/DMANAGER_DIR=${path.join(root, 'apps/manager/release/win-unpacked')}`,
       `/DSTUDENT_DIR=${path.join(root, 'apps/student/release/win-unpacked')}`,
-      `/DICON_PATH=${whitelabel.iconPath || path.join(root, 'apps/manager/resources/icon.ico')}`,
+      `/DICON_PATH=${path.join(root, 'installer/resources/installer.ico')}`,
+      `/DUNICON_PATH=${path.join(root, 'installer/resources/uninstall.ico')}`,
       `/DLICENSE_PATH=${path.join(root, 'installer/LICENSE.txt')}`,
     ];
 
@@ -82,31 +93,11 @@ async function main() {
     nsisArgs.push(path.join(root, 'installer/suite.nsi'));
     await runNsisWithProgress(makensis, nsisArgs);
 
-    ['apps/server/release', 'apps/manager/release', 'apps/student/release'].forEach(dir => {
-      fs.rmSync(path.join(root, dir), { recursive: true, force: true });
-    });
-
     const sizeMb = (fs.statSync(outInstaller).size / 1024 / 1024).toFixed(1);
-    const manifest = {
-      productName: whitelabel.isWhitelabel ? whitelabel.suiteName : 'Queez CBT Suite',
-      schoolName: whitelabel.schoolName || undefined,
-      whitelabel: whitelabel.isWhitelabel,
-      unlicensedMode: whitelabel.unlicensedMode,
-      version,
-      releaseDate: new Date().toISOString(),
-      installer: path.basename(outInstaller),
-      sizeMb,
-      components: [
-        whitelabel.serverName || 'Queez Local Server',
-        whitelabel.managerName || 'Queez Assessment Manager',
-        whitelabel.studentName || 'Queez Student Portal',
-      ],
-    };
-    fs.writeFileSync(path.join(releaseDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
-
     console.log(`\nInstaller built successfully: ${outInstaller} (${sizeMb} MB)\n`);
   } finally {
     clearBakedWhitelabel();
+    cleanupWhitelabelBuild(root, releaseDir, whitelabel?.iconPath);
   }
 }
 

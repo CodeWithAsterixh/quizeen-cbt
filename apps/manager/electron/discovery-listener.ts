@@ -15,7 +15,8 @@ export function startDiscoveryListener(
         }
       } catch {}
     });
-    socket.bind(4001);
+    socket.on('error', () => {});
+    socket.bind({ port: 4001, exclusive: false });
     return () => {
       try { socket.close(); } catch {}
     };

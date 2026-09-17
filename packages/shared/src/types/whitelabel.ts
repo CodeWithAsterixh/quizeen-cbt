@@ -12,6 +12,9 @@ export interface WhitelabelConfig {
   accentColor?: string;
   iconPath?: string;
   appIconUrl?: string;
+  logo?: string;
+  badges?: { server?: string; manager?: string; student?: string; uninstall?: string; installer?: string };
+  badgeColors?: { server?: string; manager?: string; student?: string; uninstall?: string; installer?: string };
   version?: string;
   isDryRun?: boolean;
   [key: string]: any;

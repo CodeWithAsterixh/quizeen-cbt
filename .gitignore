@@ -11,3 +11,5 @@ build/
 Thumbs.db
 data/
 license-public.pem
+*.tsbuildinfo
+installer/resources/
