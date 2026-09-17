@@ -48,7 +48,10 @@ export const useDeviceHeartbeat = ({
 
     const sendHeartbeat = async () => {
       const payload = buildPayload();
-      socketClient.send('device:heartbeat', payload);
+      if (socketClient.isConnected()) {
+        socketClient.send('device:heartbeat', payload);
+        return;
+      }
       try {
         const res = await deviceApi.reportHeartbeat(payload);
         if (!isCancelled && res.pushUpdate && pushCallbackRef.current) {

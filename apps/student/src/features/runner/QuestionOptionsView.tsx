@@ -7,7 +7,7 @@ interface QuestionOptionsViewProps {
   onSelectAnswer: (val: string) => void;
 }
 
-export const QuestionOptionsView: React.FC<QuestionOptionsViewProps> = ({
+export const QuestionOptionsView = React.memo<QuestionOptionsViewProps>(({
   question,
   currentAnswer,
   onSelectAnswer,
@@ -80,4 +80,4 @@ export const QuestionOptionsView: React.FC<QuestionOptionsViewProps> = ({
       />
     </div>
   );
-};
+});

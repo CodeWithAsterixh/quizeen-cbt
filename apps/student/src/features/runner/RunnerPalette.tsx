@@ -8,7 +8,7 @@ interface RunnerPaletteProps {
   onSelectIndex: (index: number) => void;
 }
 
-export const RunnerPalette: React.FC<RunnerPaletteProps> = ({
+export const RunnerPalette = React.memo<RunnerPaletteProps>(({
   questions,
   currentIndex,
   answers,
@@ -51,4 +51,4 @@ export const RunnerPalette: React.FC<RunnerPaletteProps> = ({
       </Card>
     </nav>
   );
-};
+});

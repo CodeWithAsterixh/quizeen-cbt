@@ -17,7 +17,7 @@ interface RunnerQuestionCardProps {
   isLast: boolean;
 }
 
-export const RunnerQuestionCard: React.FC<RunnerQuestionCardProps> = ({
+export const RunnerQuestionCard = React.memo<RunnerQuestionCardProps>(({
   question,
   questionNumber,
   totalQuestions,
@@ -84,4 +84,4 @@ export const RunnerQuestionCard: React.FC<RunnerQuestionCardProps> = ({
       <ImageZoomModal isOpen={isZoomOpen} imageUrl={question.imageUrl} caption={question.imageCaption} onClose={() => setIsZoomOpen(false)} />
     </article>
   );
-};
+});

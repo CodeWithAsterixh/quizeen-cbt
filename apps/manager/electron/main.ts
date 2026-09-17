@@ -2,6 +2,12 @@ import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 
+app.commandLine.appendSwitch('enable-low-end-device-mode');
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256 --optimize_for_size');
+app.commandLine.appendSwitch('renderer-process-limit', '2');
+app.commandLine.appendSwitch('disable-background-networking');
+app.commandLine.appendSwitch('disk-cache-size', '16777216');
+
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
@@ -24,6 +30,7 @@ function createWindow() {
       contextIsolation: true,
       sandbox: false,
       devTools: false,
+      spellcheck: false,
     },
   });
 

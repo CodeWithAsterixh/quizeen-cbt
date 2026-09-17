@@ -41,21 +41,36 @@ export const AssessmentRunner: React.FC<AssessmentRunnerProps> = ({
     return () => { (window as any).electronApi?.exitExamMode?.(); };
   }, [exam.id, student.classGroup, student.department, student.studentName]);
 
+  const answersRef = React.useRef(answers);
+  answersRef.current = answers;
+  const secondsLeftRef = React.useRef(secondsLeft);
+  secondsLeftRef.current = secondsLeft;
+  const isSubmittingRef = React.useRef(isSubmitting);
+  isSubmittingRef.current = isSubmitting;
+
   const handleSubmit = useCallback(async () => {
-    if (isSubmitting) return;
+    if (isSubmittingRef.current) return;
     setIsSubmitting(true);
-    const submission = buildExamSubmission(exam, student, answers, secondsLeft);
+    const submission = buildExamSubmission(exam, student, answersRef.current, secondsLeftRef.current);
     await onSubmitExam(submission);
-  }, [answers, exam, isSubmitting, onSubmitExam, secondsLeft, student]);
+  }, [exam, student, onSubmitExam]);
 
   // Auto-submit immediately if student leaves the exam window
   useAntiCheatTracker(handleSubmit);
 
   useEffect(() => {
-    if (secondsLeft <= 0) return void handleSubmit();
-    const timer = setInterval(() => setSecondsLeft((s) => s - 1), 1000);
+    const timer = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
     return () => clearInterval(timer);
-  }, [secondsLeft, handleSubmit]);
+  }, [handleSubmit]);
 
   const currentQ = questions[currentIndex];
   const unansweredCount = questions.length - Object.keys(answers).filter((k) => answers[k]?.trim()).length;

@@ -8,6 +8,10 @@ import { themeService } from '../src/features/theme/theme.service.js';
 import { applyRuntimeBranding, applyCachedBranding } from './branding-service.js';
 import { cryptoLicenseService } from '../src/features/license/crypto-license.service.js';
 
+app.commandLine.appendSwitch('enable-low-end-device-mode');
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=384 --optimize_for_size');
+app.commandLine.appendSwitch('disk-cache-size', '16777216');
+
 let mainWindow: BrowserWindow | null = null;
 const serverManager = new ServerManager((entry) => mainWindow?.webContents.send('server:request-logged', entry));
 onServerThemeChange((theme) => mainWindow?.webContents.send('server:theme-changed', theme));
@@ -20,6 +24,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false, contextIsolation: true, sandbox: false, devTools: true,
+      spellcheck: false,
     },
   });
 
