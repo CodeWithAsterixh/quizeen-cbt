@@ -1,12 +1,13 @@
 process.env.WS_NO_BUFFER_UTIL = 'true';
 process.env.WS_NO_UTF_8_VALIDATE = 'true';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import { ServerManager } from './server-manager.js';
 import { onServerThemeChange } from '../src/features/theme/theme.routes.js';
 import { themeService } from '../src/features/theme/theme.service.js';
-import { applyRuntimeBranding, applyCachedBranding } from './branding-service.js';
+import { applyRuntimeBranding, applyCachedBranding, getInitialAppName } from './branding-service.js';
 import { cryptoLicenseService } from '../src/features/license/crypto-license.service.js';
+import { bakedWhitelabelConfig } from '@cbt/shared';
 
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=384');
 app.commandLine.appendSwitch('enable-features', 'NetworkServiceInProcess');
@@ -16,9 +17,11 @@ const serverManager = new ServerManager((entry) => mainWindow?.webContents.send(
 onServerThemeChange((theme) => mainWindow?.webContents.send('server:theme-changed', theme));
 
 function createWindow() {
+  const appTitle = getInitialAppName();
+  app.name = appTitle;
   mainWindow = new BrowserWindow({
     width: 1080, height: 720, minWidth: 840,
-    title: 'Queez CBT Server', icon: path.join(__dirname, '../dist/icon.png'),
+    title: appTitle, icon: path.join(__dirname, '../dist/icon.png'),
     frame: false, backgroundColor: '#f2f7f4', show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -28,6 +31,20 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => mainWindow?.show());
+  mainWindow.on('unresponsive', () => {
+    dialog.showMessageBox(mainWindow!, {
+      type: 'warning',
+      title: appTitle,
+      message: `${appTitle} is not responding`,
+      detail: 'The server application is taking longer than expected. You can wait or restart.',
+      buttons: ['Wait', 'Restart Application', 'Close'],
+      defaultId: 0,
+      cancelId: 0,
+    }).then(({ response }) => {
+      if (response === 1) { app.relaunch(); app.exit(0); }
+      else if (response === 2) { mainWindow?.destroy(); }
+    });
+  });
   const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5176';
   mainWindow.webContents.on('did-fail-load', (_e, code, desc) => {
     console.warn(`Server UI load failed (${code}: ${desc}), retrying...`);
@@ -44,7 +61,8 @@ function createWindow() {
 app.whenReady().then(() => {
   if (app.isPackaged && !process.env.QUEEZ_DATA_DIR) {
     const common = process.env.PROGRAMDATA || process.env.ALLUSERSPROFILE;
-    process.env.QUEEZ_DATA_DIR = common ? path.join(common, 'Queez CBT Suite', 'data') : path.join(app.getPath('userData'), 'data');
+    const suite = bakedWhitelabelConfig?.suiteName || 'Queez CBT Suite';
+    process.env.QUEEZ_DATA_DIR = common ? path.join(common, suite, 'data') : path.join(app.getPath('userData'), 'data');
   }
   createWindow();
   try {

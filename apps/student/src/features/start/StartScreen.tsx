@@ -75,6 +75,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick, logo
           Enter Student ID
         </Button>
       </Card>
+      <div style={{ marginTop: '1.25rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', opacity: 0.75 }}>
+        Powered by Queez CBT
+      </div>
     </section>
   );
 };

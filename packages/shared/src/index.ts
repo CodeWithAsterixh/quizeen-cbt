@@ -12,3 +12,4 @@ export * from './utils/image-utils.js';
 export * from './whitelabel-data.js';
 export * from './data/subjects.js';
 export * from './data/formula-presets-types.js';
+export * from './utils/grade-utils.js';

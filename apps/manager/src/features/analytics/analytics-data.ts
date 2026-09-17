@@ -58,7 +58,7 @@ export function buildStudentSummaries(cName: string, submissions: Submission[]):
 
   return Array.from(byStudent.entries()).map(([name, subs]) => {
     const avg = Math.round(subs.reduce((a, s) => a + s.percentage, 0) / subs.length);
-    const { grade, remark, badgeColor } = getGradeAndRemark(avg);
+    const { grade, remark, badgeColor } = getGradeAndRemark(avg, cName);
     const passed = subs.filter((s) => s.percentage >= 50).length;
     const infractions = subs.reduce((a, s) => a + (s.infractionCount || 0), 0);
     return {

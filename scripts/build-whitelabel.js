@@ -199,6 +199,38 @@ async function main() {
     const rawBaseName = `${config.suiteName.replace(/[^a-zA-Z0-9_-]/g, '-')}-Setup-v${config.version}.exe`;
     const outInstaller = path.join(releaseDir, rawBaseName);
     const defsPath = path.join(root, 'installer', 'whitelabel-defs.nsh');
+
+    const whitelabelLicensePath = path.join(releaseDir, 'LICENSE.txt');
+    const licenseText = [
+      `${config.suiteName.toUpperCase()}`,
+      `POWERED BY QUEEZ CBT`,
+      `END USER LICENSE AGREEMENT AND TERMS OF USE`,
+      ``,
+      `Please read these terms carefully before installing or using ${config.suiteName}.`,
+      ``,
+      `1. SCOPE AND ACCEPTANCE`,
+      `By installing, copying, or using this software, you agree to be bound by these terms. If you do not agree to these terms, click "Cancel" to abort the installation.`,
+      ``,
+      `2. SOFTWARE DESCRIPTION`,
+      `${config.suiteName} is an offline computer based testing platform powered by Queez CBT, configured for ${config.schoolName}. It includes three interconnected applications:`,
+      `- ${config.serverName}: The local network assessment and database engine.`,
+      `- ${config.managerName}: The administration portal for creating tests, managing students, and marking submissions.`,
+      `- ${config.studentName}: The examination client used by students to take tests.`,
+      ``,
+      `3. LICENSE GRANT`,
+      `You are granted a non-exclusive, non-transferable license to install and run the software on computers within your institution or testing center for educational and assessment purposes.`,
+      ``,
+      `4. OFFLINE DATA AND PRIVACY`,
+      `All student records, exam questions, credentials, and test submissions are processed and stored locally on your institution host computer and network. No examination content or student records are transmitted to external servers without your explicit action. Your institution remains the sole custodian of your local assessment data.`,
+      ``,
+      `5. RESTRICTIONS`,
+      `You may not reverse engineer, decompile, or tamper with examination records or student scores.`,
+      ``,
+      `6. DISCLAIMER OF WARRANTIES`,
+      `The software is provided "as is" without warranty of any kind. Always verify local network connectivity and battery backups before live examinations.`,
+    ].join('\r\n');
+    fs.writeFileSync(whitelabelLicensePath, licenseText, 'utf8');
+
     const defs = [
       `!define VERSION "${config.version}"`,
       `!define OUT_FILE "${outInstaller.replace(/\\/g, '\\\\')}"`,
@@ -207,12 +239,15 @@ async function main() {
       `!define STUDENT_DIR "${path.join(root, 'apps/student/release/win-unpacked').replace(/\\/g, '\\\\')}"`,
       `!define ICON_PATH "${path.join(root, 'installer/resources/installer.ico').replace(/\\/g, '\\\\')}"`,
       `!define UNICON_PATH "${path.join(root, 'installer/resources/uninstall.ico').replace(/\\/g, '\\\\')}"`,
-      `!define LICENSE_PATH "${path.join(root, 'installer/LICENSE.txt').replace(/\\/g, '\\\\')}"`,
+      `!define LICENSE_PATH "${whitelabelLicensePath.replace(/\\/g, '\\\\')}"`,
       `!define SUITE_NAME "${config.suiteName}"`,
-      `!define BRANDING_TEXT "${config.brandingText}"`,
+      `!define BRANDING_TEXT "${config.brandingText} | Powered by Queez CBT"`,
       `!define STUDENT_NAME "${config.studentName}"`,
       `!define MANAGER_NAME "${config.managerName}"`,
       `!define SERVER_NAME "${config.serverName}"`,
+      `!define SERVER_EXE "${config.serverName}.exe"`,
+      `!define MANAGER_EXE "${config.managerName}.exe"`,
+      `!define STUDENT_EXE "${config.studentName}.exe"`,
     ].join('\n');
     fs.writeFileSync(defsPath, defs, 'utf8');
 

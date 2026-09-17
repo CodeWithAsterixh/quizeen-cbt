@@ -1,92 +1,92 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Assessment, Submission, SchoolBrandingConfig } from '@cbt/shared';
+import { Assessment, Submission, SchoolBrandingConfig, getGradeAndRemark } from '@cbt/shared';
+import { preparePdfLogo } from './pdfLogoHelper';
 
 function hexToRgb(hex = '#059669'): [number, number, number] {
   const c = hex.replace('#', '');
-  if (c.length === 6) {
-    return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
-  }
-  return [5, 150, 105];
+  return c.length === 6 ? [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)] : [5, 150, 105];
 }
 
 export function buildAssessmentResultPdf(
-  assessment: Assessment,
-  submissions: Submission[],
-  brandingOrName?: string | SchoolBrandingConfig,
-  primaryColor = '#059669'
+  assessment: Assessment, submissions: Submission[], brandingOrName?: string | SchoolBrandingConfig,
+  primaryColor = '#059669', preparedLogo?: string
 ): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const b = typeof brandingOrName === 'object' ? brandingOrName : (brandingOrName ? { schoolName: brandingOrName } as SchoolBrandingConfig : undefined);
-  const rgb = hexToRgb(primaryColor);
-  const schoolName = (b?.schoolName || 'CBT Assessment System').toUpperCase();
-  const total = submissions.length;
-  const passingScore = assessment.passingScore || 50;
-  const passedCount = submissions.filter((s) => (s.percentage ?? 0) >= passingScore).length;
-  const avg = total > 0 ? Math.round(submissions.reduce((acc, s) => acc + (s.percentage ?? 0), 0) / total) : 0;
-  const highest = total > 0 ? Math.max(...submissions.map((s) => s.percentage ?? 0)) : 0;
-
+  const rgb = hexToRgb(primaryColor), school = (b?.schoolName || 'CBT Assessment System').toUpperCase();
+  const total = submissions.length, passScore = assessment.passingScore || 50;
+  const passed = submissions.filter((s) => (s.percentage ?? 0) >= passScore).length;
+  const avg = total > 0 ? Math.round(submissions.reduce((a, s) => a + (s.percentage ?? 0), 0) / total) : 0;
+  const high = total > 0 ? Math.max(...submissions.map((s) => s.percentage ?? 0)) : 0;
+  const logo = preparedLogo || b?.logoUrl || b?.appIconUrl;
   let textLeft = 14;
-  const logo = b?.logoUrl || b?.appIconUrl;
-  if (logo && (logo.startsWith('data:image/') || logo.startsWith('http') || logo.startsWith('/'))) {
-    try { doc.addImage(logo, 14, 10, 16, 16); textLeft = 34; } catch {}
+
+  if (logo) {
+    try {
+      doc.setFillColor(255, 255, 255); doc.roundedRect(13, 9, 20, 20, 1, 1, 'F');
+      doc.addImage(logo, logo.startsWith('data:image/png') ? 'PNG' : 'JPEG', 14, 10, 18, 18); textLeft = 36;
+    } catch {}
   }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.text(school, textLeft, 15);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(71, 85, 105);
+  doc.text(`Official Assessment Result Sheet: ${assessment.title}`, textLeft, 20);
+  if (b?.motto) { doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139); doc.text(`"${b.motto}"`, textLeft, 24.5); }
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(rgb[0], rgb[1], rgb[2]);
-  doc.text(schoolName, textLeft, 16);
+  const cardY = b?.motto ? 38 : 34;
+  doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.roundedRect(14, cardY, 182, 11, 1.5, 1.5, 'FD');
+  const meta = [['SUBJECT', assessment.subject || '-'], ['TARGET CLASS', assessment.targetClasses.join(', ') || 'All Classes'], ['ACADEMIC SESSION', assessment.session || 'Current Term'], ['PASSING SCORE', `${passScore}%`]];
+  meta.forEach(([lbl, val], i) => {
+    const x = 18 + i * 46;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 116, 139); doc.text(lbl, x, cardY + 4);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(15, 23, 42); doc.text(val, x, cardY + 8.5);
+  });
 
-  doc.setFontSize(8.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(80, 90, 100);
-  if (b?.motto) doc.text(`"${b.motto}"`, textLeft, 21);
+  const statsY = cardY + 15;
+  const stats: [string, string, [number, number, number]][] = [['CANDIDATES', String(total), [15, 23, 42]], ['PASSED', String(passed), [16, 185, 129]], ['FAILED', String(total - passed), [239, 68, 68]], ['AVERAGE', `${avg}%`, [15, 23, 42]], ['HIGHEST', `${high}%`, rgb]];
+  stats.forEach(([lbl, val, col], i) => {
+    const bx = 14 + i * 37;
+    doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.roundedRect(bx, statsY, 34, 11, 1.5, 1.5, 'FD');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(100, 116, 139); doc.text(lbl, bx + 17, statsY + 3.8, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(col[0], col[1], col[2]); doc.text(val, bx + 17, statsY + 8.5, { align: 'center' });
+  });
 
-  const startMetaY = b?.motto ? 26 : 22;
-  doc.text(`Official Result Sheet: ${assessment.title}`, textLeft, startMetaY);
-  doc.text(`Subject: ${assessment.subject} | Classes: ${assessment.targetClasses.join(', ')} | Session: ${assessment.session || 'Current'}`, textLeft, startMetaY + 5);
-  doc.text(`Total: ${total} | Passed: ${passedCount} | Failed: ${total - passedCount} | Average: ${avg}% | High: ${highest}%`, textLeft, startMetaY + 10);
-
-  const sorted = [...submissions].sort((a, b) => (b.percentage ?? 0) - (a.percentage ?? 0));
-  const rows = sorted.map((s, idx) => {
+  const rows = [...submissions].sort((a, b) => (b.percentage ?? 0) - (a.percentage ?? 0)).map((s, idx) => {
     const pct = s.percentage ?? 0;
-    return [
-      String(idx + 1), s.studentName, s.classGroup || '-',
-      `${s.score ?? 0} / ${s.totalPoints ?? assessment.questions?.length ?? 0}`,
-      `${pct}%`, pct >= passingScore ? 'Passed' : 'Failed',
-      s.submittedAt ? new Date(s.submittedAt).toLocaleDateString() : '-',
-    ];
+    const { grade, remark } = getGradeAndRemark(pct, s.classGroup || assessment.targetClasses.join(' '));
+    return [String(idx + 1), s.studentName, s.classGroup || '-', `${s.score ?? 0} / ${s.totalPoints ?? assessment.questions?.length ?? 0}`, `${pct}%`, grade, remark, pct >= passScore ? 'Passed' : 'Failed'];
   });
 
   autoTable(doc, {
-    startY: Math.max(startMetaY + 15, 34),
-    head: [['Rank', 'Candidate Name', 'Class', 'Score', 'Percentage', 'Status', 'Date']],
-    body: rows,
-    theme: 'grid',
-    headStyles: { fillColor: rgb, textColor: 255, fontStyle: 'bold', fontSize: 9 },
-    bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    columnStyles: {
-      0: { halign: 'center', cellWidth: 14 },
-      2: { halign: 'center', cellWidth: 20 },
-      3: { halign: 'center', cellWidth: 24 },
-      4: { halign: 'center', cellWidth: 24, fontStyle: 'bold' },
-      5: { halign: 'center', cellWidth: 20 },
-      6: { halign: 'center', cellWidth: 24 },
+    startY: statsY + 15, head: [['Rank', 'Candidate Name', 'Class', 'Score', 'Percentage', 'Grade', 'Remark', 'Status']], body: rows,
+    theme: 'grid', headStyles: { fillColor: rgb, textColor: 255, fontStyle: 'bold', fontSize: 9 },
+    bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] }, alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: { 0: { halign: 'center', cellWidth: 12 }, 2: { halign: 'center', cellWidth: 18 }, 3: { halign: 'center', cellWidth: 22 }, 4: { halign: 'center', cellWidth: 18, fontStyle: 'bold' }, 5: { halign: 'center', cellWidth: 16, fontStyle: 'bold' }, 6: { cellWidth: 28 }, 7: { halign: 'center', cellWidth: 22 } },
+    didParseCell: (d) => {
+      if (d.section === 'body' && d.column.index === 5) {
+        const r = String(d.cell.raw);
+        d.cell.styles.textColor = r.startsWith('A') ? [16, 185, 129] : (r.startsWith('B') || r.startsWith('C') ? [37, 99, 235] : (r.startsWith('D') || r.startsWith('E') ? [217, 119, 6] : [225, 29, 72]));
+      }
+      if (d.section === 'body' && d.column.index === 7) {
+        d.cell.styles.textColor = d.cell.raw === 'Passed' ? [16, 185, 129] : [239, 68, 68]; d.cell.styles.fontStyle = 'bold';
+      }
+    },
+    didDrawPage: (data) => {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
+      doc.text('Official Examination Report - Powered by Queez CBT', 14, 290);
+      doc.text(`Page ${data.pageNumber} of ${doc.getNumberOfPages()}`, 196, 290, { align: 'right' });
     },
   });
-
   return doc;
 }
 
-export function downloadAssessmentResultPdf(
-  assessment: Assessment,
-  submissions: Submission[],
-  brandingOrName?: string | SchoolBrandingConfig,
-  customFilename?: string,
-  primaryColor?: string
-): void {
-  const doc = buildAssessmentResultPdf(assessment, submissions, brandingOrName, primaryColor);
+export async function downloadAssessmentResultPdf(
+  assessment: Assessment, submissions: Submission[], brandingOrName?: string | SchoolBrandingConfig,
+  customFilename?: string, primaryColor?: string
+): Promise<void> {
+  const b = typeof brandingOrName === 'object' ? brandingOrName : undefined;
+  const logo = await preparePdfLogo(b?.logoUrl || b?.appIconUrl);
+  const doc = buildAssessmentResultPdf(assessment, submissions, brandingOrName, primaryColor, logo || undefined);
   const cleanName = (customFilename || assessment.subject).replace(/[^a-zA-Z0-9_-]/g, '_');
   doc.save(`${cleanName}_Results.pdf`);
 }

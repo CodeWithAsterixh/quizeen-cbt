@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
+import { bakedWhitelabelConfig } from '@cbt/shared';
 
 export interface BrandingInfo {
   schoolName?: string;
@@ -8,6 +9,18 @@ export interface BrandingInfo {
   shortName?: string;
   appIconUrl?: string;
   logoUrl?: string;
+}
+
+export function getInitialAppName(): string {
+  try {
+    const f = path.join(app.getPath('userData'), 'branding', 'branding.json');
+    if (fs.existsSync(f)) {
+      const b: BrandingInfo = JSON.parse(fs.readFileSync(f, 'utf8'));
+      const name = b.appName || b.schoolName;
+      if (name) return `${name} Assessment Manager`;
+    }
+  } catch {}
+  return bakedWhitelabelConfig?.managerName || (bakedWhitelabelConfig?.schoolName ? `${bakedWhitelabelConfig.schoolName} Assessment Manager` : 'Queez CBT Manager');
 }
 
 function ensureIcoFromPng(b: Buffer): Buffer {
@@ -22,6 +35,7 @@ export async function applyRuntimeBranding(b: BrandingInfo, win: BrowserWindow |
   const brandName = b.appName || b.schoolName;
   if (!brandName) return false;
   const newTitle = `${brandName} Assessment Manager`;
+  app.name = newTitle;
   if (win) win.setTitle(newTitle);
 
   const brandDir = path.join(app.getPath('userData'), 'branding');

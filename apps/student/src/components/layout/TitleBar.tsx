@@ -1,5 +1,4 @@
-import React from 'react';
-import { TitleBar as SharedTitleBar } from '@cbt/shared';
+import { TitleBar as SharedTitleBar, bakedWhitelabelConfig } from '@cbt/shared';
 
 interface TitleBarProps {
   title?: string;
@@ -8,9 +7,10 @@ interface TitleBarProps {
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
-  title = 'Queez',
+  title,
   badge,
   iconUrl,
 }) => {
-  return <SharedTitleBar title={title} badge={badge} iconUrl={iconUrl} />;
+  const fallback = bakedWhitelabelConfig?.studentName || (bakedWhitelabelConfig?.schoolName ? `${bakedWhitelabelConfig.schoolName} Student Portal` : 'Student Portal');
+  return <SharedTitleBar title={title || fallback} badge={badge} iconUrl={iconUrl} />;
 };

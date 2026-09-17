@@ -15,6 +15,8 @@ const CloseIcon = () => (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" /></svg>
 );
 
+import { bakedWhitelabelConfig } from '../whitelabel-data.js';
+
 export interface TitleBarProps {
   title?: string;
   badge?: string;
@@ -23,11 +25,12 @@ export interface TitleBarProps {
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
-  title = 'Queez',
+  title,
   badge,
   iconUrl,
   onClose,
 }) => {
+  const displayTitle = title || bakedWhitelabelConfig?.suiteName || 'CBT Portal';
   const { isElectron, isMax, handleMinimize, handleMaximize, handleClose } = useTitleBar();
   const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
 
@@ -50,7 +53,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
             style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain' }}
           />
         )}
-        <span className="title-bar-title">{title}</span>
+        <span className="title-bar-title">{displayTitle}</span>
         {badge && <span className="title-bar-badge">{badge}</span>}
         {isServerOnline !== null && (
           <span

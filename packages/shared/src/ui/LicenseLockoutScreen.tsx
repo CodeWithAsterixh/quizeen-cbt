@@ -55,6 +55,9 @@ export const LicenseLockoutScreen: React.FC<Props> = ({ licenseState, onRetry })
           </button>
         </div>
         <LockoutServerPicker onRetry={onRetry} />
+        <div style={{ marginTop: 14, fontSize: 11, color: 'var(--color-text-muted, #4d7298)', opacity: 0.75 }}>
+          Powered by Queez CBT
+        </div>
       </div>
     </div>
   );

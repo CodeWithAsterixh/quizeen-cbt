@@ -18,14 +18,10 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
     } catch {}
   }, [getUrl]);
   useEffect(() => { fetchStatus(); }, [fetchStatus]);
-  const handleCopyHw = () => {
-    if (state?.hardwareId) { navigator.clipboard.writeText(state.hardwareId); setCopied(true); setTimeout(() => setCopied(false), 2000); }
-  };
+  const handleCopyHw = () => { if (state?.hardwareId) { navigator.clipboard.writeText(state.hardwareId); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = (ev) => { const t = ev.target?.result as string; if (t) setTokenInput(t.trim()); };
-    r.readAsText(f);
+    const r = new FileReader(); r.onload = (ev) => { const t = ev.target?.result as string; if (t) setTokenInput(t.trim()); }; r.readAsText(f);
   };
   const handleActivate = async () => {
     setMsg(null);
@@ -90,6 +86,9 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
             <input value={tokenInput} onChange={(e) => setTokenInput(e.target.value)} placeholder="XXXX-XXXX-XXXX-XXXX or token" style={{ flex: 1, padding: '8px 10px', fontSize: '0.85rem', fontFamily: 'monospace', borderRadius: 4, border: '1px solid var(--color-border)' }} />
             <Button size="sm" variant="primary" onClick={handleActivate} disabled={!tokenInput.trim()} icon={<LockKey size={14} />}>Activate</Button>
           </div>
+        </div>
+        <div style={{ marginTop: 12, textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-subtle)', opacity: 0.8 }}>
+          Powered by Queez CBT Engine
         </div>
       </div>
     </div>

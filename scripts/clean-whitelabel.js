@@ -42,6 +42,7 @@ function restoreOriginalIcons(root) {
 
 function cleanupWhitelabelBuild(root, releaseDir, tempLogoPath) {
   restoreOriginalIcons(root);
+  try { require('./whitelabel-writer.js').restoreElectronBuilders(); } catch {}
 
   const installerRes = path.join(root, 'installer', 'resources');
   if (fs.existsSync(installerRes)) {

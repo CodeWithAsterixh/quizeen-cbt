@@ -23,13 +23,15 @@ export interface ClassSubjectSummary {
   lowestScore: number;
 }
 
+import { GradeType } from './grade-utils';
+
 export interface StudentClassSummary {
   studentName: string;
   classGroup: string;
   department?: string;
   submissionsCount: number;
   averagePercentage: number;
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  grade: GradeType;
   remark: string;
   badgeColor: 'emerald' | 'blue' | 'amber' | 'rose';
   infractions: number;

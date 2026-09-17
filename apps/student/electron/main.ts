@@ -1,6 +1,9 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, Menu, dialog } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
+import { startDiscoveryListener } from './discovery-listener.js';
+import { setupIpc } from './ipc.js';
+import { applyCachedBranding, getInitialAppName } from './branding-service.js';
 
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 app.commandLine.appendSwitch('enable-features', 'NetworkServiceInProcess');
@@ -9,13 +12,15 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   Menu.setApplicationMenu(null);
+  const appTitle = getInitialAppName();
+  app.name = appTitle;
 
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'Queez Student Portal',
+    title: appTitle,
     icon: path.join(__dirname, '../dist/icon.png'),
     backgroundColor: '#f2f7f4',
     frame: false,
@@ -35,6 +40,21 @@ function createWindow() {
     mainWindow?.show();
   });
 
+  mainWindow.on('unresponsive', () => {
+    dialog.showMessageBox(mainWindow!, {
+      type: 'warning',
+      title: appTitle,
+      message: `${appTitle} is not responding`,
+      detail: 'The application is taking longer than expected. You can wait or restart.',
+      buttons: ['Wait', 'Restart Application', 'Close'],
+      defaultId: 0,
+      cancelId: 0,
+    }).then(({ response }) => {
+      if (response === 1) { app.relaunch(); app.exit(0); }
+      else if (response === 2) { mainWindow?.destroy(); }
+    });
+  });
+
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F12' && input.type === 'keyDown') {
       mainWindow?.webContents.toggleDevTools();
@@ -51,10 +71,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 }
-
-import { startDiscoveryListener } from './discovery-listener.js';
-import { setupIpc } from './ipc.js';
-import { applyCachedBranding } from './branding-service.js';
 
 app.whenReady().then(() => {
   setupIpc(() => mainWindow);

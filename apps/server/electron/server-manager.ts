@@ -65,7 +65,7 @@ export class ServerManager {
       const fallback = await this.tryListen(fallbackPort);
       if (fallback.success) {
         this.currentPort = fallbackPort;
-        const msg = (probe.active ? `Another Queez Server is active on port ${requestedPort}. ` : `Port ${requestedPort} is in use. `) + `Started on port ${fallbackPort}.`;
+        const msg = (probe.active ? `Another CBT Server is active on port ${requestedPort}. ` : `Port ${requestedPort} is in use. `) + `Started on port ${fallbackPort}.`;
         return { success: true, port: fallbackPort, fallbackFrom: requestedPort, message: msg };
       }
     }

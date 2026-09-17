@@ -33,6 +33,9 @@ export const ManagerSettingsView: React.FC<Props> = ({
       <SettingsSyncCard onSync={onSync} isSyncing={isSyncing} />
       <SettingsServerCard onOpenServerModal={onOpenServerModal} />
       <SettingsThemeCard currentTheme={currentTheme} schoolName={schoolName} onNotify={onNotify} />
+      <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--color-text-muted)', fontSize: '0.82rem', opacity: 0.8 }}>
+        Powered by Queez CBT
+      </div>
     </div>
   );
 };

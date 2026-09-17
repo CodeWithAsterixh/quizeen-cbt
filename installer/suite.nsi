@@ -51,7 +51,7 @@ Var Relaunched
   !define SUITE_NAME "Queez CBT Suite"
 !endif
 !ifndef BRANDING_TEXT
-  !define BRANDING_TEXT "Quizeen CBT Systems"
+  !define BRANDING_TEXT "${SUITE_NAME} | Powered by Queez CBT"
 !endif
 !ifndef STUDENT_NAME
   !define STUDENT_NAME "Queez Student Portal"
@@ -61,6 +61,15 @@ Var Relaunched
 !endif
 !ifndef SERVER_NAME
   !define SERVER_NAME "Queez Local Server"
+!endif
+!ifndef SERVER_EXE
+  !define SERVER_EXE "Queez CBT Server.exe"
+!endif
+!ifndef MANAGER_EXE
+  !define MANAGER_EXE "Queez CBT Manager.exe"
+!endif
+!ifndef STUDENT_EXE
+  !define STUDENT_EXE "Queez CBT Student.exe"
 !endif
 
 Name "${SUITE_NAME} ${VERSION}"
@@ -88,7 +97,7 @@ FunctionEnd
 ; Page 1: Welcome
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfRelaunched
 !define MUI_WELCOMEPAGE_TITLE "Welcome to ${SUITE_NAME} Setup"
-!define MUI_WELCOMEPAGE_TEXT "This setup wizard will install the ${SUITE_NAME} on your computer.$\r$\n$\r$\n${SUITE_NAME} is an offline assessment suite built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT "This setup wizard will install ${SUITE_NAME} on your computer.$\r$\n$\r$\n${SUITE_NAME} is an offline assessment suite powered by Queez CBT, built for schools and examination centers, connecting local database servers, teacher management tools, and student test terminals.$\r$\n$\r$\nClick Next to continue."
 !insertmacro MUI_PAGE_WELCOME
 
 ; Page 2: License Agreement
@@ -180,18 +189,18 @@ Section -Post
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     ${If} ${SectionIsSelected} ${SecServer}
       SetOutPath "$INSTDIR\Server"
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
-      CreateShortcut "$DESKTOP\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk" "$INSTDIR\Server\${SERVER_EXE}" "" "$INSTDIR\Server\${SERVER_EXE}" 0
+      CreateShortcut "$DESKTOP\${SERVER_NAME}.lnk" "$INSTDIR\Server\${SERVER_EXE}" "" "$INSTDIR\Server\${SERVER_EXE}" 0
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecManager}
       SetOutPath "$INSTDIR\Manager"
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
-      CreateShortcut "$DESKTOP\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\${MANAGER_EXE}" "" "$INSTDIR\Manager\${MANAGER_EXE}" 0
+      CreateShortcut "$DESKTOP\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\${MANAGER_EXE}" "" "$INSTDIR\Manager\${MANAGER_EXE}" 0
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecStudent}
       SetOutPath "$INSTDIR\Student"
-      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
-      CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
+      CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk" "$INSTDIR\Student\${STUDENT_EXE}" "" "$INSTDIR\Student\${STUDENT_EXE}" 0
+      CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\${STUDENT_EXE}" "" "$INSTDIR\Student\${STUDENT_EXE}" 0
     ${EndIf}
     SetOutPath "$INSTDIR"
     CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
@@ -220,7 +229,7 @@ Section -Post
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\${MANAGER_EXE}"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "all"
@@ -239,7 +248,7 @@ Section -Post
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\${MANAGER_EXE}"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "InstallScope" "current"
@@ -249,10 +258,10 @@ Section -Post
 
   ; Open Windows Firewall for LAN access - without this, student machines on the
   ; same router cannot reach the server even though it binds to 0.0.0.0
-  ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Server"'
-  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Server" dir=in action=allow protocol=TCP localport=4000 profile=any enable=yes'
-  ExecWait 'netsh advfirewall firewall delete rule name="Queez CBT Discovery"'
-  ExecWait 'netsh advfirewall firewall add rule name="Queez CBT Discovery" dir=in action=allow protocol=UDP localport=4001 profile=any enable=yes'
+  ExecWait 'netsh advfirewall firewall delete rule name="${SERVER_NAME}"'
+  ExecWait 'netsh advfirewall firewall add rule name="${SERVER_NAME}" dir=in action=allow protocol=TCP localport=4000 profile=any enable=yes'
+  ExecWait 'netsh advfirewall firewall delete rule name="${SERVER_NAME} Discovery"'
+  ExecWait 'netsh advfirewall firewall add rule name="${SERVER_NAME} Discovery" dir=in action=allow protocol=UDP localport=4001 profile=any enable=yes'
 SectionEnd
 
 ; Component Descriptions
@@ -324,6 +333,9 @@ Function PageInstallScopeLeave
 FunctionEnd
 
 Function .onInit
+  ExecWait 'taskkill /F /IM "${SERVER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${MANAGER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${STUDENT_EXE}" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'
@@ -406,6 +418,9 @@ Function un.onInit
   ${EndIf}
 
   ; Terminate running suite instances before removal starts
+  ExecWait 'taskkill /F /IM "${SERVER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${MANAGER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${STUDENT_EXE}" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'
@@ -413,12 +428,12 @@ FunctionEnd
 
 ; Launch helper
 Function LaunchManager
-  ${If} ${FileExists} "$INSTDIR\Manager\Queez CBT Manager.exe"
-    Exec "$INSTDIR\Manager\Queez CBT Manager.exe"
-  ${ElseIf} ${FileExists} "$INSTDIR\Server\Queez CBT Server.exe"
-    Exec "$INSTDIR\Server\Queez CBT Server.exe"
-  ${ElseIf} ${FileExists} "$INSTDIR\Student\Queez CBT Student.exe"
-    Exec "$INSTDIR\Student\Queez CBT Student.exe"
+  ${If} ${FileExists} "$INSTDIR\Manager\${MANAGER_EXE}"
+    Exec "$INSTDIR\Manager\${MANAGER_EXE}"
+  ${ElseIf} ${FileExists} "$INSTDIR\Server\${SERVER_EXE}"
+    Exec "$INSTDIR\Server\${SERVER_EXE}"
+  ${ElseIf} ${FileExists} "$INSTDIR\Student\${STUDENT_EXE}"
+    Exec "$INSTDIR\Student\${STUDENT_EXE}"
   ${EndIf}
 FunctionEnd
 
@@ -439,6 +454,9 @@ Section "Uninstall"
   ${EndIf}
 
   ; Terminate running suite instances to release file locks
+  ExecWait 'taskkill /F /IM "${SERVER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${MANAGER_EXE}" /T'
+  ExecWait 'taskkill /F /IM "${STUDENT_EXE}" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Server.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Manager.exe" /T'
   ExecWait 'taskkill /F /IM "Queez CBT Student.exe" /T'

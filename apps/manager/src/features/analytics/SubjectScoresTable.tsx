@@ -25,7 +25,7 @@ export const SubjectScoresTable: React.FC<Props> = ({ subject, submissions }) =>
           </tr>
         ) : (
           submissions.map((sub) => {
-            const { grade, remark, badgeColor } = getGradeAndRemark(sub.percentage);
+            const { grade, remark, badgeColor } = getGradeAndRemark(sub.percentage, sub.classGroup);
             return (
               <tr key={sub.id}>
                 <td><strong style={{ color: 'var(--color-text)' }}>{sub.studentName}</strong></td>
