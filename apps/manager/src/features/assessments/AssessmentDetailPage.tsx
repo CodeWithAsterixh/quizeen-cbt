@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Assessment, Submission, Button, ListNumbers, Table } from '@cbt/shared';
+import { Assessment, Submission, Button, ListNumbers, Table, useAppLicense } from '@cbt/shared';
 import { AssessmentDetailHeader } from './AssessmentDetailHeader';
 import { AssessmentDetailStats } from './AssessmentDetailStats';
 import { AssessmentDetailResultsTable } from './AssessmentDetailResultsTable';
@@ -20,6 +20,9 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
   assessment, submissions, onBack, onEdit, onDuplicate, onDelete, onSelectSubmission,
 }) => {
   const [activeTab, setActiveTab] = useState<'results' | 'questions'>('results');
+  const { licenseState } = useAppLicense();
+  const branding = licenseState?.license?.branding;
+  const primaryColor = licenseState?.license?.theme?.primaryColor;
   const exam = assessment;
   const examSubmissions = submissions.filter((s) => s.examId === exam.id);
 
@@ -27,7 +30,7 @@ export const AssessmentDetailPage: React.FC<AssessmentDetailPageProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <AssessmentDetailHeader
         assessment={exam} onBack={onBack} onEdit={onEdit} onDuplicate={onDuplicate}
-        onDelete={onDelete} onExportResults={() => downloadAssessmentResultPdf(exam, examSubmissions)}
+        onDelete={onDelete} onExportResults={() => downloadAssessmentResultPdf(exam, examSubmissions, branding, undefined, primaryColor)}
       />
 
       <AssessmentDetailStats assessment={exam} submissions={examSubmissions} />

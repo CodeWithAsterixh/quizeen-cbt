@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Assessment, Submission, DownloadSimple } from '@cbt/shared';
+import { Modal, Button, Assessment, Submission, DownloadSimple, useAppLicense } from '@cbt/shared';
 import { downloadAssessmentResultPdf } from './assessmentResultPdf';
 import { exportBatchResultsZip } from './batchResultExport';
 
@@ -18,6 +18,9 @@ export const ExportResultsModal: React.FC<Props> = ({
 }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => assessments.map((a) => a.id));
   const [isExporting, setIsExporting] = useState(false);
+  const { licenseState } = useAppLicense();
+  const branding = licenseState?.license?.branding;
+  const primaryColor = licenseState?.license?.theme?.primaryColor;
 
   if (!isOpen) return null;
 
@@ -34,12 +37,13 @@ export const ExportResultsModal: React.FC<Props> = ({
     if (selected.length === 0) return;
     setIsExporting(true);
     try {
+      const brand = branding || schoolName;
       if (selected.length === 1) {
         const item = selected[0];
         const subs = submissions.filter((s) => s.examId === item.id);
-        downloadAssessmentResultPdf(item, subs, schoolName, zipPrefix ? `${zipPrefix}_${item.subject}` : undefined);
+        downloadAssessmentResultPdf(item, subs, brand, zipPrefix ? `${zipPrefix}_${item.subject}` : undefined, primaryColor);
       } else {
-        await exportBatchResultsZip(selected, submissions, schoolName, zipPrefix);
+        await exportBatchResultsZip(selected, submissions, brand, zipPrefix, primaryColor);
       }
       onClose();
     } finally {

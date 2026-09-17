@@ -1,5 +1,7 @@
 export function parseMarkdownTables(text: string): string {
-  const lines = text.split('\n');
+  if (!text || !text.includes('|')) return text;
+  const normalized = text.replace(/<br\s*\/?>/gi, '\n');
+  const lines = normalized.split('\n');
   const result: string[] = [];
   let inTable = false;
   let tableRows: string[] = [];
@@ -12,19 +14,20 @@ export function parseMarkdownTables(text: string): string {
       return;
     }
 
+    const rawMd = tableRows.join('\n');
     const headerLine = tableRows[0];
     const dataLines = tableRows.slice(2);
-    const headers = headerLine.split('|').map((s) => s.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1 || arr.length <= 2);
+    const headers = headerLine.split('|').map((s) => s.trim()).filter((_, idx, arr) => (idx > 0 && idx < arr.length - 1) || arr.length <= 2);
     const cleanHeaders = headers.length > 0 ? headers : headerLine.split('|').map((s) => s.trim()).filter(Boolean);
 
-    let html = '<div class="cbt-table-wrapper"><table class="cbt-table"><thead><tr>';
+    let html = `<div class="cbt-table-wrapper" data-table-markdown="${encodeURIComponent(rawMd)}"><table class="cbt-table"><thead><tr>`;
     for (const h of cleanHeaders) {
       html += `<th>${h}</th>`;
     }
     html += '</tr></thead><tbody>';
 
     for (const row of dataLines) {
-      const cells = row.split('|').map((s) => s.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1 || arr.length <= 2);
+      const cells = row.split('|').map((s) => s.trim()).filter((_, idx, arr) => (idx > 0 && idx < arr.length - 1) || arr.length <= 2);
       const cleanCells = cells.length > 0 ? cells : row.split('|').map((s) => s.trim()).filter(Boolean);
       html += '<tr>';
       for (const c of cleanCells) {

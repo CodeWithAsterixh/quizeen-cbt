@@ -3,8 +3,27 @@ import { parseMarkdownTables } from './table-parser.js';
 
 const mathCache = new Map<string, string>();
 
+export function decodeMathEntities(text: string): string {
+  if (!text || !text.includes('&')) return text;
+  let decoded = text;
+  let prev = '';
+  while (decoded !== prev && decoded.includes('&')) {
+    prev = decoded;
+    decoded = decoded
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  }
+  return decoded;
+}
+
 function renderMath(math: string, displayMode: boolean): string {
-  const trimmed = math.trim();
+  const trimmed = decodeMathEntities(math).trim();
   const key = `${displayMode ? 'D' : 'I'}:${trimmed}`;
   const cached = mathCache.get(key);
   if (cached !== undefined) return cached;
@@ -20,7 +39,7 @@ function renderMath(math: string, displayMode: boolean): string {
     mathCache.set(key, res);
     return res;
   } catch {
-    return `<span class="cbt-math-fallback">${math}</span>`;
+    return `<span class="cbt-math-fallback">${trimmed}</span>`;
   }
 }
 

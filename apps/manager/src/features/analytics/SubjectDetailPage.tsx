@@ -1,6 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Button, DownloadSimple } from '@cbt/shared';
-import { Assessment, Submission, Card, Badge } from '@cbt/shared';
+import { ArrowLeft, Button, DownloadSimple, Assessment, Submission, Card, Badge, useAppLicense } from '@cbt/shared';
 import { downloadAssessmentResultPdf } from '../grading/assessmentResultPdf';
 import { getGradeAndRemark } from './grade-utils';
 import { SubjectScoresTable } from './SubjectScoresTable';
@@ -16,6 +15,9 @@ interface SubjectDetailPageProps {
 export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
   className, exam, submissions, schoolName, onBack,
 }) => {
+  const { licenseState } = useAppLicense();
+  const branding = licenseState?.license?.branding;
+  const primaryColor = licenseState?.license?.theme?.primaryColor;
   const classSubs = submissions.filter((s) => s.examId === exam.id && (s.classGroup === className || !s.classGroup));
   const total = classSubs.length;
   const avg = total > 0 ? Math.round(classSubs.reduce((a, s) => a + s.percentage, 0) / total) : 0;
@@ -53,7 +55,7 @@ export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
         </div>
         <Button
           variant="primary"
-          onClick={() => downloadAssessmentResultPdf(exam, classSubs, schoolName, `${className}_${exam.subject}`)}
+          onClick={() => downloadAssessmentResultPdf(exam, classSubs, branding || schoolName, `${className}_${exam.subject}`, primaryColor)}
           disabled={classSubs.length === 0}
           icon={<DownloadSimple size={16} />}
         >

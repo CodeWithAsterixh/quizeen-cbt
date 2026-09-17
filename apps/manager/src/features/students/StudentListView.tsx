@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { UserPlus, Users, Student, Button, Card } from '@cbt/shared';
+import { UserPlus, Users, Student, Button, Card, useAppLicense } from '@cbt/shared';
 import { StudentHeader } from './StudentHeader';
 import { StudentCard } from './StudentCard';
 import { StudentSelectionBar } from './StudentSelectionBar';
 import { SingleCodeModal } from './SingleCodeModal';
-import { printStudentCodesPdf } from './StudentPrintReport';
+import { downloadStudentCodesPdf } from './studentCodesPdf';
 import { StudentClassTabs } from './StudentClassTabs';
 import { useStudentSelection } from './useStudentSelection';
 
@@ -21,6 +21,9 @@ interface Props {
 export const StudentListView: React.FC<Props> = ({
   students, onOpenCreate, onEditStudent, onMoveStudents, onGenerateCode, onGenerateCodes, onDeleteStudent,
 }) => {
+  const { licenseState } = useAppLicense();
+  const branding = licenseState?.license?.branding;
+  const primaryColor = licenseState?.license?.theme?.primaryColor || '#059669';
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [modalStudent, setModalStudent] = useState<{ student: Student; code: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -40,7 +43,7 @@ export const StudentListView: React.FC<Props> = ({
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <StudentHeader
         selectedCount={selectedIds.size} isBusy={isBusy}
-        onPrint={() => printStudentCodesPdf(targetForPrint, selectedClass === 'all' ? undefined : selectedClass)}
+        onPrint={() => downloadStudentCodesPdf(targetForPrint, selectedClass === 'all' ? undefined : selectedClass, branding, primaryColor)}
         onGenerate={handleGenerate} onOpenCreate={onOpenCreate}
       />
       <StudentClassTabs students={students} selectedClass={selectedClass} onSelectClass={setSelectedClass} />

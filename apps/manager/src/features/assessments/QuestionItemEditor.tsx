@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Trash, Check, Function as FunctionIcon, Eye } from '@cbt/shared';
-import { Question, Card, Button, TextInput, SelectDropdown, TextEditor, RichContent } from '@cbt/shared';
+import { Question, Card, Button, SelectDropdown, TextEditor, RichContent, Trash, Check, Function as FunctionIcon, Eye } from '@cbt/shared';
 import { QuestionOptionsEditor } from './QuestionOptionsEditor';
 import { QuestionImageUploader } from './QuestionImageUploader';
 import { FormulaPaletteModal } from './FormulaPaletteModal';
@@ -23,6 +22,22 @@ export const QuestionItemEditor: React.FC<Props> = ({
     { value: 'short_answer', label: 'Short Written Answer' },
   ];
 
+  const handleInsertSnippet = (c: string) => {
+    const current = question.prompt || '';
+    const isTable = c.trim().startsWith('|');
+    const needsBreak = current.length > 0 && !current.endsWith('\n');
+    const sep = isTable ? (needsBreak ? '\n\n' : '\n') : ' ';
+    onUpdate({ prompt: current ? `${current}${sep}${c}` : c });
+  };
+
+  const updateFormula = (newF?: string) => {
+    if (!editingFormula) return;
+    const p = question.prompt || '';
+    const esc = editingFormula.replace(/&/g, '&amp;');
+    const rep = newF ? `$${newF}$` : '';
+    onUpdate({ prompt: p.includes(`$${editingFormula}$`) ? p.replace(`$${editingFormula}$`, rep) : p.replace(`$${esc}$`, rep) });
+  };
+
   return (
     <Card style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
@@ -31,14 +46,11 @@ export const QuestionItemEditor: React.FC<Props> = ({
           <div style={{ minWidth: 160 }}>
             <SelectDropdown
               value={question.type} options={typeOptions}
-              onChange={(val) => {
-                const t = val as Question['type'];
-                onUpdate({
-                  type: t,
-                  options: t === 'multiple_choice' ? ['Option A', 'Option B', 'Option C', 'Option D'] : t === 'true_false' ? ['True', 'False'] : undefined,
-                  correctAnswer: t === 'true_false' ? 'True' : 'Option A',
-                });
-              }}
+              onChange={(v) => onUpdate({
+                type: v as Question['type'],
+                options: v === 'multiple_choice' ? ['Option A', 'Option B', 'Option C', 'Option D'] : v === 'true_false' ? ['True', 'False'] : undefined,
+                correctAnswer: v === 'true_false' ? 'True' : 'Option A',
+              })}
             />
           </div>
         </div>
@@ -77,8 +89,8 @@ export const QuestionItemEditor: React.FC<Props> = ({
 
       <QuestionImageUploader imageUrl={question.imageUrl} imageCaption={question.imageCaption} onChange={onUpdate} />
       <QuestionOptionsEditor question={question} onUpdate={onUpdate} />
-      <FormulaPaletteModal isOpen={isFormulaOpen} onClose={() => setIsFormulaOpen(false)} onInsert={(c) => onUpdate({ prompt: (question.prompt || '') + ' ' + c })} />
-      <FormulaInteractiveEditorModal isOpen={Boolean(editingFormula)} onClose={() => setEditingFormula(null)} formula={editingFormula || ''} onSave={(newF) => editingFormula && onUpdate({ prompt: (question.prompt || '').replace(`$${editingFormula}$`, `$${newF}$`) })} onDelete={() => editingFormula && onUpdate({ prompt: (question.prompt || '').replace(`$${editingFormula}$`, '') })} />
+      <FormulaPaletteModal isOpen={isFormulaOpen} onClose={() => setIsFormulaOpen(false)} onInsert={handleInsertSnippet} />
+      <FormulaInteractiveEditorModal isOpen={Boolean(editingFormula)} onClose={() => setEditingFormula(null)} formula={editingFormula || ''} onSave={(nf) => updateFormula(nf)} onDelete={() => updateFormula()} />
     </Card>
   );
 };
