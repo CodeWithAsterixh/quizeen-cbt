@@ -57,7 +57,7 @@ export const ClassSubjectCard: React.FC<Props> = ({ sub, isSelected, onToggleSel
         {hasSubmissions ? (
           <div style={{ display: 'flex', gap: 20, textAlign: 'right' }}>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Subject Average</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Average</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: sub.averageScore >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>
                 {sub.averageScore}%
               </div>
@@ -69,20 +69,20 @@ export const ClassSubjectCard: React.FC<Props> = ({ sub, isSelected, onToggleSel
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Top Score</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>Highest</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Trophy size={16} /> {sub.highestScore}%
               </div>
             </div>
           </div>
         ) : (
-          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)', fontStyle: 'italic' }}>
-            Awaiting submissions
+          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)' }}>
+            No submissions yet
           </span>
         )}
 
         <Button variant="primary" size="sm" onClick={() => onSelectSubject(sub.subjectId)} icon={<ArrowRight size={14} />}>
-          View Student Breakdown
+          View Scores
         </Button>
       </div>
     </Card>

@@ -11,7 +11,7 @@ export const ClassStudentsTab: React.FC<ClassStudentsTabProps> = ({ students, cl
   if (students.length === 0) {
     return (
       <Card style={{ textAlign: 'center', padding: '3rem' }}>
-        <p style={{ color: 'var(--color-text-muted)' }}>No student submissions recorded for {className} yet.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>No submissions for {className} yet.</p>
       </Card>
     );
   }
@@ -20,9 +20,9 @@ export const ClassStudentsTab: React.FC<ClassStudentsTabProps> = ({ students, cl
     <Card style={{ padding: 0, overflow: 'hidden' }}>
       <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Class Student Roster & Summary</h3>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Student Summary</h3>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '2px 0 0' }}>
-            Overall performance, cumulative average, grade, and remark for each student.
+            Student averages, grades, and remarks.
           </p>
         </div>
         <Badge color="blue">{students.length} Student{students.length !== 1 ? 's' : ''}</Badge>
@@ -31,13 +31,13 @@ export const ClassStudentsTab: React.FC<ClassStudentsTabProps> = ({ students, cl
       <table className="data-table" aria-label={`Students in ${className}`}>
         <thead>
           <tr>
-            <th>Rank & Student Name</th>
-            <th>Tests Written</th>
-            <th>Average Score</th>
+            <th>Student Name</th>
+            <th>Tests</th>
+            <th>Average</th>
             <th>Grade</th>
             <th>Status</th>
             <th>Remark</th>
-            <th>Integrity</th>
+            <th>Switches</th>
           </tr>
         </thead>
         <tbody>
@@ -68,9 +68,9 @@ export const ClassStudentsTab: React.FC<ClassStudentsTabProps> = ({ students, cl
               </td>
               <td>
                 {st.infractions > 0 ? (
-                  <Badge color="rose">{st.infractions} switch{st.infractions !== 1 ? 'es' : ''}</Badge>
+                  <Badge color="rose">{st.infractions}</Badge>
                 ) : (
-                  <span style={{ color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 600 }}>Clean</span>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>0</span>
                 )}
               </td>
             </tr>

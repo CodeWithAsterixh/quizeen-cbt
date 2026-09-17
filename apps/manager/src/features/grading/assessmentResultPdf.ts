@@ -30,12 +30,12 @@ export function buildAssessmentResultPdf(
   }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.text(school, textLeft, 15);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(71, 85, 105);
-  doc.text(`Official Assessment Result Sheet: ${assessment.title}`, textLeft, 20);
+  doc.text(`Results: ${assessment.title}`, textLeft, 20);
   if (b?.motto) { doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139); doc.text(`"${b.motto}"`, textLeft, 24.5); }
 
   const cardY = b?.motto ? 38 : 34;
   doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.roundedRect(14, cardY, 182, 11, 1.5, 1.5, 'FD');
-  const meta = [['SUBJECT', assessment.subject || '-'], ['TARGET CLASS', assessment.targetClasses.join(', ') || 'All Classes'], ['ACADEMIC SESSION', assessment.session || 'Current Term'], ['PASSING SCORE', `${passScore}%`]];
+  const meta = [['SUBJECT', assessment.subject || '-'], ['CLASS', assessment.targetClasses.join(', ') || 'All Classes'], ['SESSION', assessment.session || 'Current Term'], ['PASS MARK', `${passScore}%`]];
   meta.forEach(([lbl, val], i) => {
     const x = 18 + i * 46;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 116, 139); doc.text(lbl, x, cardY + 4);
@@ -43,7 +43,7 @@ export function buildAssessmentResultPdf(
   });
 
   const statsY = cardY + 15;
-  const stats: [string, string, [number, number, number]][] = [['CANDIDATES', String(total), [15, 23, 42]], ['PASSED', String(passed), [16, 185, 129]], ['FAILED', String(total - passed), [239, 68, 68]], ['AVERAGE', `${avg}%`, [15, 23, 42]], ['HIGHEST', `${high}%`, rgb]];
+  const stats: [string, string, [number, number, number]][] = [['STUDENTS', String(total), [15, 23, 42]], ['PASSED', String(passed), [16, 185, 129]], ['FAILED', String(total - passed), [239, 68, 68]], ['AVERAGE', `${avg}%`, [15, 23, 42]], ['HIGHEST', `${high}%`, rgb]];
   stats.forEach(([lbl, val, col], i) => {
     const bx = 14 + i * 37;
     doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.roundedRect(bx, statsY, 34, 11, 1.5, 1.5, 'FD');
@@ -58,7 +58,7 @@ export function buildAssessmentResultPdf(
   });
 
   autoTable(doc, {
-    startY: statsY + 15, head: [['Rank', 'Candidate Name', 'Class', 'Score', 'Percentage', 'Grade', 'Remark', 'Status']], body: rows,
+    startY: statsY + 15, head: [['#', 'Student Name', 'Class', 'Score', '%', 'Grade', 'Remark', 'Status']], body: rows,
     theme: 'grid', headStyles: { fillColor: rgb, textColor: 255, fontStyle: 'bold', fontSize: 9 },
     bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] }, alternateRowStyles: { fillColor: [248, 250, 252] },
     columnStyles: { 0: { halign: 'center', cellWidth: 12 }, 2: { halign: 'center', cellWidth: 18 }, 3: { halign: 'center', cellWidth: 22 }, 4: { halign: 'center', cellWidth: 18, fontStyle: 'bold' }, 5: { halign: 'center', cellWidth: 16, fontStyle: 'bold' }, 6: { cellWidth: 28 }, 7: { halign: 'center', cellWidth: 22 } },
@@ -73,7 +73,7 @@ export function buildAssessmentResultPdf(
     },
     didDrawPage: (data) => {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
-      doc.text('Official Examination Report - Powered by Queez CBT', 14, 290);
+      doc.text('Powered by Queez CBT', 14, 290);
       doc.text(`Page ${data.pageNumber} of ${doc.getNumberOfPages()}`, 196, 290, { align: 'right' });
     },
   });

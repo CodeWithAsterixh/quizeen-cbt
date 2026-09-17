@@ -4,7 +4,7 @@ export function printStudentCodesPdf(students: Student[], classFilter?: string):
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 
-  const title = classFilter ? `Student Exam Login Slips - ${classFilter}` : 'Student Exam Login Slips - All Classes';
+  const title = classFilter ? `Student Login Slips - ${classFilter}` : 'Student Login Slips';
   const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
   const rows = students
@@ -41,19 +41,19 @@ export function printStudentCodesPdf(students: Student[], classFilter?: string):
       <body>
         <div class="header">
           <div>
-            <div class="title">Candidate Examination Login Slips</div>
-            <div class="meta">${title} | Total Candidates: ${students.length}</div>
+            <div class="title">Student Login Slips</div>
+            <div class="meta">${title} | Students: ${students.length}</div>
           </div>
-          <div class="meta">Generated: ${dateStr}</div>
+          <div class="meta">Date: ${dateStr}</div>
         </div>
         <table>
           <thead>
             <tr>
-              <th style="width: 36px; text-align: center;">S/N</th>
-              <th>Candidate Name</th>
+              <th style="width: 36px; text-align: center;">#</th>
+              <th>Student Name</th>
               <th style="width: 80px; text-align: center;">Class</th>
               <th style="width: 100px; text-align: center;">Department</th>
-              <th style="width: 130px; text-align: center;">Login ID (OTP)</th>
+              <th style="width: 130px; text-align: center;">Login Code</th>
               <th style="width: 130px;">Signature</th>
             </tr>
           </thead>

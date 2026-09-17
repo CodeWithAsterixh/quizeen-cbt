@@ -13,8 +13,13 @@ export const ClassListView: React.FC<ClassListViewProps> = ({ classSummaries, on
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
 
+  const isSearching = Boolean(searchTerm.trim());
+  const activeClasses = classSummaries.filter((c) => c.totalSubmissions > 0 || c.subjectsCount > 0);
+
   const filtered = classSummaries.filter((c) => {
-    const matchSearch = c.className.toLowerCase().includes(searchTerm.toLowerCase());
+    const hasItems = c.totalSubmissions > 0 || c.subjectsCount > 0;
+    if (!isSearching && !hasItems) return false;
+    const matchSearch = !isSearching || c.className.toLowerCase().includes(searchTerm.toLowerCase().trim());
     const matchLevel = levelFilter === 'all' || (c.educationLevel && c.educationLevel.toLowerCase().includes(levelFilter.toLowerCase()));
     return matchSearch && matchLevel;
   });
@@ -24,7 +29,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({ classSummaries, on
       <Card style={{ padding: '14px 18px', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 240, margin: 0 }}>
           <TextInput
-            placeholder="Search class (e.g. JSS 2, SSS 2, JAMB / UTME)..."
+            placeholder="Search class (e.g. SSS 2, JSS 1)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<MagnifyingGlass size={18} />}
@@ -37,25 +42,30 @@ export const ClassListView: React.FC<ClassListViewProps> = ({ classSummaries, on
             size="sm"
             onClick={() => setLevelFilter('all')}
           >
-            All Classes ({classSummaries.length})
+            All Classes ({activeClasses.length})
           </Button>
-          {EDUCATION_LEVELS.map((lvl) => (
-            <Button
-              key={lvl.id}
-              type="button"
-              variant={levelFilter === lvl.name ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setLevelFilter(lvl.name)}
-            >
-              {lvl.name}
-            </Button>
-          ))}
+          {EDUCATION_LEVELS.map((lvl) => {
+            const count = activeClasses.filter((c) => c.educationLevel === lvl.name).length;
+            return (
+              <Button
+                key={lvl.id}
+                type="button"
+                variant={levelFilter === lvl.name ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setLevelFilter(lvl.name)}
+              >
+                {lvl.name} ({count})
+              </Button>
+            );
+          })}
         </div>
       </Card>
 
       {filtered.length === 0 ? (
         <Card style={{ textAlign: 'center', padding: '3rem' }}>
-          <p style={{ color: 'var(--color-text-muted)' }}>No classes match your filter.</p>
+          <p style={{ color: 'var(--color-text-muted)' }}>
+            {isSearching ? 'No classes match your search.' : 'No classes with records for this session.'}
+          </p>
         </Card>
       ) : (
         <div className="card-grid">

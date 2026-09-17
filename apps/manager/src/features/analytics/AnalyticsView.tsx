@@ -17,13 +17,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [sessionFilter, setSessionFilter] = useState('all');
 
-  const availableSessions = Array.from(new Set(exams.map((e) => e.session || '2024/2025'))).sort().reverse();
-  const sessionOptions = [
-    { value: 'all', label: 'All Sessions' },
-    ...availableSessions.map((s) => ({ value: s, label: s })),
-  ];
+  const availableSessions = Array.from(new Set(exams.map((e) => e.session?.trim()).filter((s): s is string => Boolean(s)))).sort().reverse();
+  const sessionOptions = [{ value: 'all', label: 'All Sessions' }, ...availableSessions.map((s) => ({ value: s, label: s }))];
 
-  const filteredExams = sessionFilter === 'all' ? exams : exams.filter((e) => (e.session || '2024/2025') === sessionFilter);
+  const filteredExams = sessionFilter === 'all' ? exams : exams.filter((e) => (e.session || '') === sessionFilter);
   const examIds = new Set(filteredExams.map((e) => e.id));
   const completed = submissions.filter((s) => s.status !== 'in_progress' && examIds.has(s.examId));
 
@@ -39,10 +36,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
   if (selectedClassName && selectedSubjectId && activeExam) {
     return (
       <SubjectDetailPage
-        className={selectedClassName}
-        exam={activeExam}
-        submissions={completed}
-        schoolName={schoolName}
+        className={selectedClassName} exam={activeExam} submissions={completed} schoolName={schoolName}
         onBack={() => setSelectedSubjectId(null)}
       />
     );
@@ -54,13 +48,9 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ submissions, exams
     const classExams = filteredExams.filter((e) => e.targetClasses.includes(selectedClassName));
     return (
       <ClassDetailPage
-        className={selectedClassName}
-        summary={currentClassSummary}
-        subjects={subjects}
-        students={students}
-        exams={classExams}
-        submissions={completed}
-        schoolName={schoolName}
+        className={selectedClassName} summary={currentClassSummary} subjects={subjects}
+        students={students} exams={classExams} submissions={completed} schoolName={schoolName}
+        sessionFilter={sessionFilter} onSessionFilterChange={setSessionFilter} sessionOptions={sessionOptions}
         onBack={() => { setSelectedClassName(null); setSelectedSubjectId(null); }}
         onSelectSubject={(id) => setSelectedSubjectId(id)}
       />

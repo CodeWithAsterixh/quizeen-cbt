@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, Users, DownloadSimple, Assessment, Submission, Button } from '@cbt/shared';
+import { ArrowLeft, BookOpen, Users, DownloadSimple, Assessment, Submission, Button, SelectDropdown } from '@cbt/shared';
 import { ClassSummary, ClassSubjectSummary, StudentClassSummary } from './analytics-types';
 import { ClassSubjectsTab } from './ClassSubjectsTab';
 import { ClassStudentsTab } from './ClassStudentsTab';
@@ -14,12 +14,16 @@ interface ClassDetailPageProps {
   exams?: Assessment[];
   submissions?: Submission[];
   schoolName?: string;
+  sessionFilter?: string;
+  onSessionFilterChange?: (s: string) => void;
+  sessionOptions?: { value: string; label: string }[];
   onBack: () => void;
   onSelectSubject: (subjectId: string) => void;
 }
 
 export const ClassDetailPage: React.FC<ClassDetailPageProps> = ({
-  className, summary, subjects, students, exams = [], submissions = [], schoolName, onBack, onSelectSubject,
+  className, summary, subjects, students, exams = [], submissions = [], schoolName,
+  sessionFilter, onSessionFilterChange, sessionOptions, onBack, onSelectSubject,
 }) => {
   const [activeTab, setActiveTab] = useState<'subjects' | 'students'>('subjects');
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -32,27 +36,34 @@ export const ClassDetailPage: React.FC<ClassDetailPageProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <button type="button" onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: 0, width: 'fit-content' }}>
-        <ArrowLeft size={16} weight="bold" /><span>Back to All Classes</span>
+        <ArrowLeft size={16} weight="bold" /><span>Back to Classes</span>
       </button>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>{className} Performance Report</h1>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 4 }}>Overview of subjects taken and student results in {className}.</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>{className} Results</h1>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 4 }}>Subjects and student scores in {className}.</p>
         </div>
-        <Button variant="outline" onClick={() => setIsExportOpen(true)} disabled={exams.length === 0} icon={<DownloadSimple size={16} />}>
-          {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : `Export ${className} Results`}
-        </Button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          {sessionOptions && sessionOptions.length > 1 && onSessionFilterChange && (
+            <div style={{ minWidth: 170 }}>
+              <SelectDropdown value={sessionFilter || 'all'} onChange={onSessionFilterChange} options={sessionOptions} />
+            </div>
+          )}
+          <Button variant="outline" onClick={() => setIsExportOpen(true)} disabled={exams.length === 0} icon={<DownloadSimple size={16} />}>
+            {selectedIds.length > 0 ? `Export (${selectedIds.length})` : `Export Results`}
+          </Button>
+        </div>
       </div>
 
       <ClassDetailStats summary={summary} studentsCount={students.length} subjectsCount={subjects.length} />
 
       <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid var(--color-border)', paddingBottom: 10 }}>
         <Button variant={activeTab === 'subjects' ? 'primary' : 'secondary'} size="sm" onClick={() => setActiveTab('subjects')} icon={<BookOpen size={16} />}>
-          Subjects & Assessments ({subjects.length})
+          Subjects ({subjects.length})
         </Button>
         <Button variant={activeTab === 'students' ? 'primary' : 'secondary'} size="sm" onClick={() => setActiveTab('students')} icon={<Users size={16} />}>
-          All Students Summary ({students.length})
+          Students ({students.length})
         </Button>
       </div>
 

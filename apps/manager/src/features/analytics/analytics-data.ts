@@ -11,7 +11,7 @@ export function buildClassSummaries(exams: Assessment[], submissions: Submission
   const list: ClassSummary[] = Array.from(allClassNames).map((cName) => {
     const classSubs = submissions.filter((s) => s.classGroup === cName);
     const uniqueStudents = new Set(classSubs.map((s) => s.studentName.trim().toLowerCase())).size;
-    const classExams = exams.filter((e) => e.targetClasses?.includes(cName) || e.targetClasses?.includes('All'));
+    const classExams = exams.filter((e) => e.targetClasses?.includes(cName) || (e.targetClasses?.includes('All') && classSubs.length > 0));
     const totalSub = classSubs.length;
     const avg = totalSub > 0 ? Math.round(classSubs.reduce((acc, s) => acc + s.percentage, 0) / totalSub) : 0;
     const passed = classSubs.filter((s) => s.percentage >= 50).length;

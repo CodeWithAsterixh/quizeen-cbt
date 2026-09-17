@@ -9,10 +9,10 @@ interface Props {
 
 export const SubjectScoresTable: React.FC<Props> = ({ subject, submissions }) => (
   <Card style={{ padding: 0, overflow: 'hidden' }}>
-    <table className="data-table" aria-label={`Student scores for ${subject}`}>
+    <table className="data-table" aria-label={`Scores for ${subject}`}>
       <thead>
         <tr>
-          <th>Student Name</th><th>Raw Score</th><th>Percentage</th>
+          <th>Student Name</th><th>Score</th><th>%</th>
           <th>Grade</th><th>Remark</th>
         </tr>
       </thead>
@@ -20,7 +20,7 @@ export const SubjectScoresTable: React.FC<Props> = ({ subject, submissions }) =>
         {submissions.length === 0 ? (
           <tr>
             <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
-              No submissions for this subject yet.
+              No submissions yet.
             </td>
           </tr>
         ) : (

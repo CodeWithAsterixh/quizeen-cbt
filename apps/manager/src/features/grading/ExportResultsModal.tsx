@@ -52,11 +52,11 @@ export const ExportResultsModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title || 'Export Assessment Results'} maxWidth={560}>
+    <Modal isOpen={isOpen} onClose={onClose} title={title || 'Export Results'} maxWidth={560}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)' }}>
-            Select assessments to generate PDF score reports.
+            Select tests to export as PDF.
           </span>
           <Button variant="ghost" size="sm" onClick={toggleAll}>
             {selectedIds.length === assessments.length ? 'Deselect All' : 'Select All'}

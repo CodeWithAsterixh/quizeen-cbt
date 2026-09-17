@@ -31,7 +31,7 @@ export const StudentResultHeader: React.FC<StudentResultHeaderProps> = ({
   onAutoGrade,
   onSave,
   onBack,
-  backLabel = 'Back to Exam Results',
+  backLabel = 'Back to Results',
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -57,10 +57,10 @@ export const StudentResultHeader: React.FC<StudentResultHeaderProps> = ({
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Button variant="outline" onClick={onAutoGrade} icon={<MagicWand size={16} />}>
-            Auto-Grade Matches
+            Auto Grade
           </Button>
           <Button variant="primary" onClick={onSave} icon={<FloppyDisk size={16} />}>
-            Save & Finalize Grade
+            Save Grade
           </Button>
         </div>
       </div>

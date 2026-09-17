@@ -50,7 +50,7 @@ export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
             </Badge>
           </div>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: 0 }}>
-            Detailed student scores and grading breakdown for {className} ({exam.session || '2024/2025'}).
+            Student scores and grades for {className} ({exam.session || '2024/2025'}).
           </p>
         </div>
         <Button
@@ -59,17 +59,17 @@ export const SubjectDetailPage: React.FC<SubjectDetailPageProps> = ({
           disabled={classSubs.length === 0}
           icon={<DownloadSimple size={16} />}
         >
-          Export Result (PDF)
+          Export PDF
         </Button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
         <Card style={{ padding: '0.8rem 1.1rem' }}>
-          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Subject Average</div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Average</div>
           <div style={{ fontSize: '1.6rem', fontWeight: 800, color: avg >= 50 ? 'var(--color-success)' : 'var(--color-danger)' }}>{avg}%</div>
         </Card>
         <Card style={{ padding: '0.8rem 1.1rem' }}>
-          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Students Tested</div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Students</div>
           <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-text)' }}>{total}</div>
         </Card>
         <Card style={{ padding: '0.8rem 1.1rem' }}>

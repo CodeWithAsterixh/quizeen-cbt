@@ -27,12 +27,12 @@ export function buildStudentCodesPdf(
 
   doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.text(school, textLeft, 15);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(71, 85, 105);
-  doc.text('Official Candidate Examination Login Slips', textLeft, 20);
+  doc.text('Student Login Slips', textLeft, 20);
   if (branding?.motto) { doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139); doc.text(`"${branding.motto}"`, textLeft, 24.5); }
 
   const cardY = branding?.motto ? 38 : 34;
   doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.roundedRect(14, cardY, 182, 11, 1.5, 1.5, 'FD');
-  const meta = [['TARGET CLASS', classFilter || 'All Classes'], ['TOTAL CANDIDATES', String(students.length)], ['STATUS', 'Verified Active'], ['DATE GENERATED', dateStr]];
+  const meta = [['CLASS', classFilter || 'All Classes'], ['STUDENTS', String(students.length)], ['STATUS', 'Active'], ['DATE', dateStr]];
   meta.forEach(([lbl, val], i) => {
     const x = 18 + i * 46;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 116, 139); doc.text(lbl, x, cardY + 4);
@@ -42,7 +42,7 @@ export function buildStudentCodesPdf(
   const rows = students.map((s, idx) => [String(idx + 1), s.name, s.classGroup || '-', s.department || '-', s.code || 'NO CODE', '']);
 
   autoTable(doc, {
-    startY: cardY + 15, head: [['S/N', 'Candidate Name', 'Class', 'Department', 'Exam Login ID', 'Signature']], body: rows,
+    startY: cardY + 15, head: [['#', 'Student Name', 'Class', 'Department', 'Login Code', 'Signature']], body: rows,
     theme: 'grid', headStyles: { fillColor: rgb, textColor: 255, fontStyle: 'bold', fontSize: 9 },
     bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] }, alternateRowStyles: { fillColor: [248, 250, 252] },
     columnStyles: {
@@ -52,7 +52,7 @@ export function buildStudentCodesPdf(
     },
     didDrawPage: (data) => {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
-      doc.text('Official Examination Slips - Powered by Queez CBT', 14, 290);
+      doc.text('Powered by Queez CBT', 14, 290);
       doc.text(`Page ${data.pageNumber} of ${doc.getNumberOfPages()}`, 196, 290, { align: 'right' });
     },
   });
