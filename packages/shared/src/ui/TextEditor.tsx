@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { formatToCanvas, canvasToValue } from './math-chip-converter.js';
+import { handleWordShortcut } from './editor-shortcuts.js';
 
 export interface TextEditorProps {
   value: string;
@@ -9,6 +10,8 @@ export interface TextEditorProps {
   label?: string;
   disabled?: boolean;
   onEditFormula?: (formula: string) => void;
+  onSave?: () => void;
+  onFormula?: () => void;
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({
@@ -19,6 +22,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   label,
   disabled = false,
   onEditFormula,
+  onSave,
+  onFormula,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +77,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           onInput={handleInput}
           onBlur={handleInput}
           onClick={handleClick}
+          onKeyDown={(e) => !disabled && handleWordShortcut(e, { onSave, onFormula, onChange: handleInput })}
           data-placeholder={placeholder}
           style={minHeight ? { minHeight: `${minHeight}px` } : undefined}
           tabIndex={0}

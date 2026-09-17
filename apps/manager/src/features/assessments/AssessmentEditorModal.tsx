@@ -1,9 +1,10 @@
 import React from 'react';
-import { FloppyDisk, ListNumbers, Gear } from '@cbt/shared';
+import { FloppyDisk, ListNumbers, Gear, ArrowCounterClockwise, ArrowClockwise } from '@cbt/shared';
 import { Assessment, Question, EDUCATION_LEVELS, Modal, Button } from '@cbt/shared';
 import { QuestionsListTab } from './QuestionsListTab';
 import { AssessmentSettingsTab } from './AssessmentSettingsTab';
 import { useAssessmentForm } from './useAssessmentForm';
+import { useAssessmentShortcuts } from './useAssessmentShortcuts';
 
 interface AssessmentEditorModalProps {
   isOpen: boolean; onClose: () => void; onSave: (assessment: Assessment) => void;
@@ -13,16 +14,17 @@ interface AssessmentEditorModalProps {
 export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
   isOpen, onClose, onSave, initialExam, initialTab = 'questions',
 }) => {
+  const form = useAssessmentForm(initialExam, isOpen, initialTab);
   const {
     activeTab, setActiveTab, editingQIndex, setEditingQIndex,
-    subject, setSubject, session, setSession,
-    assessmentType, setAssessmentType, isAvailable, setIsAvailable,
-    availableFrom, setAvailableFrom, availableTo, setAvailableTo,
-    durationMinutes, setDurationMinutes, passingScore, setPassingScore,
-    educationLevel, setEducationLevel, selectedClasses, setSelectedClasses,
-    department, setDepartment, questions, setQuestions,
-    shuffleQuestions, setShuffleQuestions, shuffleOptions, setShuffleOptions,
-  } = useAssessmentForm(initialExam, isOpen, initialTab);
+    subject, setSubject, session, setSession, assessmentType, setAssessmentType,
+    isAvailable, setIsAvailable, availableFrom, setAvailableFrom,
+    availableTo, setAvailableTo, durationMinutes, setDurationMinutes,
+    passingScore, setPassingScore, educationLevel, setEducationLevel,
+    selectedClasses, setSelectedClasses, department, setDepartment,
+    questions, setQuestions, shuffleQuestions, setShuffleQuestions,
+    shuffleOptions, setShuffleOptions, undo, redo, canUndo, canRedo,
+  } = form;
 
   const handleAddQ = () => {
     const newQ: Question = { id: `q_${Date.now()}`, prompt: `Question ${questions.length + 1}`, type: 'multiple_choice', options: ['Option A', 'Option B', 'Option C', 'Option D'], correctAnswer: 'Option A', points: 10 };
@@ -47,6 +49,8 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
     });
   };
 
+  useAssessmentShortcuts({ isOpen, onSave: () => handleSave(), onUndo: undo, onRedo: redo });
+
   const modalTitle = subject.trim() ? `${subject.trim()} Assessment` : (initialExam ? `Edit: ${initialExam.subject}` : 'Create New Assessment');
   const modalSubtitle = subject.trim() ? `Subject: ${subject.trim()} | ${session || 'Current Session'}` : 'Manage assessment settings and questions';
 
@@ -56,7 +60,9 @@ export const AssessmentEditorModal: React.FC<AssessmentEditorModalProps> = ({
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{questions.length} questions • {durationMinutes} mins • {isAvailable ? 'Active' : 'Hidden'}</span>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Button type="button" variant="outline" size="sm" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)" icon={<ArrowCounterClockwise size={16} />} />
+            <Button type="button" variant="outline" size="sm" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)" icon={<ArrowClockwise size={16} />} />
             <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
             <Button type="button" variant="primary" onClick={handleSave} icon={<FloppyDisk size={18} />}>Save Assessment</Button>
           </div>

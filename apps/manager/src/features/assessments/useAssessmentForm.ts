@@ -24,6 +24,8 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
   const [shuffleQuestions, setShuffleQuestions] = useState(initialExam?.shuffleQuestions ?? true);
   const [shuffleOptions, setShuffleOptions] = useState(initialExam?.shuffleOptions ?? true);
   const [questions, setQuestions] = useState<Question[]>(initialExam?.questions ?? [{ ...defaultQ, id: `q_${Date.now()}` }]);
+  const [past, setPast] = useState<Question[][]>([]);
+  const [future, setFuture] = useState<Question[][]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -43,8 +45,35 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
       setShuffleQuestions(initialExam?.shuffleQuestions ?? true);
       setShuffleOptions(initialExam?.shuffleOptions ?? true);
       setQuestions(initialExam?.questions ?? [{ ...defaultQ, id: `q_${Date.now()}` }]);
+      setPast([]);
+      setFuture([]);
     }
   }, [isOpen, initialExam, initialTab]);
+
+  const updateQuestions = (newQ: Question[] | ((prev: Question[]) => Question[])) => {
+    setQuestions((current) => {
+      const next = typeof newQ === 'function' ? newQ(current) : newQ;
+      setPast((p) => [...p.slice(-20), current]);
+      setFuture([]);
+      return next;
+    });
+  };
+
+  const undo = () => {
+    if (past.length === 0) return;
+    const prevQ = past[past.length - 1];
+    setPast((p) => p.slice(0, -1));
+    setFuture((f) => [questions, ...f]);
+    setQuestions(prevQ);
+  };
+
+  const redo = () => {
+    if (future.length === 0) return;
+    const nextQ = future[0];
+    setFuture((f) => f.slice(1));
+    setPast((p) => [...p, questions]);
+    setQuestions(nextQ);
+  };
 
   return {
     activeTab, setActiveTab, editingQIndex, setEditingQIndex,
@@ -53,7 +82,8 @@ export function useAssessmentForm(initialExam?: Assessment | null, isOpen = fals
     availableFrom, setAvailableFrom, availableTo, setAvailableTo,
     durationMinutes, setDurationMinutes, passingScore, setPassingScore,
     educationLevel, setEducationLevel, selectedClasses, setSelectedClasses,
-    department, setDepartment, questions, setQuestions,
+    department, setDepartment, questions, setQuestions: updateQuestions,
     shuffleQuestions, setShuffleQuestions, shuffleOptions, setShuffleOptions,
+    undo, redo, canUndo: past.length > 0, canRedo: future.length > 0,
   };
 }

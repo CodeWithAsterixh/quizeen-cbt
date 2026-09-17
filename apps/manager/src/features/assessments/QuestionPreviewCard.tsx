@@ -65,7 +65,7 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
                 onClick={() => onUpdate({ correctAnswer: opt })}
                 title="Click to select as correct answer"
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 6, fontSize: '0.84rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 12px', borderRadius: 6, fontSize: '0.84rem',
                   cursor: 'pointer', userSelect: 'none', transition: 'all 0.15s ease',
                   background: isCorrect ? 'var(--color-bg-subtle, #f0fdf4)' : 'var(--color-bg-alt, #f8fafc)',
                   border: isCorrect ? '1.5px solid var(--color-success, #10b981)' : '1px solid var(--color-border)',
@@ -73,8 +73,11 @@ export const QuestionPreviewCard: React.FC<QuestionPreviewCardProps> = ({
                   fontWeight: isCorrect ? 600 : 400,
                 }}
               >
-                {isCorrect ? <CheckCircle size={15} weight="bold" color="var(--color-success)" /> : <span style={{ opacity: 0.6 }}>{String.fromCharCode(65 + i)}.</span>}
-                <RichContent html={opt} inline />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                  <span style={{ opacity: isCorrect ? 0.9 : 0.6, fontWeight: 700 }}>{String.fromCharCode(65 + i)}.</span>
+                  <RichContent html={opt} inline />
+                </div>
+                {isCorrect && <CheckCircle size={16} weight="bold" color="var(--color-success)" style={{ flexShrink: 0 }} />}
               </div>
             );
           })}

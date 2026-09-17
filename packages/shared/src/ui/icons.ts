@@ -1,4 +1,5 @@
 export { ArchiveIcon, ArchiveIcon as Archive } from '@phosphor-icons/react/dist/csr/Archive';
+export { ArrowClockwiseIcon, ArrowClockwiseIcon as ArrowClockwise } from '@phosphor-icons/react/dist/csr/ArrowClockwise';
 export { ArrowCounterClockwiseIcon, ArrowCounterClockwiseIcon as ArrowCounterClockwise } from '@phosphor-icons/react/dist/csr/ArrowCounterClockwise';
 export { ArrowLeftIcon, ArrowLeftIcon as ArrowLeft } from '@phosphor-icons/react/dist/csr/ArrowLeft';
 export { ArrowRightIcon, ArrowRightIcon as ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight';

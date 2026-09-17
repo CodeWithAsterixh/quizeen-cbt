@@ -15,16 +15,10 @@ export const QuestionOptionsEditor: React.FC<QuestionOptionsEditorProps> = ({ qu
         {question.options.map((opt, optIdx) => {
           const isCorrect = question.correctAnswer === opt;
           return (
-            <div key={optIdx} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Button
-                type="button"
-                variant={isCorrect ? 'success' : 'outline'}
-                size="sm"
-                icon={isCorrect ? <Check size={14} weight="bold" /> : undefined}
-                onClick={() => onUpdate({ correctAnswer: opt })}
-              >
-                {isCorrect ? 'Correct' : 'Mark Correct'}
-              </Button>
+            <div key={optIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: isCorrect ? 'var(--color-success)' : 'var(--color-text-muted)', width: 22, textAlign: 'center', flexShrink: 0 }}>
+                {String.fromCharCode(65 + optIdx)}.
+              </span>
               <div style={{ flex: 1 }}>
                 <TextInput
                   value={opt}
@@ -35,6 +29,16 @@ export const QuestionOptionsEditor: React.FC<QuestionOptionsEditorProps> = ({ qu
                   }}
                 />
               </div>
+              <Button
+                type="button"
+                variant={isCorrect ? 'success' : 'outline'}
+                size="sm"
+                icon={isCorrect ? <Check size={14} weight="bold" /> : undefined}
+                onClick={() => onUpdate({ correctAnswer: opt })}
+                style={{ flexShrink: 0, minWidth: 110 }}
+              >
+                {isCorrect ? 'Correct' : 'Mark Correct'}
+              </Button>
             </div>
           );
         })}
