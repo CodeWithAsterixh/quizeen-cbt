@@ -9,7 +9,7 @@ interface TitleBarProps {
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'Queez',
-  badge = 'Management',
+  badge,
   iconUrl,
 }) => {
   return <SharedTitleBar title={title} badge={badge} iconUrl={iconUrl} />;

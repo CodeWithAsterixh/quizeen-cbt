@@ -44,12 +44,15 @@ export const App: React.FC = () => {
   if (isLocked) return <LicenseLockoutScreen licenseState={licenseState} onRetry={refreshLicense} />;
 
   const branding = licenseState?.license?.branding;
+  const rawLogo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const appLogo = rawLogo && (rawLogo.startsWith('data:image/') || rawLogo.startsWith('/') || rawLogo.startsWith('http')) ? rawLogo : '/icon.png';
+
   return (
     <div className="app-shell">
-      <TitleBar title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.managerName || bakedWhitelabelConfig?.suiteName || 'Assessment Manager'} badge={(branding?.shortName || bakedWhitelabelConfig?.shortName) ? `${branding?.shortName || bakedWhitelabelConfig?.shortName} Assessment Office` : 'Management'} iconUrl={branding?.appIconUrl || branding?.logoUrl} />
+      <TitleBar title={bakedWhitelabelConfig?.managerName || (branding?.schoolName ? `${branding.schoolName} Assessment Manager` : 'Assessment Manager')} iconUrl={appLogo} />
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
       <div className="manager-body">
-        <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} />
+        <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} logoUrl={appLogo} />
         <main className="main-viewport">
           {notice && (
             <div style={{ background: 'var(--color-primary)', color: '#fff', padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 14, fontWeight: 600, fontSize: '0.88rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

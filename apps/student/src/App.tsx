@@ -47,12 +47,14 @@ export const App: React.FC = () => {
   }
 
   const branding = licenseState?.license?.branding;
+  const rawLogo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const appLogo = rawLogo && (rawLogo.startsWith('data:image/') || rawLogo.startsWith('/') || rawLogo.startsWith('http')) ? rawLogo : '/icon.png';
+
   return (
     <div className="app-shell">
       <TitleBar
-        title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.studentName || bakedWhitelabelConfig?.suiteName || 'Student Portal'}
-        badge={(branding?.shortName || bakedWhitelabelConfig?.shortName) ? `${branding?.shortName || bakedWhitelabelConfig?.shortName} Student Portal` : 'Student Portal'}
-        iconUrl={branding?.appIconUrl || branding?.logoUrl}
+        title={bakedWhitelabelConfig?.studentName || (branding?.schoolName ? `${branding.schoolName} Student Portal` : 'Student Portal')}
+        iconUrl={appLogo}
       />
       <main className="app-content">
         {view === 'start' && (

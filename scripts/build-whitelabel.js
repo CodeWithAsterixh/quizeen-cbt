@@ -13,11 +13,32 @@ function run(cmd, cwd = root) {
   execSync(cmd, { cwd, stdio: 'inherit', env: process.env });
 }
 
+const activeChildren = new Set();
+
+function killAllActiveChildren() {
+  for (const child of activeChildren) {
+    try {
+      if (child.pid) {
+        if (process.platform === 'win32') {
+          require('child_process').spawnSync('taskkill', ['/F', '/T', '/PID', String(child.pid)], { stdio: 'ignore' });
+        } else {
+          child.kill('SIGTERM');
+        }
+      }
+    } catch {}
+  }
+  activeChildren.clear();
+}
+
+process.on('SIGINT', () => { killAllActiveChildren(); process.exit(1); });
+process.on('SIGTERM', () => { killAllActiveChildren(); process.exit(1); });
+process.on('exit', () => { killAllActiveChildren(); });
+
 function runAsync(cmd, label = 'App') {
   return new Promise((resolve, reject) => {
     console.log(`[${label}] Build started`);
-    const [c, ...args] = cmd.split(' ');
-    const child = spawn(c, args, { cwd: root, shell: true, env: process.env });
+    const child = spawn(cmd, { cwd: root, shell: true, env: process.env });
+    activeChildren.add(child);
 
     const handleData = (chunk) => {
       const lines = chunk.toString().split(/\r?\n/);
@@ -48,6 +69,7 @@ function runAsync(cmd, label = 'App') {
     child.stderr.on('data', handleData);
 
     child.on('close', (code) => {
+      activeChildren.delete(child);
       if (code === 0) {
         console.log(`[${label}] Packaging completed successfully`);
         resolve();
@@ -79,9 +101,23 @@ function parseArgs() {
   const version = getArg('version', base.version || '2.0.0');
   const iconRaw = getArg('icon', getArg('logo', base.iconPath || base.logo || base.appIconUrl || ''));
   let resolvedIcon = iconRaw && fs.existsSync(iconRaw) ? iconRaw : '';
-  if (!resolvedIcon && iconRaw && iconRaw.startsWith('data:image/')) {
+  let dataUriLogo = '';
+
+  if (base.logo && typeof base.logo === 'string' && base.logo.startsWith('data:image/')) {
+    dataUriLogo = base.logo;
+  } else if (iconRaw && iconRaw.startsWith('data:image/')) {
+    dataUriLogo = iconRaw;
+  } else if (resolvedIcon && fs.existsSync(resolvedIcon)) {
     try {
-      const match = iconRaw.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+      const ext = path.extname(resolvedIcon).toLowerCase();
+      const mime = ext === '.svg' ? 'image/svg+xml' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'image/png';
+      dataUriLogo = `data:${mime};base64,${fs.readFileSync(resolvedIcon).toString('base64')}`;
+    } catch {}
+  }
+
+  if (!resolvedIcon && dataUriLogo) {
+    try {
+      const match = dataUriLogo.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
       if (match) {
         const ext = match[1] === 'svg+xml' ? 'svg' : match[1];
         const tempPath = path.join(root, '.qzn-releases', `temp-logo-${Date.now()}.${ext}`);
@@ -107,7 +143,8 @@ function parseArgs() {
     serverName: base.serverName || `${school} Local Server`,
     primaryColor: primary,
     accentColor: accent,
-    logo: iconRaw,
+    logo: dataUriLogo || undefined,
+    appIconUrl: dataUriLogo || undefined,
     iconPath: resolvedIcon || undefined,
     badges: base.badges,
     badgeColors: base.badgeColors,
@@ -161,30 +198,35 @@ async function main() {
     const makensis = findMakeNsis();
     const rawBaseName = `${config.suiteName.replace(/[^a-zA-Z0-9_-]/g, '-')}-Setup-v${config.version}.exe`;
     const outInstaller = path.join(releaseDir, rawBaseName);
-    const nsisArgs = [
-      '/V4',
-      `/DVERSION=${config.version}`,
-      `/DOUT_FILE=${outInstaller}`,
-      `/DSERVER_DIR=${path.join(root, 'apps/server/release/win-unpacked')}`,
-      `/DMANAGER_DIR=${path.join(root, 'apps/manager/release/win-unpacked')}`,
-      `/DSTUDENT_DIR=${path.join(root, 'apps/student/release/win-unpacked')}`,
-      `/DICON_PATH=${path.join(root, 'installer/resources/installer.ico')}`,
-      `/DUNICON_PATH=${path.join(root, 'installer/resources/uninstall.ico')}`,
-      `/DLICENSE_PATH=${path.join(root, 'installer/LICENSE.txt')}`,
-      `/DSUITE_NAME=${config.suiteName}`,
-      `/DBRANDING_TEXT=${config.brandingText}`,
-      `/DSTUDENT_NAME=${config.studentName}`,
-      `/DMANAGER_NAME=${config.managerName}`,
-      `/DSERVER_NAME=${config.serverName}`,
-      path.join(root, 'installer/suite.nsi'),
-    ];
+    const defsPath = path.join(root, 'installer', 'whitelabel-defs.nsh');
+    const defs = [
+      `!define VERSION "${config.version}"`,
+      `!define OUT_FILE "${outInstaller.replace(/\\/g, '\\\\')}"`,
+      `!define SERVER_DIR "${path.join(root, 'apps/server/release/win-unpacked').replace(/\\/g, '\\\\')}"`,
+      `!define MANAGER_DIR "${path.join(root, 'apps/manager/release/win-unpacked').replace(/\\/g, '\\\\')}"`,
+      `!define STUDENT_DIR "${path.join(root, 'apps/student/release/win-unpacked').replace(/\\/g, '\\\\')}"`,
+      `!define ICON_PATH "${path.join(root, 'installer/resources/installer.ico').replace(/\\/g, '\\\\')}"`,
+      `!define UNICON_PATH "${path.join(root, 'installer/resources/uninstall.ico').replace(/\\/g, '\\\\')}"`,
+      `!define LICENSE_PATH "${path.join(root, 'installer/LICENSE.txt').replace(/\\/g, '\\\\')}"`,
+      `!define SUITE_NAME "${config.suiteName}"`,
+      `!define BRANDING_TEXT "${config.brandingText}"`,
+      `!define STUDENT_NAME "${config.studentName}"`,
+      `!define MANAGER_NAME "${config.managerName}"`,
+      `!define SERVER_NAME "${config.serverName}"`,
+    ].join('\n');
+    fs.writeFileSync(defsPath, defs, 'utf8');
 
+    const nsisArgs = ['/V4', path.join(root, 'installer/suite.nsi')];
     await runNsisWithProgress(makensis, nsisArgs);
 
     const sizeMb = (fs.statSync(outInstaller).size / 1024 / 1024).toFixed(1);
     console.log(`\nWhitelabel installer built successfully: ${outInstaller} (${sizeMb} MB)\n`);
   } finally {
     clearBakedWhitelabel();
+    try {
+      const defsPath = path.join(root, 'installer', 'whitelabel-defs.nsh');
+      if (fs.existsSync(defsPath)) fs.unlinkSync(defsPath);
+    } catch {}
     cleanupWhitelabelBuild(root, releaseDir, config.iconPath);
   }
 }

@@ -24,7 +24,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const api = (window as any).serverApi;
     if (!api) return;
-    if (localStorage.getItem('cbt_server_autostart') === 'true') api.startServer(4000);
+    if (localStorage.getItem('cbt_server_autostart') !== 'false') api.startServer(4000);
     api.detectExisting?.(4000).then((r: any) => { if (r?.active) setInfoMessage(`Active Server detected at ${r.url}.`); }).catch(() => {});
     api.getTheme?.().then((t: any) => { if (t) applyThemeCustomization(t); }).catch(() => {});
     const unsubTheme = api.onThemeChanged?.((t: any) => { if (t) applyThemeCustomization(t); });
@@ -74,11 +74,14 @@ export const App: React.FC = () => {
   const handleClose = () => status.running ? setIsWarningOpen(true) : (window as any).electronApi?.closeWindow();
   const handleExit = async () => { await (window as any).serverApi?.stopServer(); (window as any).electronApi?.closeWindow(); };
 
+  const rawLogo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const appLogo = rawLogo && (rawLogo.startsWith('data:image/') || rawLogo.startsWith('/') || rawLogo.startsWith('http')) ? rawLogo : '/icon.png';
+
   return (
     <div className="server-window">
-      <TitleBar title={branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.suiteName || 'CBT Server'} badge="CBT Server" iconUrl={branding?.appIconUrl || branding?.logoUrl} onClose={handleClose} />
+      <TitleBar title={bakedWhitelabelConfig?.serverName || (branding?.schoolName ? `${branding.schoolName} Local Server` : 'Local Server')} iconUrl={appLogo} onClose={handleClose} />
       <div className="server-body">
-        <ServerSidebar currentTab={currentTab} onSelectTab={setCurrentTab} requestCount={logs.length} isRunning={Boolean(status?.running)} port={status?.port || 4000} />
+        <ServerSidebar currentTab={currentTab} onSelectTab={setCurrentTab} requestCount={logs.length} isRunning={Boolean(status?.running)} port={status?.port || 4000} logoUrl={appLogo} />
         <main className="server-content">
           {currentTab === 'overview' && <ServerOverviewTab status={status || defaultStatus} onToggle={handleToggle} errorMessage={errorMessage} infoMessage={infoMessage} />}
           {currentTab === 'devices' && <ServerDevicesTab />}

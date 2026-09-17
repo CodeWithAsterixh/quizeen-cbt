@@ -8,7 +8,10 @@ interface StartScreenProps {
 export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick }) => {
   const { licenseState } = useAppLicense();
   const branding = licenseState?.license?.branding;
-  const logo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const rawLogo = branding?.appIconUrl || branding?.logoUrl || bakedWhitelabelConfig?.appIconUrl || bakedWhitelabelConfig?.logo;
+  const initialLogo = rawLogo && (rawLogo.startsWith('data:image/') || rawLogo.startsWith('/') || rawLogo.startsWith('http')) ? rawLogo : '/icon.png';
+  const [logoSrc, setLogoSrc] = React.useState<string>(initialLogo);
+  const [imgFailed, setImgFailed] = React.useState(false);
   const appTitle = branding?.appName || branding?.schoolName || bakedWhitelabelConfig?.studentName || bakedWhitelabelConfig?.suiteName || 'CBT Portal';
 
   return (
@@ -52,8 +55,16 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStartExamClick }) =>
             boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >
-          {logo ? (
-            <img src={logo} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 6 }} />
+          {!imgFailed ? (
+            <img
+              src={logoSrc}
+              alt="Logo"
+              onError={() => {
+                if (logoSrc !== '/icon.png') setLogoSrc('/icon.png');
+                else setImgFailed(true);
+              }}
+              style={{ width: "100%", height: "100%", objectFit: "contain", padding: 6 }}
+            />
           ) : (
             <GraduationCap size={44} weight="fill" />
           )}

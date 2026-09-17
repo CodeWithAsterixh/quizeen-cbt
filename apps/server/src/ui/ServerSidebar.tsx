@@ -9,10 +9,11 @@ interface Props {
   requestCount: number;
   isRunning: boolean;
   port: number;
+  logoUrl?: string;
 }
 
 export const ServerSidebar: React.FC<Props> = ({
-  currentTab, onSelectTab, requestCount, isRunning, port,
+  currentTab, onSelectTab, requestCount, isRunning, port, logoUrl,
 }) => {
   const items = [
     { id: 'overview' as ServerTab, label: 'Overview', icon: HardDrives },
@@ -30,7 +31,12 @@ export const ServerSidebar: React.FC<Props> = ({
   return (
     <aside className="server-sidebar" aria-label="Server Navigation">
       <nav className="server-sidebar-nav">
-        <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid var(--color-border)', marginBottom: 12 }}>
+        <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid var(--color-border)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+          {logoUrl && (
+            <div style={{ width: 28, height: 28, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', flexShrink: 0 }}>
+              <img src={logoUrl} alt="Logo" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+          )}
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', letterSpacing: 0.5 }}>
             CBT SERVER
           </div>

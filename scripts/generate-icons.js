@@ -102,11 +102,11 @@ function makeMultiResolutionIco(img) {
 }
 
 const ROLE_SVGS = {
-  server: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="6" rx="2"></rect><rect x="2" y="10" width="20" height="6" rx="2"></rect><rect x="2" y="18" width="20" height="4" rx="2"></rect><circle cx="6" cy="5" r="1" fill="#4ade80"></circle><circle cx="6" cy="13" r="1" fill="#4ade80"></circle></svg>',
-  manager: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
-  student: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"></path></svg>',
-  uninstall: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
-  installer: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+  server: '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="6" rx="2"></rect><rect x="2" y="10" width="20" height="6" rx="2"></rect><rect x="2" y="18" width="20" height="4" rx="2"></rect><circle cx="6" cy="5" r="1.2" fill="#93c5fd"></circle><circle cx="6" cy="13" r="1.2" fill="#93c5fd"></circle></svg>',
+  manager: '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
+  student: '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"></path></svg>',
+  uninstall: '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
+  installer: '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
 };
 
 function toDataUri(input) {
@@ -171,11 +171,11 @@ function buildHtml(role, cfg) {
   const accent = cfg.accent || '#0d9488';
 
   const roleDefaults = {
-    server: { label: 'SRV', bg: primary },
-    manager: { label: 'MGR', bg: primary },
-    student: { label: 'STU', bg: accent },
-    uninstall: { label: 'UNINST', bg: '#dc2626' },
-    installer: { label: 'CBT', bg: primary },
+    server: { label: 'SERVER', bg: '#2563eb' },
+    manager: { label: 'MANAGER', bg: '#7c3aed' },
+    student: { label: 'STUDENT', bg: '#059669' },
+    uninstall: { label: 'UNINSTALL', bg: '#dc2626' },
+    installer: { label: 'SETUP', bg: '#0f172a' },
   };
 
   const label = (cfg.badges && cfg.badges[role]) || roleDefaults[role].label;
@@ -195,6 +195,8 @@ function buildHtml(role, cfg) {
     center = `<div class="emblem" style="background: linear-gradient(135deg, ${primary}, ${accent});">${SVG_CONTENT}</div>`;
   }
 
+  const fontSize = label.length > 7 ? '15px' : label.length > 6 ? '18px' : '21px';
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -211,11 +213,11 @@ function buildHtml(role, cfg) {
       background: transparent;
     }
     .logo-img {
-      width: 470px;
-      height: 470px;
+      width: 450px;
+      height: 450px;
       object-fit: contain;
-      image-rendering: -webkit-optimize-contrast;
-      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
+      image-rendering: auto;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.22));
     }
     .emblem {
       width: 440px;
@@ -245,12 +247,12 @@ function buildHtml(role, cfg) {
       position: absolute;
       right: 12px;
       bottom: 12px;
-      width: 136px;
-      height: 136px;
+      width: 164px;
+      height: 164px;
       border-radius: 50%;
       background: ${bg};
-      border: 7px solid #ffffff;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      border: 8px solid #ffffff;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -259,10 +261,10 @@ function buildHtml(role, cfg) {
       z-index: 10;
     }
     .badge-label {
-      font-size: 20px;
+      font-size: ${fontSize};
       font-weight: 900;
-      letter-spacing: 1.5px;
-      margin-top: 1px;
+      letter-spacing: 1.2px;
+      margin-top: 2px;
       text-transform: uppercase;
     }
   </style></head><body>
@@ -304,6 +306,16 @@ function saveRoleIcons(role, nativeImg) {
 
 if (process.versions.electron) {
   const { app, BrowserWindow } = require('electron');
+  const os = require('os');
+  const tmpUserData = path.join(os.tmpdir(), `qzn-icon-gen-${process.pid}-${Date.now()}`);
+  app.setPath('userData', tmpUserData);
+  app.commandLine.appendSwitch('disable-gpu');
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+  app.commandLine.appendSwitch('disable-software-rasterizer');
+  app.commandLine.appendSwitch('disable-gpu-compositing');
+  app.commandLine.appendSwitch('disable-gpu-rasterization');
+  app.commandLine.appendSwitch('disable-gpu-sandbox');
+
   app.whenReady().then(async () => {
     const cfg = parseArgs();
     const win = new BrowserWindow({

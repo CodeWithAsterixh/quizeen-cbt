@@ -47,6 +47,10 @@ function cleanupWhitelabelBuild(root, releaseDir, tempLogoPath) {
   if (fs.existsSync(installerRes)) {
     fs.rmSync(installerRes, { recursive: true, force: true });
   }
+  const defsFile = path.join(root, 'installer', 'whitelabel-defs.nsh');
+  if (fs.existsSync(defsFile)) {
+    try { fs.unlinkSync(defsFile); } catch {}
+  }
 
   ['apps/server/release', 'apps/manager/release', 'apps/student/release'].forEach((dir) => {
     const p = path.join(root, dir);

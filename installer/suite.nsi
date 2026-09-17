@@ -20,7 +20,9 @@ Var RadioCurrentUser
 Var InstallScope
 Var Relaunched
 
-; Define defaults if not passed via command line
+!include /NONFATAL "whitelabel-defs.nsh"
+
+; Define defaults if not passed via definitions or command line
 !ifndef VERSION
   !define VERSION "2.0.6"
 !endif
@@ -177,17 +179,21 @@ Section -Post
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     ${If} ${SectionIsSelected} ${SecServer}
+      SetOutPath "$INSTDIR\Server"
       CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
-      CreateShortcut "$DESKTOP\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe"
+      CreateShortcut "$DESKTOP\${SERVER_NAME}.lnk" "$INSTDIR\Server\Queez CBT Server.exe" "" "$INSTDIR\Server\Queez CBT Server.exe" 0
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecManager}
+      SetOutPath "$INSTDIR\Manager"
       CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
-      CreateShortcut "$DESKTOP\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe"
+      CreateShortcut "$DESKTOP\${MANAGER_NAME}.lnk" "$INSTDIR\Manager\Queez CBT Manager.exe" "" "$INSTDIR\Manager\Queez CBT Manager.exe" 0
     ${EndIf}
     ${If} ${SectionIsSelected} ${SecStudent}
+      SetOutPath "$INSTDIR\Student"
       CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
-      CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe"
+      CreateShortcut "$DESKTOP\${STUDENT_NAME}.lnk" "$INSTDIR\Student\Queez CBT Student.exe" "" "$INSTDIR\Student\Queez CBT Student.exe" 0
     ${EndIf}
+    SetOutPath "$INSTDIR"
     CreateShortcut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall ${SUITE_NAME}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -213,7 +219,7 @@ Section -Post
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayName" "${SUITE_NAME}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
     WriteRegStr HKLM "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"
@@ -232,7 +238,7 @@ Section -Post
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayName" "${SUITE_NAME}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "Publisher" "${BRANDING_TEXT}"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SUITE_NAME}" "DisplayIcon" "$INSTDIR\Manager\Queez CBT Manager.exe"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Install_Dir" "$INSTDIR"
     WriteRegStr HKCU "Software\${BRANDING_TEXT}\${SUITE_NAME}" "Start Menu Folder" "$STARTMENU_FOLDER"

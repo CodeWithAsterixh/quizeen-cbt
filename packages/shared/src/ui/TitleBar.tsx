@@ -24,7 +24,7 @@ export interface TitleBarProps {
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'Queez',
-  badge = 'CBT Platform',
+  badge,
   iconUrl,
   onClose,
 }) => {
@@ -42,7 +42,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   return (
     <header className="title-bar" onDoubleClick={handleMaximize}>
       <div className="title-bar-drag" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {iconUrl && <img src={iconUrl} alt="Logo" style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain' }} />}
+        {iconUrl && (
+          <img
+            src={iconUrl}
+            alt="Logo"
+            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+            style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'contain' }}
+          />
+        )}
         <span className="title-bar-title">{title}</span>
         {badge && <span className="title-bar-badge">{badge}</span>}
         {isServerOnline !== null && (

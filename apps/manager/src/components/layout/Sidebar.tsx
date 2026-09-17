@@ -10,12 +10,14 @@ interface SidebarProps {
   currentTab: ManagerTab;
   onSelectTab: (tab: ManagerTab) => void;
   pendingGradingCount: number;
+  logoUrl?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
   pendingGradingCount,
+  logoUrl,
 }) => {
   const navItems = [
     { id: 'dashboard' as ManagerTab, label: 'Overview', icon: Gauge },
@@ -35,7 +37,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside className="sidebar" aria-label="Teacher & Office Navigation">
       <nav className="sidebar-nav" aria-label="Main manager menu">
-        <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid var(--color-border)', marginBottom: 12 }}>
+        <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid var(--color-border)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+          {logoUrl && (
+            <div style={{ width: 28, height: 28, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', flexShrink: 0 }}>
+              <img src={logoUrl} alt="Logo" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+          )}
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', letterSpacing: 0.5 }}>
             ASSESSMENT MANAGER
           </div>
