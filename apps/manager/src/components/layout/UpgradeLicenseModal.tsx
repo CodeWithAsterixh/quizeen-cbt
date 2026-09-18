@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, CheckCircle, LockKey, ArrowSquareOut } from '@cbt/shared';
+import { Modal, Button, CheckCircle, LockKey, ArrowRight } from '@cbt/shared';
 
 interface Props {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export const UpgradeLicenseModal: React.FC<Props> = ({ isOpen, onClose, onActiva
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upgrade to Institutional License" maxWidth="520px">
+    <Modal isOpen={isOpen} onClose={onClose} title="Upgrade to Institutional License" maxWidth={520}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
         <p style={{ margin: 0, color: 'var(--color-text-subtle, #4b5563)', lineHeight: 1.5 }}>
           You are currently running the <strong>Free Version</strong> (1 student, 1 server, 1 manager). Upgrade to an institutional license to unlock full school deployment.
@@ -61,7 +61,7 @@ export const UpgradeLicenseModal: React.FC<Props> = ({ isOpen, onClose, onActiva
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="primary" onClick={handleOpenConsult} icon={<ArrowSquareOut size={16} />}>
+          <Button variant="primary" onClick={handleOpenConsult} icon={<ArrowRight size={14} />}>
             Request School Quote & License
           </Button>
         </div>

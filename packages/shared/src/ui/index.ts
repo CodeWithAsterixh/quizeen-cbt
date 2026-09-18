@@ -31,4 +31,4 @@ export * from './ToastContainer.js';
 export * from './ConfirmDialog.js';
 export * from './PromptDialog.js';
 export * from './GlobalDialogHost.js';
-
+export * from './SvgBackground.js';
