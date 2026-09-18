@@ -54,7 +54,7 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {state?.status === 'active' && <Button size="sm" variant="secondary" onClick={handleSync}>Sync Status</Button>}
-            <Badge color={state?.status === 'active' ? 'emerald' : state?.status === 'expired' ? 'amber' : 'rose'}>{state?.status?.toUpperCase() || 'UNLICENSED'}</Badge>
+            <Badge color={state?.status === 'active' ? 'emerald' : state?.status === 'expired' ? 'amber' : 'blue'}>{state?.status === 'active' ? 'ACTIVE LICENSE' : 'FREE VERSION'}</Badge>
           </div>
         </div>
         <div style={{ background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 4, marginBottom: 14, border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -64,16 +64,14 @@ export const ServerLicenseTab: React.FC<{ port?: number }> = ({ port = 4000 }) =
           </div>
           <Button size="sm" variant="secondary" onClick={handleCopyHw} icon={copied ? <Check size={14} /> : <Copy size={14} />}>{copied ? 'Copied' : 'Copy'}</Button>
         </div>
-        {state?.license && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 14 }}>
-            {[['School Name', state.license.branding.schoolName], ['Term & Validity', `${state.license.term} (${state.daysRemaining} days left)`], ['Station Quota', `${state.license.stationLimit} Student Stations`]].map(([lbl, val]) => (
-              <div key={lbl} style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>{lbl}</span>
-                <strong style={{ fontSize: '0.9rem' }}>{val}</strong>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 14 }}>
+          {(state?.license ? [['School Name', state.license.branding.schoolName], ['Term', `${state.license.term} (${state.daysRemaining}d)`], ['Station Quota', `${state.license.stationLimit} Stations`]] : [['Edition', 'Free Community'], ['Station Quota', '1 Student Station'], ['Quota', '1 Server, 1 Manager']]).map(([lbl, val]) => (
+            <div key={lbl} style={{ background: 'var(--color-surface-hover)', padding: '8px 12px', borderRadius: 4 }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', display: 'block' }}>{lbl}</span>
+              <strong style={{ fontSize: '0.9rem' }}>{val}</strong>
+            </div>
+          ))}
+        </div>
         <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Activate Server (16-Digit Key or File)</span>

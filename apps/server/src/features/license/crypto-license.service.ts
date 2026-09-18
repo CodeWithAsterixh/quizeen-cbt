@@ -37,15 +37,16 @@ class CryptoLicenseService {
     if (wl) return wl;
     const trap = tamperTrapService.verifyAndRecordTimestamp();
     if (!trap.valid) return { status: 'tampered', hardwareId: hwId, message: trap.reason };
+    const freeLimits = { maxStudents: 1, maxServers: 1, maxManagers: 1 };
     if (!fs.existsSync(this.licenseFile)) {
-      return { status: 'unlicensed', hardwareId: hwId, message: 'No license installed' };
+      return { status: 'unlicensed', tier: 'free', limits: freeLimits, hardwareId: hwId, message: 'Free Version (1 Student, 1 Server, 1 Manager)' };
     }
 
     try {
       const raw = fs.readFileSync(this.licenseFile, 'utf8');
       const token: SignedLicenseToken = JSON.parse(raw);
       if (!this.verifySignature(token)) {
-        return { status: 'unlicensed', hardwareId: hwId, message: 'Cryptographic signature is invalid' };
+        return { status: 'unlicensed', tier: 'free', limits: freeLimits, hardwareId: hwId, message: 'Invalid license signature. Running Free Version.' };
       }
 
       const p = token.payload;
@@ -53,16 +54,15 @@ class CryptoLicenseService {
         return { status: 'hardware_mismatch', license: p, hardwareId: hwId, message: `Bound to ${p.hardwareId}, this is ${hwId}` };
       }
 
-      const expiry = new Date(p.validUntil).getTime();
-      const now = Date.now();
+      const expiry = new Date(p.validUntil).getTime(), now = Date.now();
       if (now > expiry) {
         return { status: 'expired', license: p, hardwareId: hwId, message: `Expired on ${new Date(expiry).toLocaleDateString()}` };
       }
 
       const daysRemaining = Math.max(0, Math.ceil((expiry - now) / (1000 * 60 * 60 * 24)));
-      return { status: 'active', license: p, hardwareId: hwId, daysRemaining };
+      return { status: 'active', tier: 'licensed', limits: { maxStudents: p.stationLimit || 50, maxServers: 1, maxManagers: 9999 }, license: p, hardwareId: hwId, daysRemaining };
     } catch {
-      return { status: 'unlicensed', hardwareId: hwId, message: 'Malformed license file' };
+      return { status: 'unlicensed', tier: 'free', limits: freeLimits, hardwareId: hwId, message: 'Malformed license file. Running Free Version.' };
     }
   }
 

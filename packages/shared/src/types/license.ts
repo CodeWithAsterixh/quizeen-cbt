@@ -46,11 +46,20 @@ export interface SignedLicenseToken {
 
 export type LicenseStatus = 'active' | 'expired' | 'tampered' | 'hardware_mismatch' | 'unlicensed';
 
+export interface LicenseTierLimits {
+  maxStudents: number;
+  maxServers: number;
+  maxManagers: number;
+}
+
 export interface LicenseState {
   status: LicenseStatus;
+  tier?: 'free' | 'licensed';
+  limits?: LicenseTierLimits;
+  portalUrl?: string;
   license?: LicensePayload | null;
   hardwareId: string;
   daysRemaining?: number;
   message?: string;
-  serverOnline?:boolean
+  serverOnline?: boolean;
 }

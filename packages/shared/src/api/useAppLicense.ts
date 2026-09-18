@@ -16,9 +16,7 @@ export function useAppLicense() {
   const [error, setError] = useState<string | null>(null);
   const isFetchingRef = useRef(false);
   const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Use a ref to track initial load without it becoming a dep of fetchLicense
-  const isInitialRef = useRef(true);
-  const hasResolvedRef = useRef(false);
+  const isInitialRef = useRef(true), hasResolvedRef = useRef(false);
 
   const fetchLicense = useCallback(async () => {
     if (isFetchingRef.current) return;
@@ -84,7 +82,9 @@ export function useAppLicense() {
     };
   }, [fetchLicense]);
 
-  const isLocked = Boolean(!bakedWhitelabelConfig?.unlicensedMode && hasResolved && licenseState && licenseState.status !== 'active');
+  const isHardLock = licenseState?.status === 'tampered' || licenseState?.status === 'hardware_mismatch' || !licenseState?.serverOnline;
+  const isLocked = Boolean(!bakedWhitelabelConfig?.unlicensedMode && hasResolved && isHardLock);
+  const isFreeTier = Boolean(licenseState && (licenseState.status === 'unlicensed' || licenseState.tier === 'free'));
 
   return {
     licenseState,
@@ -92,5 +92,6 @@ export function useAppLicense() {
     error,
     refreshLicense: fetchLicense,
     isLocked,
+    isFreeTier,
   };
 }

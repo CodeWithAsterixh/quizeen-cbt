@@ -9,6 +9,8 @@ import { useStudentStore } from './store/useStudentStore';
 import { useManagerHeartbeat } from './features/device/useManagerHeartbeat';
 import { useManagerUpdater } from './features/device/useManagerUpdater';
 import { ManagerUpdateBanner } from './features/device/ManagerUpdateBanner';
+import { FreeTierBanner } from './components/layout/FreeTierBanner';
+import { UpgradeLicenseModal } from './components/layout/UpgradeLicenseModal';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<ManagerTab>('dashboard');
@@ -19,8 +21,8 @@ export const App: React.FC = () => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [modals, setModals] = useState({ student: false, server: false, theme: false, loader: false });
-  const { licenseState, isLocked, refreshLicense } = useAppLicense();
+  const [modals, setModals] = useState({ student: false, server: false, theme: false, loader: false, upgrade: false });
+  const { licenseState, isLocked, isFreeTier, refreshLicense } = useAppLicense();
   const isAuthoring = isEditorOpen || modals.student;
   const updater = useManagerUpdater(isAuthoring);
 
@@ -48,6 +50,7 @@ export const App: React.FC = () => {
   return (
     <div className="app-shell">
       <TitleBar title={bakedWhitelabelConfig?.managerName || (branding?.schoolName ? `${branding.schoolName} Assessment Manager` : 'Assessment Manager')} iconUrl={appLogo} />
+      {isFreeTier && <FreeTierBanner onOpenUpgrade={() => setModals((m) => ({ ...m, upgrade: true }))} />}
       <ManagerUpdateBanner visible={updater.bannerVisible} phase={updater.phase} progress={updater.progress} latestVersion={updater.latestVersion} error={updater.error} onStart={updater.startDownload} onDismiss={updater.dismissBanner} />
       <div className="manager-body">
         <Sidebar currentTab={currentTab} onSelectTab={(t) => { setSelectedExamId(null); setSelectedSubmissionId(null); setCurrentTab(t); }} pendingGradingCount={submissions.filter((s) => s.status === 'awaiting_result').length} logoUrl={appLogo} />
@@ -83,6 +86,7 @@ export const App: React.FC = () => {
         isLoaderOpen={modals.loader} onCloseLoader={() => setModals(m => ({ ...m, loader: false }))}
         onImportQzn={async (items) => { for (const item of items) await saveAssessment(item); await handleRefresh(); notify(`Imported ${items.length} assessment(s) successfully.`); }}
       />
+      <UpgradeLicenseModal isOpen={modals.upgrade} onClose={() => setModals((m) => ({ ...m, upgrade: false }))} onActivated={refreshLicense} portalUrl={licenseState?.portalUrl} />
       <GlobalDialogHost />
     </div>
   );
