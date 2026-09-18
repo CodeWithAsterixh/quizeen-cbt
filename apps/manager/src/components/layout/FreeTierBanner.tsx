@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ArrowRight, Sparkle } from '@cbt/shared';
+import { ArrowRight } from '@cbt/shared';
 
 interface Props {
   onOpenUpgrade: () => void;
